@@ -1,0 +1,52 @@
+extends ../../default/cve/render.pug
+
+block prepend content
+    mixin email(cve)
+       - var sourceText = {"INTERNAL":"This issue was found during internal product security testing or research.", "EXTERNAL":"This issue was discovered during an external security research.", "USER":"This issue was seen during production usage.", "UNKNOWN":""};
+       - var CDM = cve.CVE_data_meta;
+       - var cveid = CDM.ID.match(/^CVE-[0-9-]+$/)? CDM.ID : 'CVE-yyyy-nnnn';
+       pre
+           = "To: oss-security@lists.openwall.com"
+           br
+           = "From: " + cve.CVE_data_meta.EMAIL
+           br
+           = "Reply-to: **yourusermailinglist**@**project**.apache.org"
+           br
+           = "Subject: " 
+           if cve.source.advisory
+                = cve.source.advisory +": "
+           = cveid +": "            
+           if CDM.TITLE
+                = CDM.TITLE +" "
+           else
+                = getProductListNoVendor(cve) + " "
+                for d in cve.problemtype.problemtype_data
+                    for b in d.description
+                        = b.value
+           br
+           br
+           = "Description:"
+           +mpara(cve.description.description_data)
+           = textUtil.getAffectedProductString(cve)
+           br
+           if cve.source
+                if sourceText[cve.source.discovery]
+                    br
+                    =sourceText[cve.source.discovery]
+           if CDM.AKA
+                br
+                = "This issue is also known as "+CDM.AKA
+           if cve.source.defect && cve.source.defect.length > 0
+                br
+                = "This issue is being tracked as "+cve.source.defect
+           br
+           if cve.credit && cve.credit.length > 0
+                = "Credit:"
+                +mpara(cve.credit)
+           = "References:"
+           br
+           br
+           each r in cve.references.reference_data
+               =r.url
+               br       
+
