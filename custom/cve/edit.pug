@@ -28,7 +28,7 @@ block loadEditor
         
 block append customtabs
         input.tab(name='tabs', type='radio', id='emailTab', value="7")
-        label.lbl(for='emailTab') OSS Email
+        label.lbl(for='emailTab') OSS-Email
         .wht.fil.bor.pad
             div#outemail            
 
@@ -36,14 +36,20 @@ block append customtabs
         input.tab(name='tabs', type='radio', id='aboutTab', value="0")
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
-         p= "This form is designed to help you format an ASF CVE entry and handle the CVE process. "
+         p!= "This form is designed to help you format an ASF CVE entry and handle the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>. "
          ul
-             li= "Fill in the details using the 'Editor' tab.  You could use the 'GIT' option to prepopulate based on a previous public CVE"
+             li!= "Fill in the details using the <a href='#editor'>'Editor'</a> tab.  You could use the 'GIT' option to prepopulate based on a previous public CVE your project has previously produced."
              p=""
-             li= "Use the 'CVE-JSON' tab for the data you submit to MITRE.  Go to https://cveform.mitre.org/ and use 'Notify CVE about a publication'. You must use your @apache.org e-mail address in the form. Fill in the two required fields and paste the JSON in the field labelled 'Additional information and CVE ID description updates'.  If the JSON is rejected as too large, submit it empty and when you get the auto reply from MITRE with a ticket ID, reply to that with the JSON."
+             li= "The information you enter is local to your browser and not stored.  If you want to complete your entry later you can use the 'Download'/'Open' links to get a JSON file with your work so far.  You could store this in your projects repo."
              p=""
-             li= "Use the 'OSS Email' tab for the email you should send to oss-security@lists.openwall.com (subscription not required). You must use a separate email to this list, please do not cc."
+             li!= "When completed, use the <a href='#json'>'CVE-JSON'</a> tab for the data you need to submit to MITRE."
+             ul
+                p=""
+                li!= "Go to <a href='https://cveform.mitre.org/' target='blank'>cveform.mitre.org</a> and use 'Notify CVE about a publication'. You must use your @apache.org e-mail address in the form."
+                li= "Fill in the two required fields and paste the JSON in the field labelled 'Additional information and CVE ID description updates'.  If the JSON is rejected as too large, submit it empty and when you get the auto reply from MITRE with a ticket ID, reply to that with the JSON attached."
+                li= "Mitre will acknowledge or ask for corrections within a few days."
              p=""
-             li= "The JSON created using this tool is not stored, however you can 'Download' / 'Open' could be stored in your projects repo."
-         p= "The information you enter is local to your browser and not stored.  For help contact security@apache.org"
+             li!= "Use the <a href='#email'>'OSS-Email'</a> tab for the email you should send to oss-security@lists.openwall.com (subscription not required). You could also use this email for your announcement to your apache.org lists, but note you must use a separate email to oss-security, please do not cc or bcc."
+             p=""
+         p!= "For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 

@@ -200,7 +200,7 @@ module.exports = {
 						for (var committee in res.committees) {
 							console.log()
 							res.committees[committee].display_name &&
-								projects.push('Apache ' + res.committees[committee].display_name);
+							        projects.push('Apache ' + res.committees[committee].display_name);
 						}
 					}
 				}
