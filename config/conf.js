@@ -61,39 +61,18 @@ module.exports = {
     usernameRegex: '[a-zA-Z0-9]{3,}',
     sections: [
         'cve',
-        'nvd'
+        'nvd',
+        'home'
     ],
     homepage: '/home',
-    charts: [
+
+    // Configure addional custom ExpressJS routes.
+    /*
+    customRoutes: [
         {
-            href: "/cve/agg?state=DRAFT,REVIEW,READY&sort=ym&f=ym&f=owner",
-            key: "ym", // X-axis
-            list: "/cve/?state=DRAFT,REVIEW,READY&sort=ym", //link prefix
-            title: "Active CVE Pipeline"
-        },
-        {
-            href: "/cve/agg?sort=ym&f=ym&f=owner",
-            key: "ym",
-            list: "/cve/?sort=ym",
-            title: "CVEs over time"
-        },
-        {
-            href: "/cve/agg?state=DRAFT,REVIEW,READY&f=product",
-            key: "product",
-            list: "/cve/?state=DRAFT,REVIEW,READY,PUBLIC",
-            title: "Active CVEs by Product",
-            type: "pie"
-        },
-        {
-            href: "/cve/agg?f=severity",
-            key: "severity",
-            list: "/cve/?",
-            title: "All CVEs by Severity",
-            type: "pie",
-            color: {
-                domain: ["CRITICAL", "HIGH", "MEDIUM", "LOW", "NONE", "", null],
-                range: ["orangered","salmon","orange","gold","green", "lightgray", "lightgray"]
-            }
+            path:"/info",
+            route: "./customRoutes/info"
         }
     ]
+    */
 };

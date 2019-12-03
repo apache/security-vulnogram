@@ -1,7 +1,6 @@
-extends layout
-
-block banner
-
+extends ../../views/list.pug
+block info
+block content    
 block facetBanner
     .wlp
         script(src="/js/d3.v3.min.js")
@@ -13,5 +12,5 @@ block facetBanner
             label.out.pad.bor.icn.box(for="chartZ",style="text-align:right;") Large
         #charts.grd.pad
         script.
-            var charts = !{JSON.stringify(conf.charts)};
+            var charts = !{JSON.stringify(docs)};
             plotCharts("charts", charts);
