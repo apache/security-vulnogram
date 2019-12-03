@@ -40,6 +40,7 @@ block prepend content
                 br
                 = "This issue is being tracked as "+cve.source.defect
            br
+           br
            if cve.credit && cve.credit.length > 0
                 = "Credit:"
                 +mpara(cve.credit)
