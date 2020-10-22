@@ -1,5 +1,9 @@
 // Copyright (c) 2017 Chandan B N. All rights reserved.
 
+module.exports = function (passport) { return null};
+
+/*
+
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 const config = require('./conf');
@@ -37,4 +41,4 @@ module.exports = function (passport) {
             done(err, user);
         });
     });
-};
+};*/

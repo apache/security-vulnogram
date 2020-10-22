@@ -8,9 +8,9 @@ block prepend content
        pre
            = "To: oss-security@lists.openwall.com"
            br
-           = "From: " + cve.CVE_data_meta.EMAIL
+           = "From: " + cve.CNA_private.email
            br
-           = "Reply-to: [users]@[project].apache.org"
+           = "Reply-to: users@" + cve.CNA_private.owner+".apache.org"
            br
            = "Subject: " 
            if cve.source.advisory

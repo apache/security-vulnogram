@@ -24,7 +24,7 @@ html
                 .right
                     block topHeaderRight
                         if user
-                            a.icn.fbn.user(class= (page == 'users' ? " active" : ""), href="/users/profile/" + user.username)= user.name
+                            a.icn.fbn.user(class= (page == 'users' ? " active" : ""), href="")= user.name
                             //if opts && opts.conf && opts.conf.userpage
                             //    a.icn.fbn.folder(href='/' + schemaName+'/' +opts.conf.userpage + user.username) Mine
                             a.icn.fbn.exit(href="/users/logout")=" Logout "
@@ -54,6 +54,7 @@ html
         script.
             var userName = "#{user.name}";
             var userUsername = "#{user.username}";
+            var userPMCS = "#{user.pmcs}";
     else
         script.
             var userUsername = ""

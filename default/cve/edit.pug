@@ -3,9 +3,6 @@
 //- Extends default document editor for CVE
 
 extends ../../views/edit
-block append bannerItemsLeft
-    a.icn.fbn.twitter(type="button",oncontextmenu='tweetJSON(event, this);',onclick='tweetJSON(event, this);',value="Download",target="_blank",title="Share a tweet about this CVE") Tweet
-
 block append scripts
     script
         include script.js

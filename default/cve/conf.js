@@ -8,18 +8,18 @@ module.exports = {
 conf: {
     title: 'CVE: Common Vulnerabilities and Exposures',
     name: 'CVE',
-    uri: '/cve/?state=DRAFT,REVIEW,READY',
+    uri: '/cve/?state=RESERVED,DRAFT,REVIEW,READY',
     class: 'icn alert',
     order: 0.1, //Where to place the section on heading?
     shortcuts: [
     {
         label: 'My CVEs',
         href: function(g) {
-            return ('/cve/?state=RESERVED,DRAFT,REVIEW,READY&owner='+g.user.username);
+            return ('/cve/?state=RESERVED,DRAFT,REVIEW,READY'+'&owner='+g.user.pmcs);
         },
         class: 'icn folder'
     },
-    {
+/*    {
         label: 'Preview',
         href: '/review/drafts',
         class: 'icn REVIEW',
@@ -30,7 +30,7 @@ conf: {
         href: '/review/slides',
         class: 'icn Slides',
         target: '_blank'
-    }
+    }*/
     ]
 },
 
@@ -66,9 +66,10 @@ facet: {
         class: 'icn nobr '
     },
     CVSS: {
-        path: 'body.impact.cvss.baseScore'
+        path: 'body.impact.cvss.baseScore',
+        hideColumn: true	
     },
-    severity: {
+/*    severity: {
         path: 'body.impact.cvss.baseSeverity',
         chart: true,
         hideColumn: true
@@ -82,9 +83,10 @@ facet: {
         path: 'body.source.defect',
         href: conf.defectURL,
         showDistinct: true
-    },
+    },*/
     Advisory: {
-        path: 'body.source.advisory'
+        path: 'body.source.advisory',
+        hideColumn: true	
     },
     date: {
         path: 'body.CVE_data_meta.DATE_PUBLIC'
@@ -118,16 +120,15 @@ facet: {
     },
     ym: {
         path: 'body.CNA_private.publish.ym',
-        chart: true,
+        chart: false,
         hideColumn: true,
         sort: -1
     },
     owner: {
         path: 'body.CNA_private.owner',
         chart: true,
-        bulk: true,
-        enum: ['example', 'team', 'memebers'],
-        class: 'ico '
+        bulk: false,
+        xxclass: 'ico '
     },
   /*  'state!': {
         path: 'body.CVE_data_meta.STATE',
@@ -393,8 +394,8 @@ schema: {
      "maxLength": 3999,
      "format": "textarea",
      "options": {
-      "input_height": "9em",
-      "expand_height": true
+      "input_height": "10em",
+	 "expand_height": false,
      }
     }
    }
@@ -506,10 +507,6 @@ schema: {
     "STATE": {
      "type": "string",
      "enum": [
-      "DRAFT",
-      "REVIEW",
-      "READY",
-      "PUBLIC",
       "RESERVED",
    //   "REPLACED_BY",
       "REJECT",
@@ -520,7 +517,7 @@ schema: {
      "format": "radio",
       "options": {
          "grid_columns": 12
-     }    }
+      }    }
    },
    "id": "CDM",
    "options": {
@@ -682,7 +679,7 @@ schema: {
     "description_data"
    ],
    "properties": {
-    "description_data": {
+       "description_data": {
      "type": "array",
      "minItems": 1,
      "items": {
@@ -786,12 +783,11 @@ schema: {
            }
        }
    }
-   },
+  },
   "CNA_private": {
    "properties": {
     "owner": {
      "type": "string",
-     "format": "radio",
      "$ref": "/users/list/json"
     },
     "publish": {

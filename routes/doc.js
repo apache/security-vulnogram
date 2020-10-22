@@ -56,6 +56,7 @@ module.exports = function (name, opts) {
             max: 22000
         }
     };
+    console.log(queryDef);
     var project = {};
     var columns = [];
     var tabFacet = {};
@@ -134,6 +135,7 @@ module.exports = function (name, opts) {
                     }
                 })
             }
+	    console.log("chartfacet"+JSON.stringify(chartFacet));
         }
         if(options.bulk) {
             if(options.enum) {
@@ -153,6 +155,20 @@ module.exports = function (name, opts) {
         }
     }
 
+    function asfgroupacls(documentacl,yourpmcs) {
+	console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
+	if (yourpmcs.includes("security")) {
+	    return true;
+	}
+	for (i=0; i< yourpmcs.length; i++) {
+	    if (yourpmcs[i] == documentacl) {
+		return true;
+	    }
+	}
+	console.log('mjc9 access denied');
+	return false;
+    }
+    
     function phraseSplit(searchString) {
         var s1 = searchString.match(/\\?.|^$/g).reduce((p, c) => {
         if(c === '"'){
@@ -206,7 +222,7 @@ module.exports = function (name, opts) {
         var o = {};
         o[x] = toIndex[x];
         delete o.createIndex;
-        //console.log(name + ' createIndex('+JSON.stringify(o)+')');
+        console.log(name + ' createIndex('+JSON.stringify(o)+')');
         Document.collection.createIndex(o, {background: true});
     }
     module.createDoc = function (req, res) {
@@ -401,6 +417,8 @@ module.exports = function (name, opts) {
 
     if (!opts.conf.readonly) {
         router.get('/new', csrfProtection, function (req, res) {
+	    var pmcs = req.user.pmcs;
+	    if (pmcs.includes("security")) {
             res.render(opts.edit, {
                 title: 'New',
                 doc: null,
@@ -410,11 +428,15 @@ module.exports = function (name, opts) {
                 csrfToken: req.csrfToken(),
                 allowAjax: true
             });
+	    } else {
+		res.send("sorry only security team for now");
+	    }
         });
     }
 
     router.get('/json/:id', function (req, res) {
         var ids = req.params.id.match(RegExp(idpattern, 'img'));
+	console.log("debug mjc1" + ids)
         if (ids) {
             var searchSchema = Document;
             var q = {};
@@ -467,6 +489,7 @@ module.exports = function (name, opts) {
         .custom((val, {
             req
         }) => {
+	    console.log("debug mjc2");
             if (validator.matches(val, '^' + idpattern + '$')) {
                 return true;
             }
@@ -481,6 +504,7 @@ module.exports = function (name, opts) {
         }) => {
             var q = {};
             q[idpath] = val;
+	    console.log("debug mjc3" )	   ;
             return Document.findOne(q).then((doc) => {
                 if (doc) {
                     throw new Error('Document ' + val + ' exists. Save with a different ID or Update the existing one');
@@ -598,11 +622,17 @@ module.exports = function (name, opts) {
         }
     });
 
-    var getSubDocs = async function (subSchema, doc_id) {
+    var getSubDocs = async function (subSchema, doc_id, mypmcs) {
         var q = {}
         q[idpath] = doc_id;
+	console.log("debug mjc4" + doc_id)	
         parentDoc = await Document.findOne(q).exec();
         if (parentDoc) {
+	    if (parentDoc.body && parentDoc.body.CNA_private && !asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
+		return {
+                    'message': 'Access Denied'
+		};		
+	    }
             var subq = {
                 parent_id: parentDoc._id
             }
@@ -631,7 +661,7 @@ module.exports = function (name, opts) {
     });
 */
     router.get('/log/:id(' + idpattern + ')', function (req, res) {
-        getSubDocs(History, req.params.id).then(r => {
+        getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });
     });
@@ -652,6 +682,7 @@ module.exports = function (name, opts) {
         router.post('/:id(' + idpattern + ')/file', csrfProtection, async function (req, res) {
             var fq = {};
             fq[idpath] = req.params.id;
+	    console.log("debug mjc4 " + req.params.id)	    ;
             var doc = await Document.findOne(fq);
             if(doc) {
                 var fcount = 0;
@@ -1064,15 +1095,23 @@ module.exports = function (name, opts) {
     router.get('/', csrfProtection, querymen.middleware(qSchema), async function (req, res) {
         try {
 
+	    console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
+	    //req.user.pmcs=["tomcat"]; // MJC FIXME
+	    // MJC FIXME
+	    if (!asfgroupacls("security",req.user.pmcs)) {
+		tabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
+		chartCount = 0;
+		// MJC because we have to filter them all 
+	    }
+	    
             var pipeLine = normalizeQuery(req.querymen.query);
             // to get the documents
             // get top level tabs aggregated counts
             var tabs = [];
             if (Object.keys(tabFacet).length != 0) {
-                //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));
                 tabs = await Document.aggregate([{
                                 $facet: tabFacet
-                            }]).exec();
+                }]).exec();
             }
             
             // get the charts aggregated counts            
@@ -1111,8 +1150,10 @@ module.exports = function (name, opts) {
             var charts = [];
             var total = 0;
 
+
             if (chartCount > 0) {
                 chartFacet.all = allQuery;
+		console.log('Chartcount QUERY: ' + JSON.stringify(chartFacet, null, 3));		
                 pipeLine.push({
                         $facet: chartFacet
                 });
@@ -1139,6 +1180,12 @@ module.exports = function (name, opts) {
                 //total = docs.length;
             }
             //console.log('Results'+ JSON.stringify(docs,1,1,1));
+
+	    // filter out things you have no access to here. we could alter the query, but lets do it here
+	    //
+	    var filtered = docs.filter(function(value,index,arr){
+		return asfgroupacls(value.owner,req.user.pmcs)});
+	    docs = filtered;
 
             var currentPage = 1;
             if (req.query.page) {
@@ -1186,7 +1233,7 @@ module.exports = function (name, opts) {
 
     //console.log('/:id(' + idpattern + ')');
     router.get('/:id(' + idpattern + ')', csrfProtection, function (req, res) {
-        //console.log('Got GET ' + req.params.id);
+        console.log('mjc8 Got GET ' + req.params.id);
         var q = {};
         q[idpath] = req.params.id;
         Document.findOne(q, async function (err, doc) {
@@ -1194,6 +1241,12 @@ module.exports = function (name, opts) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
             }
+	    if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
+		if (!asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
+		    req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
+		    doc = {};
+		}
+	    }
             var ucomments = await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if(opts.conf.readonly) {
