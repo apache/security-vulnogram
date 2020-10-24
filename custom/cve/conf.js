@@ -60,7 +60,7 @@ module.exports = {
 		    },    
 		    "STATE": {
 			"type": "string",
-			"description": "Use DRAFT when you are working on the advisory, move to REVIEW to have ASF security review",
+			"description": "Use DRAFT when you are working on the advisory, move to READY when you want this published live and it will notify ASF Security.  Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
 			"default": "RESERVED",
 			"enum": [
 			    "RESERVED",

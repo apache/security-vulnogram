@@ -4,6 +4,7 @@ const fs = require('fs');
 const ObjectID = require('mongodb').ObjectID;
 const docModel = require('../models/doc');
 const textUtil = require('../public/js/util.js');
+const email = require('../public/js/email.js');
 const conf = require('../config/conf');
 const package = require('../package.json');
 const csurf = require('csurf');
@@ -264,6 +265,19 @@ module.exports = function (name, opts) {
 
     module.addHistory = function (oldDoc, newDoc) {
 
+	if (oldDoc != null) {
+	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
+		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
+		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE)) {
+		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
+		    se = email.sendemail({"from":newDoc.body.CNA_private.email,
+					  "cc":newDoc.body.CNA_private.email,
+					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
+					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
+		}
+	    }
+	}
+	
         if (oldDoc === null) {
             oldDoc = {
                 __v: -1,
@@ -285,7 +299,6 @@ module.exports = function (name, opts) {
                 patch: jsonpatch.compare(oldDoc.body, newDoc.body),
             },
         };
-        //console.log(JSON.stringify(auditTrail));
         //todo: eliminate mongoose and call InsertOne directly
         if(auditTrail.body.patch.length > 0) {
             History.bulkWrite([{
@@ -304,6 +317,8 @@ module.exports = function (name, opts) {
         }
     }
     module.upsertDoc = function (req, res) {
+        console.log('mjc8 Got upsert ' + req.params.id);	    
+	
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -328,6 +343,7 @@ module.exports = function (name, opts) {
         queryNewID[idpath] = inputID;
         queryOldID[idpath] = req.params.id;
         var renaming = (req.params.id != inputID);
+	var dorefresh = false;
         //console.log('req.params.id = ' + req.params.id + ' == ' + inputID)
         Document.findOne(queryNewID).then((existingDoc) => {
             if (existingDoc) {
@@ -340,12 +356,24 @@ module.exports = function (name, opts) {
                     return;
                 }
             }
+
+	    // mjc enfoce workflow state
+            if (req.body.CVE_data_meta.STATE == "RESERVED") {
+		// if it's in reserved but someone is editing it, move it to draft
+		if (!req.user.pmcs.includes("security")) {
+		    console.log("mjc4 reserved but the description changed");
+		    req.body.CVE_data_meta.STATE = "DRAFT";
+		    dorefresh=true;
+		}
+	    }
+	    
             var d = new Date();
             newDoc = {
                 body: req.body,
                 author: req.user.username,
                 updatedAt: d
             };
+
             Document.findAndModify(
                 queryOldID, [], {
                     "$set": newDoc,
@@ -370,7 +398,7 @@ module.exports = function (name, opts) {
                             msg: 'Error! Document not Updated, ' + err
                         });
                     } else {
-                        if (renaming) {
+                        if (renaming || dorefresh) {
                             res.json({
                                 type: 'go',
                                 to: inputID
@@ -861,7 +889,7 @@ module.exports = function (name, opts) {
                 var d = new Date();
                 q.author = req.user.username;
                 q.updatedAt = d;
-                    //console.log(q);
+                    console.log("mjc1 "+q);
                     var fq = {};
                     fq[idpath] = f;
                     var docs = await Document.find(fq);
@@ -1153,7 +1181,7 @@ module.exports = function (name, opts) {
 
             if (chartCount > 0) {
                 chartFacet.all = allQuery;
-		console.log('Chartcount QUERY: ' + JSON.stringify(chartFacet, null, 3));		
+		//console.log('Chartcount QUERY: ' + JSON.stringify(chartFacet, null, 3));		
                 pipeLine.push({
                         $facet: chartFacet
                 });

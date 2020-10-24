@@ -31,6 +31,7 @@
     "linkifyjs": "^2.1.8",
     "mongodb": "^3.2.2",
     "mongoose": "^5.4.20",
+    "nodemailer": "^6.4.14",
     "nodemon": "^1.18.10",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",

@@ -36,17 +36,17 @@ block append customtabs
         input.tab(name='tabs', type='radio', id='aboutTab', value="0")
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
-         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>. "
+         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>.  This workflow replaces section 15."
          ul
-             li!= "Fill in the details using the <a href='#editor'>'Editor'</a> tab.  You could use the 'GIT' option to prepopulate based on a previous public CVE your project has previously produced, but you are probably better just entering it by hand.  Anything marked optional is not required or given to the CVE project but is used for making all the other templates. "
+             li!= "15 a. Fill in the details using the <a href='#editor'>'Editor'</a> tab.  Any field marked optional is not required and it is not given to the CVE project but is used for filling in the other tabs here. "
              p=""
-             li!= "The information you enter is stored when you hit SAVE.  It is only visible to other members of your PMC and the ASF security team.  Just be careful if you are part of more than one PMC that you don't change the owning PMC to the wrong one"
+             li!= "15 b. The information you enter is stored when you hit SAVE.  It is only visible to other members of your PMC and the ASF security team.  So you can prepare some of it in advance.  Just be careful if you are part of more than one PMC that you don't change the owning PMC to the wrong one"
              p=""
-             li!= "Set the STATE to 'draft' while you are working on the issue.  Set the STATE to 'ready' once you are ready to publish the CVE."
+             li!= "15 c. Use STATE 'draft' while you are working on the issue.  Set the STATE to 'ready' once you are ready to publish the CVE and you have finished editing and including the public reference.  This auto notifies ASF Security who will review and submit to Mitre and then set STATE to 'public'.  STATE 'review' is optional, set this if you want ASF Security to be notified to help with this entry."
              p=""
-             li!= "When your issue is public just let us know at security@apache.org and we'll submit the data from the <a href='#json'>'CVE-JSON'</a> tab to MITRE on your behalf.  "
+             li!= "15 d. Use the <a href='#email'>'OSS-Email'</a> tab for the email you should send to oss-security@lists.openwall.com (subscription not required). You could also use this email or the one in Advisory for your announcement to your apache.org lists, announce@apache.org, and security@apache.org (but note you must use a separate email to oss-security, please do not cc or bcc.)"
              p=""
-             li!= "Use the <a href='#email'>'OSS-Email'</a> tab for the email you should send to oss-security@lists.openwall.com (subscription not required). You could also use this email or the one in Advisory for your announcement to your apache.org lists, but note you must use a separate email to oss-security, please do not cc or bcc."
-             p=""
+             li!= "15 e. You should update your products security pages"
+         p=""
          p!= "We are still testing this service.  For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 
