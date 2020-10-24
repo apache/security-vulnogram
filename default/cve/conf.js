@@ -96,7 +96,7 @@ facet: {
     },
     product: {
         path: 'body.affects.vendor.vendor_data.product.product_data.product_name',
-        chart: true,
+        chart: false,
         pipeline: [
             {
                 $unwind: "$body.affects.vendor.vendor_data"
