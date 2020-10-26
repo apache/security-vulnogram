@@ -289,8 +289,11 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = b.value) ? "" : pug_inte
 
 }
 pug_html = pug_html + ("\u003Cbr\u002F\u003E\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Description:") ? "" : pug_interp)));
-pug_mixins["mpara"](cve.description.description_data);
-pug_html = pug_html + (pug_escape(null == (pug_interp = textUtil.getAffectedProductString(cve)) ? "" : pug_interp)) + "\u003Cbr\u002F\u003E";
+pug_mixins["mpara"].call({
+block: function(){
+pug_html = pug_html + " ";
+}
+}, cve.description.description_data);
 if (cve.source) {
 if (sourceText[cve.source.discovery]) {
 pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = sourceText[cve.source.discovery]) ? "" : pug_interp)));
@@ -302,7 +305,7 @@ pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp 
 if (cve.source.defect && cve.source.defect.length > 0) {
 pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "This issue is being tracked as "+cve.source.defect) ? "" : pug_interp)));
 }
-pug_html = pug_html + "\u003Cbr\u002F\u003E\u003Cbr\u002F\u003E";
+pug_html = pug_html + "\u003Cbr\u002F\u003E";
 if (cve.credit && cve.credit.length > 0) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = "Credit:") ? "" : pug_interp));
 pug_mixins["mpara"](cve.credit);
@@ -430,15 +433,19 @@ pug_html = pug_html + "\u003C\u002Ftable\u003E";
 else {
 pug_html = pug_html + "\u003Cp\u003EThis issue has been assigned \u003Ca" + (pug_attr("href", "http://cve.mitre.org/cgi-bin/cvename.cgi?name="+cveid, true, false)) + "\u003E" + (pug_escape(null == (pug_interp = cveid) ? "" : pug_interp)) + "\u003C\u002Fa\u003E.\u003C\u002Fp\u003E";
 }
+if (cve.solution && cve.solution.length > 0) {
 pug_html = pug_html + "\u003Ch4\u003ESOLUTION:\u003C\u002Fh4\u003E";
 pug_mixins["mpara"](cve.solution);
+}
 if (cve.source.defect && cve.source.defect.length > 0) {
 pug_html = pug_html + "\u003Cp\u003EThis issue is being tracked as ";
 pug_mixins["linklist"](cve.source.defect, defectURL);
 pug_html = pug_html + ".\u003C\u002Fp\u003E";
 }
+if (cve.work_around && cve.work_around.length > 0) {
 pug_html = pug_html + "\u003Ch4\u003EWORKAROUND:\u003C\u002Fh4\u003E";
 pug_mixins["mpara"](cve.work_around);
+}
 pug_html = pug_html + "\u003Ch4\u003EMODIFICATION HISTORY:\u003C\u002Fh4\u003E\u003Cp\u003E\u003Cul\u003E\u003Cli\u003E";
 pug_mixins["renderDate"](CDM.DATE_PUBLIC);
 pug_html = pug_html + ": Initial Publication.\u003C\u002Fli\u003E\u003C\u002Ful\u003E\u003C\u002Fp\u003E\u003Ch4\u003ERELATED LINKS:\u003C\u002Fh4\u003E\u003Cul\u003E";
@@ -463,9 +470,9 @@ pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", r.url, true, f
   }
 }).call(this);
 
-pug_html = pug_html + "\u003C\u002Ful\u003E\u003Ch4\u003ECVSS SCORE:\u003C\u002Fh4\u003E";
+pug_html = pug_html + "\u003C\u002Ful\u003E";
 if (cve.impact && cve.impact.cvss) {
-pug_html = pug_html + "\u003Cp\u003E";
+pug_html = pug_html + "\u003Ch4\u003ECVSS SCORE:\u003C\u002Fh4\u003E\u003Cp\u003E";
 pug_mixins["CVSS"](cve.impact.cvss);
 pug_html = pug_html + "\u003C\u002Fp\u003E";
 if (cve.impact.cvss.baseSeverity) {

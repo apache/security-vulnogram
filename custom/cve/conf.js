@@ -60,7 +60,7 @@ module.exports = {
 		    },    
 		    "STATE": {
 			"type": "string",
-			"description": "Use DRAFT when you are working on the advisory, move to READY when you want this published live and it will notify ASF Security.  Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
+			"description": "Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security.  Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
 			"default": "RESERVED",
 			"enum": [
 			    "RESERVED",
@@ -76,7 +76,8 @@ module.exports = {
                     "DATE_PUBLIC": {
 			"description": "The date this issue was public or blank or a future date is not public yet",
 			"options": {
-			    "grid_columns": 12
+			    "grid_columns": 12,
+			    "hidden":"true",
 			},
 		    },		    
 		}
@@ -168,14 +169,13 @@ module.exports = {
 		"properties": ""
 	    },
 	    "description": {
-		"title":"test",
 		"properties": {
 		    "description_data": {
 			"items": {
 			    "title": "another description section",
 			    "properties": {
 				"value": {
-				    "title": "description: (due to an unfixed bug please click in the 1px high box below and press a key) **Note that Mitre request that we please include the product and version information in the description itself as well as in the version section line in our submissions**)",
+				    "title": "description: Note that Mitre request that we please include the product and version information in the description itself as well as in the version section line in our submissions)",
 				    "description": "e.g. While investigating bug 60718, it was noticed that some calls to application listeners in Apache Tomcat versions 9.0.0.M1 to 9.0.0.M17, 8.5.0 to 8.5.11, 8.0.0.RC1 to 8.0.41 and 7.0.0 to 7.0.75 did not use the appropriate facade object. When running an untrusted application under a SecurityManager, it was therefore possible for that untrusted application to retain a reference to the request or response object and thereby access and/or modify information associated with another web application.",
 				}
 			    }
@@ -201,7 +201,7 @@ module.exports = {
                     "email" : {
 			"type":"string",
 			"description":"your apache email address",
-			"title":"ASF Email Address",
+			"title":"Your ASF Email Address",
 			"$ref": "/users/me/json",			
 			"options":{
 			    "hidden":false,

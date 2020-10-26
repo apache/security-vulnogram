@@ -26,9 +26,9 @@ block prepend content
            br
            br
            = "Description:"
-           +mpara(cve.description.description_data)
-           = textUtil.getAffectedProductString(cve)
-           br
+           +mpara(cve.description.description_data) 
+           //- = textUtil.getAffectedProductString(cve)
+           //- br
            if cve.source
                 if sourceText[cve.source.discovery]
                     br
@@ -39,7 +39,7 @@ block prepend content
            if cve.source.defect && cve.source.defect.length > 0
                 br
                 = "This issue is being tracked as "+cve.source.defect
-           br
+           //- br
            br
            if cve.credit && cve.credit.length > 0
                 = "Credit:"
