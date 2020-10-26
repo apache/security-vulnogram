@@ -33,9 +33,11 @@ protected.get('/profile/:id(' + conf.usernameRegex + ')?', csrfProtection, funct
         User.findOne({
             username: req.params.id
         }, function (err, user) {
+	    user = req.user;
+	    user.group = user.pmcs;
             if (user) {
                 //if Admin or self then present edit form
-                if (admin || req.user.username == req.params.id) {
+                if (admin || req.user.username == req.params.id && 0) {
                     res.render('users/edit', {
                         title: 'Update profile: ' + user.username,
                         profile: user,
