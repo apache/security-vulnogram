@@ -335,6 +335,34 @@ protected.get('/list/json', function (req, res) {
     }
 });
 
+// If you are in security pmc allow you to specify a different pmc for testing
+
+protected.get('/setpmc', function (req, res) {
+    if (req.isAuthenticated()) {
+        User.find({group:req.user.group}, ['username','name','emoji'], {
+            sort: {
+                username: 1
+            }
+        }, function (err, users) {
+            if (err) {
+                res.status(500).send('Error');
+            } else {
+		groups = req.user.pmcs;;
+		if (groups.includes("security")) {
+		    if (req.query.pmc) {
+			req.session.user.pmcs = req.query.pmc.split(',');
+			res.json({"result":"ok"});
+		    } else {
+			res.json({"error":"no pmc given"});
+		    }
+		} else {
+                    res.json({"error":"you are not in security pmc"});
+		}
+	    }
+        });
+    }
+});
+
 
 protected.get('/me/json', function (req, res) {
     if (req.isAuthenticated()) {
