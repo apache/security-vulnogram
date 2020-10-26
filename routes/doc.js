@@ -57,7 +57,6 @@ module.exports = function (name, opts) {
             max: 22000
         }
     };
-    console.log(queryDef);
     var project = {};
     var columns = [];
     var tabFacet = {};
@@ -136,7 +135,6 @@ module.exports = function (name, opts) {
                     }
                 })
             }
-	    console.log("chartfacet"+JSON.stringify(chartFacet));
         }
         if(options.bulk) {
             if(options.enum) {
@@ -223,7 +221,7 @@ module.exports = function (name, opts) {
         var o = {};
         o[x] = toIndex[x];
         delete o.createIndex;
-        console.log(name + ' createIndex('+JSON.stringify(o)+')');
+        //console.log(name + ' createIndex('+JSON.stringify(o)+')');
         Document.collection.createIndex(o, {background: true});
     }
     module.createDoc = function (req, res) {
@@ -317,8 +315,6 @@ module.exports = function (name, opts) {
         }
     }
     module.upsertDoc = function (req, res) {
-        console.log('mjc8 Got upsert ' + req.params.id);	    
-	
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -464,7 +460,6 @@ module.exports = function (name, opts) {
 
     router.get('/json/:id', function (req, res) {
         var ids = req.params.id.match(RegExp(idpattern, 'img'));
-	console.log("debug mjc1" + ids)
         if (ids) {
             var searchSchema = Document;
             var q = {};
@@ -517,7 +512,6 @@ module.exports = function (name, opts) {
         .custom((val, {
             req
         }) => {
-	    console.log("debug mjc2");
             if (validator.matches(val, '^' + idpattern + '$')) {
                 return true;
             }
@@ -532,7 +526,6 @@ module.exports = function (name, opts) {
         }) => {
             var q = {};
             q[idpath] = val;
-	    console.log("debug mjc3" )	   ;
             return Document.findOne(q).then((doc) => {
                 if (doc) {
                     throw new Error('Document ' + val + ' exists. Save with a different ID or Update the existing one');
@@ -653,7 +646,6 @@ module.exports = function (name, opts) {
     var getSubDocs = async function (subSchema, doc_id, mypmcs) {
         var q = {}
         q[idpath] = doc_id;
-	console.log("debug mjc4" + doc_id)	
         parentDoc = await Document.findOne(q).exec();
         if (parentDoc) {
 	    if (parentDoc.body && parentDoc.body.CNA_private && !asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
@@ -889,7 +881,6 @@ module.exports = function (name, opts) {
                 var d = new Date();
                 q.author = req.user.username;
                 q.updatedAt = d;
-                    console.log("mjc1 "+q);
                     var fq = {};
                     fq[idpath] = f;
                     var docs = await Document.find(fq);
@@ -1137,9 +1128,10 @@ module.exports = function (name, opts) {
             // get top level tabs aggregated counts
             var tabs = [];
             if (Object.keys(tabFacet).length != 0) {
+                //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));		
                 tabs = await Document.aggregate([{
                                 $facet: tabFacet
-                }]).exec();
+		}]).exec();
             }
             
             // get the charts aggregated counts            
@@ -1178,10 +1170,8 @@ module.exports = function (name, opts) {
             var charts = [];
             var total = 0;
 
-
             if (chartCount > 0) {
                 chartFacet.all = allQuery;
-		//console.log('Chartcount QUERY: ' + JSON.stringify(chartFacet, null, 3));		
                 pipeLine.push({
                         $facet: chartFacet
                 });
@@ -1261,7 +1251,7 @@ module.exports = function (name, opts) {
 
     //console.log('/:id(' + idpattern + ')');
     router.get('/:id(' + idpattern + ')', csrfProtection, function (req, res) {
-        console.log('mjc8 Got GET ' + req.params.id);
+        //console.log('Got GET ' + req.params.id);
         var q = {};
         q[idpath] = req.params.id;
         Document.findOne(q, async function (err, doc) {

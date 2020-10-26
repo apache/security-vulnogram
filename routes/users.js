@@ -396,7 +396,6 @@ protected.get('/list/css', function (req, res) {
             if (err) {
                 res.status(500).send('Error');
             } else {
-		groups = req.user.pmcs;		
                 res.setHeader('Content-Type', 'text/css');
                 for(u of users) {
                     res.write('.' + u.username + ':before {content: "' + u.emoji + '";}\n');
