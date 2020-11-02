@@ -1,0 +1,29 @@
+//- Copyright (c) 2017 Chandan B N. All rights reserved.
+
+extends ./layout
+
+block content
+ div
+  - var action = '/allocatecve/';
+  form.pad2.bor.shd.rnd(method='POST', action=action)
+    input(type='hidden', name='_csrf', value=csrfToken)
+    .row
+        .cardtitle=title
+    .row
+      label.lbl.icn Number of CVE:
+      input.txt(name='number', type='text', value=number)
+    .row
+      label.lbl.icn Year:
+      input.txt(name='year', type='text', value=year)
+    .row
+      label.lbl.icn Short description/title:
+      input.txt(name='cvetitle', type='text', value=cvetitle)      
+    .row
+      label.lbl.icn PMC (or use 'security'):
+      input.txt(name='pmc', type='text', value="security")
+    .row
+      label.lbl.icn Requesting PMC members email address (or use 'security@apache.org'):
+      input.txt(name='email', type='text', value="@apache.org")
+    .row
+        button.btn.sfe(type='submit', value='Allocate') Allocate
+    
