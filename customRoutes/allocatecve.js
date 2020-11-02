@@ -40,6 +40,13 @@ protected.get('/', csrfProtection, function (req, res) {
 protected.post('/', csrfProtection, function(req,res) {
     let Document = res.locals.docs.cve.Document;
     let lastdocuri = "";
+
+    groups = req.user.pmcs;
+    if (!groups.includes(conf.admingroupname)) {
+        req.flash('error',"not allowed");
+        res.render('blank');
+        return;
+    }
     
     var opt = {
         'method' : 'POST',

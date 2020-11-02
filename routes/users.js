@@ -320,7 +320,7 @@ protected.get('/list/json', function (req, res) {
             } else {
 		groups = req.user.pmcs;
 
-		if (groups.includes("security")) {
+		if (groups.includes(conf.admingroupname)) {
                     res.json({
 			"description": "lower case pmc name to assign this to",
 			"options": {"grid_columns":12},
@@ -349,8 +349,8 @@ protected.get('/setpmc', function (req, res) {
             if (err) {
                 res.status(500).send('Error');
             } else {
-		groups = req.user.pmcs;;
-		if (groups.includes("security")) {
+		groups = req.user.pmcs;
+		if (groups.includes(conf.admingroupname)) {
 		    if (req.query.pmc) {
 			req.session.user.pmcs = req.query.pmc.split(',');
 			res.json({"result":"ok"});
@@ -358,7 +358,7 @@ protected.get('/setpmc', function (req, res) {
 			res.json({"error":"no pmc given"});
 		    }
 		} else {
-                    res.json({"error":"you are not in security pmc"});
+                    res.json({"error":"you are not in "+conf.admingroupname+" pmc"});
 		}
 	    }
         });

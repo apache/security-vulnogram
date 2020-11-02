@@ -156,7 +156,7 @@ module.exports = function (name, opts) {
 
     function asfgroupacls(documentacl,yourpmcs) {
 	console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
-	if (yourpmcs.includes("security")) {
+	if (yourpmcs.includes(conf.admingroupname)) {
 	    return true;
 	}
 	for (i=0; i< yourpmcs.length; i++) {
@@ -356,7 +356,7 @@ module.exports = function (name, opts) {
 	    // mjc enfoce workflow state
             if (req.body.CVE_data_meta.STATE == "RESERVED") {
 		// if it's in reserved but someone is editing it, move it to draft
-		if (!req.user.pmcs.includes("security")) {
+		if (!req.user.pmcs.includes(conf.admingroupname)) {
 		    console.log("mjc4 reserved but the description changed");
 		    req.body.CVE_data_meta.STATE = "DRAFT";
 		    dorefresh=true;
@@ -441,7 +441,7 @@ module.exports = function (name, opts) {
     if (!opts.conf.readonly) {
         router.get('/new', csrfProtection, function (req, res) {
 	    var pmcs = req.user.pmcs;
-	    if (pmcs.includes("security")) {
+	    if (pmcs.includes(conf.admingroupname)) {
             res.render(opts.edit, {
                 title: 'New',
                 doc: null,
@@ -1115,7 +1115,7 @@ module.exports = function (name, opts) {
 	    console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
 	    //req.user.pmcs=["tomcat"]; // MJC FIXME
 	    // MJC FIXME
-	    if (!asfgroupacls("security",req.user.pmcs)) {
+	    if (!asfgroupacls(conf.admingroupname,req.user.pmcs)) {
 		tabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
 		chartCount = 0;
 		// MJC because we have to filter them all 

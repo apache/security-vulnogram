@@ -12,6 +12,8 @@ module.exports = {
     cveapiheaders: secrets.cveapiheaders,
     cveapiurl: "https://cveawg-dev.mitre.org/api/cve-id",
     cveapishortname: "night",
+    // which PMC is admin group?
+    admingroupname: "security",
     
     // The Mongodb URL where CVE entries and users are stored.
     // WARNING! Configure MongoDB authentication and use a strong password
