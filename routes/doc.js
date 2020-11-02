@@ -1111,10 +1111,7 @@ module.exports = function (name, opts) {
     /* The Main listing routine */
     router.get('/', csrfProtection, querymen.middleware(qSchema), async function (req, res) {
         try {
-
-	    console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
-	    //req.user.pmcs=["tomcat"]; // MJC FIXME
-	    // MJC FIXME
+	    //console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
 	    if (!asfgroupacls(conf.admingroupname,req.user.pmcs)) {
 		tabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
 		chartCount = 0;

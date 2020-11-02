@@ -1,6 +1,5 @@
 const express = require('express');
 const protected = express.Router();
-const public = express.Router();
 const conf = require('../config/conf');
 const csurf = require('csurf');
 var request = require('request');
@@ -8,21 +7,11 @@ const email = require('../public/js/email.js');
 const doc = require('../routes/doc.js');
 const optSet = require('../models/set');
 
-const {
-    check,
-    validationResult
-} = require('express-validator/check');
-const {
-    matchedData,
-    sanitize
-} = require('express-validator/filter');
-const validator = require('validator');
 var csrfProtection = csurf();
 
 protected.get('/test', csrfProtection, function(req,res) {
     console.log(JSON.stringify(res.locals));
-    req.flash('error','OK');
-    res.render('blank');    
+    res.redirect('/cve');
 });
 
 protected.get('/', csrfProtection, function (req, res) {
@@ -37,9 +26,9 @@ protected.get('/', csrfProtection, function (req, res) {
 });
 
 // number, year, pmc, email
-protected.post('/', csrfProtection, function(req,res) {
+protected.post('/', csrfProtection, async function(req,res) {
     let Document = res.locals.docs.cve.Document;
-    let lastdocuri = "";
+    let html = "";
 
     groups = req.user.pmcs;
     if (!groups.includes(conf.admingroupname)) {
@@ -54,7 +43,7 @@ protected.post('/', csrfProtection, function(req,res) {
         'json': true,
         'headers': conf.cveapiheaders,
     };
-    request(opt, function (error, response, body) {
+    await request(opt, async function (error, response, body) {
 //        body = {"cve_ids":[{"requested_by":{"cna":"address","user":"joshuaburton@address.com"},"cve_id":"CVE-2021-20252","cve_year":"2021","state":"RESERVED","owning_cna":"address","reserved":"2020-10-26T17:20:04.291Z"},{"requested_by":{"cna":"address","user":"joshuaburton@address.com"},"cve_id":"CVE-2021-20253","cve_year":"2021","state":"RESERVED","owning_cna":"address","reserved":"2020-10-26T17:20:04.291Z"}]};
         if (error) {
             req.flash('error',error);
@@ -81,18 +70,16 @@ protected.post('/', csrfProtection, function(req,res) {
 			"body": newdoc,
 			"author": req.user.username
 		    });
-		    entry.save(function (err, doc) {
+		    await entry.save(function (err, doc) {
 			if (err || !doc._id) {
 			    req.flash('error',JSON.stringify(err));
 			} else {
 			    console.log(err,doc);
                             count++;
-                            req.flash('error','allocated '+cve);
+                            res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
 			}
 		    });
                 }
-                req.flash('error',OK);
-                res.render('blank');
             }
         }
     });
@@ -100,6 +87,5 @@ protected.post('/', csrfProtection, function(req,res) {
 
 
 module.exports = {
-    public: public,
     protected: protected
 };
