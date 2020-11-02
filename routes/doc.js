@@ -369,7 +369,6 @@ module.exports = function (name, opts) {
                 author: req.user.username,
                 updatedAt: d
             };
-
             Document.findAndModify(
                 queryOldID, [], {
                     "$set": newDoc,
@@ -702,7 +701,6 @@ module.exports = function (name, opts) {
         router.post('/:id(' + idpattern + ')/file', csrfProtection, async function (req, res) {
             var fq = {};
             fq[idpath] = req.params.id;
-	    console.log("debug mjc4 " + req.params.id)	    ;
             var doc = await Document.findOne(fq);
             if(doc) {
                 var fcount = 0;
@@ -1128,7 +1126,7 @@ module.exports = function (name, opts) {
             // get top level tabs aggregated counts
             var tabs = [];
             if (Object.keys(tabFacet).length != 0) {
-                //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));		
+                //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));
                 tabs = await Document.aggregate([{
                                 $facet: tabFacet
 		}]).exec();

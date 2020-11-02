@@ -1,20 +1,23 @@
 const fs = require("fs");
 var package = require('../package.json');
-
+var secrets = require('./secrets.js');
 
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem', 'utf8');
 const ca = fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem', 'utf8');
 
-
-
 module.exports = {
 
+    // CVE automation configuration and CNA name
+    cveapiheaders: secrets.cveapiheaders,
+    cveapiurl: "https://cveawg-dev.mitre.org/api/cve-id",
+    cveapishortname: "night",
+    
     // The Mongodb URL where CVE entries and users are stored.
     // WARNING! Configure MongoDB authentication and use a strong password
     // WARNING! Ensure MongoDB is not reachable from the network. 
     // database:'mongodb://vulnogram:StringLongPass@127.0.0.1:27017/vulnogram'
-    database: 'mongodb://127.0.0.1:27017/vulnogram',
+    database: secrets.database,
 
     // Name of the organization that should be used in page titles etc.,
     //orgName: 'Example Org',

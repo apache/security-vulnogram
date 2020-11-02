@@ -158,6 +158,7 @@ app.use('/users', ensureAuthenticated, users.protected);
 let docs = require('./routes/doc');
 
 app.locals.confOpts = {};
+app.locals.docs = {};
 
 var defaultSections = fs.readdirSync('./default');
 var customSections = fs.existsSync('./custom') ? fs.readdirSync('./custom') : [];
@@ -169,6 +170,7 @@ for(section of sections) {
     if(s.facet && s.facet.ID) {
         app.locals.confOpts[section] = s;
         let r = docs(section, app.locals.confOpts[section]);
+	app.locals.docs[section] = r;
         app.use('/' + section, ensureAuthenticated, r.router);
     }
 }
@@ -212,8 +214,15 @@ app.use('/home/stats', ensureAuthenticated, async function(req, res, next){
 
 app.use(function (req, res, next) {
     res.locals.confOpts = app.locals.confOpts;
+    res.locals.docs = app.locals.docs;
     next();
 });
+
+let ac = require('./customRoutes/allocatecve');
+app.use('/allocatecve', ensureAuthenticated, ac.protected);
+
+
+
 
 //Configuring a reviewToken in conf file allows sharing drafts with 'people who have a link containing the configurable token' 
 let review = require('./routes/review');
