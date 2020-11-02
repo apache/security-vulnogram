@@ -168,14 +168,14 @@ for(section of sections) {
     var s = optSet(section, ['default', 'custom']);
     //var s = conf.sections[section];
     if(s.facet && s.facet.ID) {
-        app.locals.confOpts[section] = s;
-        let r = docs(section, app.locals.confOpts[section]);
+        if (conf.sections.includes(section)){
+            app.locals.confOpts[section] = s;
+        }
+        let r = docs(section, s);
 	app.locals.docs[section] = r;
         app.use('/' + section, ensureAuthenticated, r.router);
     }
 }
-delete app.locals.confOpts['nvd'];
-delete app.locals.confOpts['home'];
 
 app.use('/home/stats', ensureAuthenticated, async function(req, res, next){
     var sections = [];
@@ -220,9 +220,6 @@ app.use(function (req, res, next) {
 
 let ac = require('./customRoutes/allocatecve');
 app.use('/allocatecve', ensureAuthenticated, ac.protected);
-
-
-
 
 //Configuring a reviewToken in conf file allows sharing drafts with 'people who have a link containing the configurable token' 
 let review = require('./routes/review');
