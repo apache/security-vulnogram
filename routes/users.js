@@ -33,11 +33,9 @@ protected.get('/profile/:id(' + conf.usernameRegex + ')?', csrfProtection, funct
         User.findOne({
             username: req.params.id
         }, function (err, user) {
-	    user = req.user;
-	    user.group = user.pmcs;
             if (user) {
                 //if Admin or self then present edit form
-                if (admin || req.user.username == req.params.id && 0) {
+                if (admin || req.user.username == req.params.id) {
                     res.render('users/edit', {
                         title: 'Update profile: ' + user.username,
                         profile: user,
@@ -320,11 +318,12 @@ protected.get('/list/json', function (req, res) {
                 enum: users.map(function(u) { return u.username;}),
                 options: {enum_titles: users.map(function(u){return u.name})
                 }});
-	    }
+            }
         });
+    } else {
+
     }
 });
-
 protected.get('/list/css', function (req, res) {
     if (req.isAuthenticated()) {
         User.find({group:req.user.group}, ['username','name','emoji'], {

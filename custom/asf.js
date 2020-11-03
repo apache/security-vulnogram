@@ -61,6 +61,21 @@ function usersmejson (req, res) {
     }
 }
 
+function usersprofile (req,res) {
+    user = req.user;
+    user.group = user.pmcs;
+    res.render('users/view', {
+        title: 'Profile: ' + user.username,
+        profile: user,
+        admin: 	user.group.includes(conf.admingroupname),
+        page: 'users',
+    });
+}
+
+function userslist (req,res) {
+    res.render('blank');    
+}
+
 // If we are in security team then allow you to assign the CVE to any PMC
 // otherwise give a radio list of the PMCs you are part of
 
@@ -115,6 +130,8 @@ var self = module.exports = {
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
         app.get('/users/me/json', ensureAuthenticated, usersmejson); 
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
+        app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing        
+        app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing        
     },
     
 }
