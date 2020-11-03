@@ -8,6 +8,7 @@ const email = require('../public/js/email.js');
 const conf = require('../config/conf');
 const package = require('../package.json');
 const csurf = require('csurf');
+const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
 var querymen = require('querymen');
 var qs = require('querystring');
@@ -154,20 +155,6 @@ module.exports = function (name, opts) {
         }
     }
 
-    function asfgroupacls(documentacl,yourpmcs) {
-	console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
-	if (yourpmcs.includes(conf.admingroupname)) {
-	    return true;
-	}
-	for (i=0; i< yourpmcs.length; i++) {
-	    if (yourpmcs[i] == documentacl) {
-		return true;
-	    }
-	}
-	console.log('mjc9 access denied');
-	return false;
-    }
-    
     function phraseSplit(searchString) {
         var s1 = searchString.match(/\\?.|^$/g).reduce((p, c) => {
         if(c === '"'){
@@ -647,7 +634,7 @@ module.exports = function (name, opts) {
         q[idpath] = doc_id;
         parentDoc = await Document.findOne(q).exec();
         if (parentDoc) {
-	    if (parentDoc.body && parentDoc.body.CNA_private && !asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
+	    if (parentDoc.body && parentDoc.body.CNA_private && !asf.asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
 		return {
                     'message': 'Access Denied'
 		};		
@@ -1112,7 +1099,7 @@ module.exports = function (name, opts) {
     router.get('/', csrfProtection, querymen.middleware(qSchema), async function (req, res) {
         try {
 	    //console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
-	    if (!asfgroupacls(conf.admingroupname,req.user.pmcs)) {
+	    if (!asf.asfgroupacls(conf.admingroupname,req.user.pmcs)) {
 		tabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
 		chartCount = 0;
 		// MJC because we have to filter them all 
@@ -1197,7 +1184,7 @@ module.exports = function (name, opts) {
 	    // filter out things you have no access to here. we could alter the query, but lets do it here
 	    //
 	    var filtered = docs.filter(function(value,index,arr){
-		return asfgroupacls(value.owner,req.user.pmcs)});
+		return asf.asfgroupacls(value.owner,req.user.pmcs)});
 	    docs = filtered;
 
             var currentPage = 1;
@@ -1255,7 +1242,7 @@ module.exports = function (name, opts) {
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
             }
 	    if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
-		if (!asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
+		if (!asf.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
 		    req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
 		    doc = {};
 		}

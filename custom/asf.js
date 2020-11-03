@@ -93,6 +93,20 @@ var self = module.exports = {
         });
     },
 
+    asfgroupacls: function (documentacl,yourpmcs) {
+	//console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
+	if (yourpmcs.includes(conf.admingroupname)) {
+	    return true;
+	}
+	for (i=0; i< yourpmcs.length; i++) {
+	    if (yourpmcs[i] == documentacl) {
+		return true;
+	    }
+	}
+	//console.log('mjc9 access denied');
+	return false;
+    },
+    
     asfroutes: function (ensureAuthenticated, app) {
         app.get("/users/login", asflogin); // replaces existing
         app.use('/.well-known', express.static("/home/mjc/server/.well-known", { dotfiles: 'allow' } ));
