@@ -305,9 +305,6 @@ protected.get('/list', function (req, res) {
     }
 });
 
-// If we are in security team then allow you to assign the CVE to any PMC
-// otherwise give a radio list of the PMCs you are part of
-
 protected.get('/list/json', function (req, res) {
     if (req.isAuthenticated()) {
         User.find({group:req.user.group}, ['username','name','emoji'], {
@@ -318,40 +315,11 @@ protected.get('/list/json', function (req, res) {
             if (err) {
                 res.status(500).send('Error');
             } else {
-		groups = req.user.pmcs;
-
-		if (groups.includes(conf.admingroupname)) {
-                    res.json({
-			"description": "lower case pmc name to assign this to",
-			"options": {"grid_columns":12},
-		    });
-		} else {
-                    res.json({
-			enum: groups,
-			format: "radio",
-			options: {enum_titles: groups},
-		    });
-		}
-	    }
-        });
-    }
-});
-
-protected.get('/me/json', function (req, res) {
-    if (req.isAuthenticated()) {
-        User.find({group:req.user.group}, ['username','name','emoji'], {
-            sort: {
-                username: 1
-            }
-        }, function (err, users) {
-            if (err) {
-                res.status(500).send('Error');
-            } else {
-		groups = req.user.pmcs;
                 res.json({
-                    default: req.user.email,
-                    value: req.user.email,		    
-		});
+                default: req.user.username,
+                enum: users.map(function(u) { return u.username;}),
+                options: {enum_titles: users.map(function(u){return u.name})
+                }});
 	    }
         });
     }

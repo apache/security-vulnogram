@@ -51,6 +51,37 @@ function asflogin (req, res) {
     }
 }
 
+function usersmejson (req, res) {
+    if (req.isAuthenticated()) {
+	groups = req.user.pmcs;
+        res.json({
+            default: req.user.email,
+            value: req.user.email,		    
+	});
+    }
+}
+
+// If we are in security team then allow you to assign the CVE to any PMC
+// otherwise give a radio list of the PMCs you are part of
+
+function userslistjson (req, res) {
+    if (req.isAuthenticated()) {
+	groups = req.user.pmcs;
+
+	if (groups.includes(conf.admingroupname)) {
+            res.json({
+		"description": "lower case pmc name to assign this to",
+		"options": {"grid_columns":12},
+	    });
+	} else {
+            res.json({
+		enum: groups,
+		format: "radio",
+		options: {enum_titles: groups},
+	    });
+	}
+    }
+}
 
 var self = module.exports = {
     asfinit: function (app) {
@@ -63,11 +94,13 @@ var self = module.exports = {
     },
 
     asfroutes: function (ensureAuthenticated, app) {
-        app.get("/users/login", asflogin);
+        app.get("/users/login", asflogin); // replaces existing
         app.use('/.well-known', express.static("/home/mjc/server/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
+        app.get('/users/me/json', ensureAuthenticated, usersmejson); 
+        app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
     },
     
 }
