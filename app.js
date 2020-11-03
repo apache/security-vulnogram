@@ -7,10 +7,8 @@ const mongoose = require('mongoose');
 const flash = require('connect-flash');
 const https = require('https');
 
-
 // ASF
-const { v4: uuidv4 } = require('uuid');
-const request = require('request');
+const asf = require('./custom/asf.js')
 
 // TODO: don't use express-session for large-scale production use
 const session = require('express-session');
@@ -84,13 +82,12 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
+asf.asfinit(app);
+
 // Express Messages Middleware
 // This shows error messages on the client
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
-    if (req.session.user && req.session.user.username) {
-	req.user = req.session.user
-    }
     res.locals.user = req.user || null;
     res.locals.startTime = Date.now();
     res.locals.messages = require('express-messages')(req, res);
@@ -118,38 +115,7 @@ app.use(function (req, res, next) {
     next()
 })
 
-app.get("/users/login", function (req, res) {
-    sess = req.session;
-    if (req.query.code) {
-	const userinfo_endpoint= 'https://oauth.apache.org/token'
-	uri = userinfo_endpoint+"?code="+req.query.code
-	request(uri, {json:true},(err,cbres,body) => {
-	    if (err) {res.send(err);}
-	    else if (cbres.statusCode != 200) {res.send(body);}
-	    else if (body.state != sess.state) { res.send("auth is broken") }
-	    else {
-		sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:body.pmcs};
-		//sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:["airflow"]};		
-		if (sess.returnTo) {
-		    res.redirect(req.session.returnTo);
-		    delete req.session.returnTo;
-		} else {
-		    res.redirect("/");
-		}
-		console.log(body);
-	    }
-	});
-    } else {
-	delete  sess.user;
-	sess.state = uuidv4();
-	const authorization_endpoint= 'https://oauth.apache.org/auth'
-	redirecturl = authorization_endpoint+"?state="+sess.state+"&redirect_uri=https://"+req.get('host')+req.originalUrl;
-	res.redirect(redirecturl)
-    }
-})
-
-app.use('/.well-known', express.static("/home/mjc/server/.well-known", { dotfiles: 'allow' } ));
-
+asf.asfroutes(ensureAuthenticated, app);
 // set up routes
 let users = require('./routes/users');
 app.use('/users', users.public);
@@ -218,8 +184,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-let ac = require('./customRoutes/allocatecve');
-app.use('/allocatecve', ensureAuthenticated, ac.protected);
 
 //Configuring a reviewToken in conf file allows sharing drafts with 'people who have a link containing the configurable token' 
 let review = require('./routes/review');
