@@ -27,6 +27,11 @@ protected.get('/', csrfProtection, function (req, res) {
 
 // number, year, pmc, email
 protected.post('/', csrfProtection, async function(req,res) {
+    if (!res.locals.docs) {
+        console.log(res.locals);
+        return;
+    }
+    
     let Document = res.locals.docs.cve.Document;
     let html = "";
 

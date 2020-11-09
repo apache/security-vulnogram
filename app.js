@@ -180,7 +180,6 @@ app.use('/home/stats', ensureAuthenticated, async function(req, res, next){
 
 app.use(function (req, res, next) {
     res.locals.confOpts = app.locals.confOpts;
-    res.locals.docs = app.locals.docs;
     next();
 });
 

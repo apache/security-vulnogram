@@ -103,7 +103,8 @@ var self = module.exports = {
         app.use(function (req, res, next) {
             if (req.session.user && req.session.user.username) {
 	        req.user = req.session.user
-            }        
+            }
+            res.locals.docs = app.locals.docs;
             next();
         });
     },
