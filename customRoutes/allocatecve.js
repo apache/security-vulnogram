@@ -16,7 +16,7 @@ protected.get('/test', csrfProtection, function(req,res) {
 
 protected.get('/', csrfProtection, function (req, res) {
     thisyear = new Date().getFullYear();
-    res.render('allocatecve', {
+    res.render('../customRoutes/allocatecve', {
         title: 'Reserve and Allocate CVE.  Will get IDs from Mitre, create template documents, and send an email',
         number: 1,
 	title: '',
