@@ -1,9 +1,33 @@
 module.exports = {
+    conf: {
+        uri: '/cve/?state=RESERVED,DRAFT,REVIEW,READY',
+        shortcuts: [
+            {
+            label: 'My PMC CVEs',
+            href: function(g) {
+                return ('/cve/?state=RESERVED,DRAFT,REVIEW,READY'+'&owner='+g.user.pmcs);
+            },
+                class: 'icn folder'
+            },
+            "","",
+        ],
+    },
+    facet: {
+        CVSS: { hideColumn: true },
+        Advisory: { hideColumn: true },
+        product: { chart: false },
+        ym: { chart: false },        
+        owner: {bulk: false, class: '',enum: '' },
+        severity: {chart: false},
+        discovery: {chart: false, hideColumn: true},
+        Defect: {hideColumn: true},
+    },
     schema: {
 	"definitions": {
 	    "cve_id": {
 		"links": ["", ""]
 	    },
+            "lang_string": { "properties": { "value": {"options":{"expand_height":false}}}},
 	    "product": {
 		"properties": {
 		    "product_name": {
@@ -197,6 +221,7 @@ module.exports = {
 		"properties": {
 		    "owner": {
 			"title": "Apache PMC",
+                        "format": "",
 		    },
                     "email" : {
 			"type":"string",
