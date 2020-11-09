@@ -3,7 +3,7 @@ const protected = express.Router();
 const conf = require('../config/conf');
 const csurf = require('csurf');
 var request = require('request');
-const email = require('../public/js/email.js');
+const email = require('./email.js');
 const doc = require('../routes/doc.js');
 const optSet = require('../models/set');
 
