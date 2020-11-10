@@ -4,7 +4,6 @@ const fs = require('fs');
 const ObjectID = require('mongodb').ObjectID;
 const docModel = require('../models/doc');
 const textUtil = require('../public/js/util.js');
-const email = require('../customRoutes/email.js');
 const conf = require('../config/conf');
 const package = require('../package.json');
 const csurf = require('csurf');
@@ -249,20 +248,7 @@ module.exports = function (name, opts) {
     };
 
     module.addHistory = function (oldDoc, newDoc) {
-
-	if (oldDoc != null) {
-	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
-		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
-		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE)) {
-		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
-		    se = email.sendemail({"from":newDoc.body.CNA_private.email,
-					  "cc":newDoc.body.CNA_private.email,
-					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
-					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
-		}
-	    }
-	}
-	
+        asf.asfhookaddhistory(oldDoc, newDoc);
         if (oldDoc === null) {
             oldDoc = {
                 __v: -1,
@@ -339,17 +325,7 @@ module.exports = function (name, opts) {
                     return;
                 }
             }
-
-	    // mjc enfoce workflow state
-            if (req.body.CVE_data_meta.STATE == "RESERVED") {
-		// if it's in reserved but someone is editing it, move it to draft
-		if (!req.user.pmcs.includes(conf.admingroupname)) {
-		    console.log("mjc4 reserved but the description changed");
-		    req.body.CVE_data_meta.STATE = "DRAFT";
-		    dorefresh=true;
-		}
-	    }
-	    
+	    asf.asfhookupsertdoc(req,dorefresh);
             var d = new Date();
             newDoc = {
                 body: req.body,
@@ -427,8 +403,6 @@ module.exports = function (name, opts) {
 
     if (!opts.conf.readonly) {
         router.get('/new', csrfProtection, function (req, res) {
-	    var pmcs = req.user.pmcs;
-	    if (pmcs.includes(conf.admingroupname)) {
             res.render(opts.edit, {
                 title: 'New',
                 doc: null,
@@ -438,9 +412,6 @@ module.exports = function (name, opts) {
                 csrfToken: req.csrfToken(),
                 allowAjax: true
             });
-	    } else {
-		res.send("sorry only security team for now");
-	    }
         });
     }
 
@@ -1241,12 +1212,7 @@ module.exports = function (name, opts) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
             }
-	    if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
-		if (!asf.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
-		    req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
-		    doc = {};
-		}
-	    }
+            asf.asfhookshowcveacl(doc, req);
             var ucomments = await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if(opts.conf.readonly) {

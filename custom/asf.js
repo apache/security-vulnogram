@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const request = require('request');
 const express = require('express');
 const conf = require('../config/conf');
+const email = require('../customRoutes/email.js');
 
 // If you are in security pmc allow you to specify a different pmc for testing
 
@@ -76,6 +77,15 @@ function userslist (req,res) {
     res.render('blank');    
 }
 
+function cvenew (req,res,next) {
+    var pmcs = req.user.pmcs;
+    if (pmcs.includes(conf.admingroupname)) {
+        next();
+    } else {
+	res.send("sorry only security team for now");
+    }
+}
+
 // If we are in security team then allow you to assign the CVE to any PMC
 // otherwise give a radio list of the PMCs you are part of
 
@@ -132,7 +142,46 @@ var self = module.exports = {
         app.get('/users/me/json', ensureAuthenticated, usersmejson); 
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing        
-        app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing        
+        app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
+        app.get('/cve/new', ensureAuthenticated, cvenew); // replaces existing
+    },
+
+    asfhookupsertdoc: function(req,dorefresh) {
+	// mjc enfoce workflow state
+        if (req.body.CVE_data_meta.STATE == "RESERVED") {
+	    // if it's in reserved but someone is editing it, move it to draft
+	    if (!req.user.pmcs.includes(conf.admingroupname)) {
+		console.log("mjc4 reserved but the description changed");
+		req.body.CVE_data_meta.STATE = "DRAFT";
+		dorefresh=true;
+	    }
+	}        
+    },
+
+    asfhookshowcveacl: function(doc, req, res) {
+	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
+	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
+		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
+                console.log("wrong acl");
+                doc = {};
+	    }
+	} else {
+	    req.flash('error','something is wrong');
+        }
     },
     
+    asfhookaddhistory: function(oldDoc, newDoc) {
+	if (oldDoc != null) {
+	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
+		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
+		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE)) {
+		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
+		    se = email.sendemail({"from":newDoc.body.CNA_private.email,
+					  "cc":newDoc.body.CNA_private.email,
+					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
+					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
+		}
+	    }
+	}
+    },
 }
