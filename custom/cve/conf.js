@@ -19,14 +19,25 @@ module.exports = {
         ym: { chart: false },        
         owner: {bulk: false, class: '',enum: '' },
         severity: {chart: false},
+        date: {hideColumn: true},
         discovery: {chart: false, hideColumn: true},
         Defect: {hideColumn: true},
     },
     schema: {
+        "required" : [
+            "data_type",
+            "data_format",
+            "data_version",
+            "CVE_data_meta",
+            "affects",
+            "problemtype",
+            "description"            
+        ],
 	"definitions": {
 	    "cve_id": {
 		"links": ["", ""]
 	    },
+            "reference": { "required" : [], "properties": {"url":{"pattern":""}}},
             "lang_string": { "properties": { "value": {"options":{"expand_height":false}}}},
 	    "product": {
 		"properties": {
@@ -144,12 +155,13 @@ module.exports = {
 		}
 	    },
 	    "references": {
+                "required": [],
 		"properties": {
 		    "reference_data": {
 			"items": {
 			    "properties": {
 				"refsource": {
-				    "title": "refsource: (use 'CONFIRM' type for links to official ASF resources)"
+				    "title": "refsource: (use 'CONFIRM' type for links to your official ASF public mailing list post)"
 				},
 				"url": {
 				    "description": "e.g. link at an apache site or permalink to a lists.apache.org mailing list post"
@@ -176,8 +188,11 @@ module.exports = {
 		},
 	    },
 	    "work_around": {
+		"items": {
+                    "title": "Mitigation/Work Around (optional, not sent to Mitre)",
+                },                
 		"options": {
-		    "hidden": "true"
+		    "xhidden": "false"
 		},
 	    },
 	    "solution": {
