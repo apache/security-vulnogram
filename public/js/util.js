@@ -240,7 +240,8 @@ function (cve) {
         }
         lines.push(pstring.join(" "));
     }
-    return lines.join();  
+    var x = lines.join();
+    return x.replace(" .",".");  
 },
 getProblemTypeString: function (o) {
     var pts = [];
