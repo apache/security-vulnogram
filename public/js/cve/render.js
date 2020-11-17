@@ -305,6 +305,11 @@ pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp 
 if (cve.source.defect && cve.source.defect.length > 0) {
 pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "This issue is being tracked as "+cve.source.defect) ? "" : pug_interp)));
 }
+if (cve.work_around && cve.work_around.length > 0) {
+pug_html = pug_html + (pug_escape(null == (pug_interp = "Mitigation:") ? "" : pug_interp));
+pug_mixins["mpara"](cve.work_around);
+pug_html = pug_html + "\u003Cbr\u002F\u003E";
+}
 pug_html = pug_html + "\u003Cbr\u002F\u003E";
 if (cve.credit && cve.credit.length > 0) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = "Credit:") ? "" : pug_interp));

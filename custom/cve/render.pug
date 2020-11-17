@@ -40,6 +40,10 @@ block prepend content
                 br
                 = "This issue is being tracked as "+cve.source.defect
            //- br
+           if cve.work_around && cve.work_around.length > 0
+                = "Mitigation:"
+                +mpara(cve.work_around)
+                br
            br
            if cve.credit && cve.credit.length > 0
                 = "Credit:"
