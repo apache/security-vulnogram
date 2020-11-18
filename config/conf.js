@@ -22,16 +22,17 @@ module.exports = {
     database: secrets.database,
 
     // Name of the organization that should be used in page titles etc.,
-    //orgName: 'Example Org',
+    orgName: ' ',
 
     // Name of the group that should be used in page titles etc.,
-    groupName: 'ASF Security',
+    groupName: ' ',
 
     //CNA contact address
     contact: 'security@apache.org',
 
-    classification: 'ASF INTERNAL USE ONLY',
-    copyright: 'Made with ' + package.name + ' ' + package.version,
+    classification: ' ',
+    copyright: ' ',
+    //copyright: 'Made with ' + package.name + ' ' + package.version,
 
     // Uncomment this line and set a random string to allow unauthenticated access to draft CVE entries that are in review-ready or publish-ready state via /review/<token>/ or /review/<token>/CVE-ID
     // This may be useful to share a link to the draft for internal reviews and only those with the link have access to the drafts.    
