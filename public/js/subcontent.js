@@ -683,7 +683,7 @@ var searchString = query ? (Array.isArray(query.q) ? query.q.join(' '): query.q)
 delete query.q;
 pug_html = pug_html + "\u003C!--each i, d in query--\u003E\u003C!--    input(type=\"hidden\",name=d,value=i)--\u003E\u003Cspan class=\"right\"\u003E";
 if (pages <= 1) {
-pug_html = pug_html + ("Found " + (pug_escape(null == (pug_interp = total) ? "" : pug_interp)));
+pug_html = pug_html + "\u003C!-- | Found --\u003E\u003C!-- = total--\u003E";
 }
 if (pages > 1) {
 pug_html = pug_html + "\u003Cspan class=\"pagination\"\u003EShowing " + (pug_escape(null == (pug_interp = ((current-1)*limit + 1)) ? "" : pug_interp)) + " - " + (pug_escape(null == (pug_interp = current*limit > total ? total : current*limit) ? "" : pug_interp)) + " of " + (pug_escape(null == (pug_interp = total) ? "" : pug_interp)) + " ";
@@ -722,7 +722,7 @@ pug_html = pug_html + "\u003Ca" + (" class=\"btn\""+pug_attr("href", bs+pages, t
 }
 pug_html = pug_html + "\u003C\u002Fspan\u003E";
 }
-pug_html = pug_html + "\u003C\u002Fspan\u003E \u003Cspan class=\"indent out\"\u003E\u003Cinput" + (" class=\"txt\""+" size=\"20\" type=\"text\" name=\"q\" placeholder=\" Filter results \""+pug_attr("value", searchString, true, false)+" results=\"10\""+pug_attr("required", true, true, false)) + "\u002F\u003E\u003Cinput class=\"btn\" type=\"submit\" value=\"filter\"\u002F\u003E\u003C\u002Fspan\u003E \u003Clabel class=\"lbl icn fold\" for=\"compactTable\" onclick=\"this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)\" val=\"\"\u003E\u003C\u002Flabel\u003E\u003C\u002Fform\u003E";
+pug_html = pug_html + "\u003C\u002Fspan\u003E \u003Cspan class=\"indent out\"\u003E\u003Cinput" + (" class=\"txt\""+" size=\"25\" type=\"text\" name=\"q\" placeholder=\" Filter results by search string \""+pug_attr("value", searchString, true, false)+" results=\"10\""+pug_attr("required", true, true, false)) + "\u002F\u003E\u003Cinput class=\"btn\" type=\"submit\" value=\"filter\"\u002F\u003E\u003C\u002Fspan\u003E \u003C!-- label.lbl.icn.fold(for=\"compactTable\",onclick=\"this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)\",val=\"\")--\u003E\u003C\u002Fform\u003E";
 }
 };
 pug_mixins["bulkTable"] = pug_interp = function(docs, columns, id){

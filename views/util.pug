@@ -302,8 +302,8 @@ mixin paginate
         //    input(type="hidden",name=d,value=i)
         span.right
             if pages <= 1
-                | Found 
-                = total
+                // | Found 
+                // = total
             if pages > 1
                 span.pagination
                     | Showing 
@@ -337,10 +337,10 @@ mixin paginate
                         a.btn(href=bs+pages)=pages
         | 
         span.indent.out
-            input.txt(size=20,type="text",name="q",placeholder=" Filter results ",value=searchString,results="10",required)
+            input.txt(size=25,type="text",name="q",placeholder=" Filter results by search string ",value=searchString,results="10",required)
             input.btn(type="submit", value="filter")
         | 
-        label.lbl.icn.fold(for="compactTable",onclick="this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)",val="")
+        // label.lbl.icn.fold(for="compactTable",onclick="this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)",val="")
 
 mixin bulkTable(docs, columns, id)
     if !docs || docs.length == 0
