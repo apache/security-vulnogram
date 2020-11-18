@@ -13,6 +13,7 @@ module.exports = {
         ],
     },
     facet: {
+        ID: { showDistinct: false },
         CVSS: { hideColumn: true },
         Advisory: { hideColumn: true },
         product: { chart: false },

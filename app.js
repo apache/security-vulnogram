@@ -89,7 +89,7 @@ asf.asfinit(app);
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
     res.locals.user = req.user || null;
-    res.locals.startTime = Date.now();
+    //res.locals.startTime = Date.now();
     res.locals.messages = require('express-messages')(req, res);
     next();
 });
