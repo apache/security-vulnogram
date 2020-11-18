@@ -9,11 +9,6 @@ const optSet = require('../models/set');
 
 var csrfProtection = csurf();
 
-protected.get('/test', csrfProtection, function(req,res) {
-    console.log(JSON.stringify(res.locals));
-    res.redirect('/cve');
-});
-
 protected.get('/', csrfProtection, function (req, res) {
     thisyear = new Date().getFullYear();
     res.render('../customRoutes/allocatecve', {
@@ -61,7 +56,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                 console.log("ok");
                 var count = 0;
                 for (cveid in body.cve_ids) {
-                    cve = body.cve_ids[cveid].cve_id;
+                    cve = body.cve_ids[cveid].cve_id+"-TEST"
                     console.log("got a CVE ID "+cve+" reserved for "+req.body.pmc+" for "+req.body.email);
 		    se = email.sendemail({"to":"mjc@apache.org",
                                           "cc":req.body.email,
