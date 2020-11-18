@@ -1,0 +1,5 @@
+extends ../../views/list.pug
+
+block prepend bannerItemsLeft
+    if user.pmcs.includes("security")
+        a.fbn.sfe(href='/allocatecve') ALLOCATE CVE
