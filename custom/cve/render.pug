@@ -5,12 +5,20 @@ block prepend content
        - var sourceText = {"INTERNAL":"This issue was found during internal product security testing or research.", "EXTERNAL":"This issue was discovered during an external security research.", "USER":"This issue was seen during production usage.", "UNKNOWN":""};
        - var CDM = cve.CVE_data_meta;
        - var cveid = CDM.ID.match(/^CVE-[0-9-]+$/)? CDM.ID : 'CVE-yyyy-nnnn';
+       = "Cut, paste, and send the email below.  Modify it before sending if you wish.  "       
+       if (cve.who == "oss")
+           = "Subscription not required.  Use a separate email for this, don't cc or bcc."
        pre
-           = "To: oss-security@lists.openwall.com"
-           br
            = "From: " + cve.CNA_private.email
            br
            = "Reply-to: users@" + cve.CNA_private.owner+".apache.org"
+           br
+           if (cve.who == "oss")           
+               = "To: oss-security@lists.openwall.com"
+           if (cve.who == "asf")           
+               = "To: announce@apache.org, users@"+ cve.CNA_private.owner+".apache.org"
+               br
+               = "Bcc: security@apache.org"
            br
            = "Subject: " 
            if cve.source.advisory
@@ -43,15 +51,15 @@ block prepend content
            if cve.work_around && cve.work_around.length > 0
                 = "Mitigation:"
                 +mpara(cve.work_around)
-                br
-           br
+           //br
            if cve.credit && cve.credit.length > 0
                 = "Credit:"
                 +mpara(cve.credit)
-           = "References:"
-           br
-           br
-           each r in cve.references.reference_data
-               =r.url
-               br       
+           if cve.references.reference_data && cve.references.reference_data[0].url.length > 0
+               = "References:"
+               br
+               br
+               each r in cve.references.reference_data
+                   =r.url
+                   br       
 

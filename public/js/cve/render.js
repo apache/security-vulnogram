@@ -225,7 +225,18 @@ var block = (this && this.block), attributes = (this && this.attributes) || {};
 var sourceText = {"INTERNAL":"This issue was found during internal product security testing or research.", "EXTERNAL":"This issue was discovered during an external security research.", "USER":"This issue was seen during production usage.", "UNKNOWN":""};
 var CDM = cve.CVE_data_meta;
 var cveid = CDM.ID.match(/^CVE-[0-9-]+$/)? CDM.ID : 'CVE-yyyy-nnnn';
-pug_html = pug_html + ("\u003Cpre\u003E" + (pug_escape(null == (pug_interp = "To: oss-security@lists.openwall.com") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "From: " + cve.CNA_private.email) ? "" : pug_interp)) + "\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Reply-to: users@" + cve.CNA_private.owner+".apache.org") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Subject: ") ? "" : pug_interp)));
+pug_html = pug_html + (pug_escape(null == (pug_interp = "Cut, paste, and send the email below.  Modify it before sending if you wish.  ") ? "" : pug_interp));
+if ((cve.who == "oss")) {
+pug_html = pug_html + (pug_escape(null == (pug_interp = "Subscription not required.  Use a separate email for this, don't cc or bcc.") ? "" : pug_interp));
+}
+pug_html = pug_html + "\u003Cpre\u003E" + (pug_escape(null == (pug_interp = "From: " + cve.CNA_private.email) ? "" : pug_interp)) + "\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Reply-to: users@" + cve.CNA_private.owner+".apache.org") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E";
+if ((cve.who == "oss")) {
+pug_html = pug_html + (pug_escape(null == (pug_interp = "To: oss-security@lists.openwall.com") ? "" : pug_interp));
+}
+if ((cve.who == "asf")) {
+pug_html = pug_html + ((pug_escape(null == (pug_interp = "To: announce@apache.org, users@"+ cve.CNA_private.owner+".apache.org") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Bcc: security@apache.org") ? "" : pug_interp)));
+}
+pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Subject: ") ? "" : pug_interp)));
 if (cve.source.advisory) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = cve.source.advisory +": ") ? "" : pug_interp));
 }
@@ -308,13 +319,13 @@ pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp 
 if (cve.work_around && cve.work_around.length > 0) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = "Mitigation:") ? "" : pug_interp));
 pug_mixins["mpara"](cve.work_around);
-pug_html = pug_html + "\u003Cbr\u002F\u003E";
 }
-pug_html = pug_html + "\u003Cbr\u002F\u003E";
+pug_html = pug_html + "\u003C!--br--\u003E";
 if (cve.credit && cve.credit.length > 0) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = "Credit:") ? "" : pug_interp));
 pug_mixins["mpara"](cve.credit);
 }
+if (cve.references.reference_data && cve.references.reference_data[0].url.length > 0) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = "References:") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E\u003Cbr\u002F\u003E";
 // iterate cve.references.reference_data
 ;(function(){
@@ -334,6 +345,7 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp
   }
 }).call(this);
 
+}
 pug_html = pug_html + "\u003C\u002Fpre\u003E";
 };
 pug_mixins["slide"] = pug_interp = function(cve){
