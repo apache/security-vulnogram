@@ -20,6 +20,7 @@ module.exports = {
         product: { chart: false },
         ym: { chart: false },        
         owner: {bulk: false, class: '',enum: '' },
+        state: {bulk:false},
         severity: {chart: false},
         date: {hideColumn: true},
         discovery: {chart: false, hideColumn: true},
