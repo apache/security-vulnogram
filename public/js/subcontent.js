@@ -645,7 +645,7 @@ pug_html = pug_html + "\u003Clabel" + (pug_attr("for", "flt"+field, true, false)
   }
 }).call(this);
 
-pug_html = pug_html + "\u003Cdiv class=\"right gap\"\u003E\u003Cinput class=\"indent btn\" id=\"filter\" type=\"submit\" value=\"Filter\"\u002F\u003E\u003Ca" + (" class=\"indent btn\""+pug_attr("href", "/" + schemaName, true, false)+" type=\"submit\" value=\"Clear\"") + "\u003EClear\u003C\u002Fa\u003E\u003C\u002Fdiv\u003E\u003C\u002Fdiv\u003E";
+pug_html = pug_html + "\u003Cdiv class=\"gap\"\u003E\u003Cinput class=\"indent btn\" id=\"filter\" type=\"submit\" value=\"Filter\"\u002F\u003E\u003Ca" + (" class=\"indent btn\""+pug_attr("href", "/" + schemaName, true, false)+" type=\"submit\" value=\"Clear\"") + "\u003EClear\u003C\u002Fa\u003E\u003C\u002Fdiv\u003E\u003C\u002Fdiv\u003E";
 }
 if (pages > 1) {
 // iterate columns
