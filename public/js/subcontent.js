@@ -722,13 +722,13 @@ pug_html = pug_html + "\u003Ca" + (" class=\"btn\""+pug_attr("href", bs+pages, t
 }
 pug_html = pug_html + "\u003C\u002Fspan\u003E";
 }
-pug_html = pug_html + "\u003C\u002Fspan\u003E \u003Cspan class=\"indent out\"\u003E\u003Cinput" + (" class=\"txt\""+" size=\"25\" type=\"text\" name=\"q\" placeholder=\" Filter results by search string \""+pug_attr("value", searchString, true, false)+" results=\"10\""+pug_attr("required", true, true, false)) + "\u002F\u003E\u003Cinput class=\"btn\" type=\"submit\" value=\"filter\"\u002F\u003E\u003C\u002Fspan\u003E \u003C!-- label.lbl.icn.fold(for=\"compactTable\",onclick=\"this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)\",val=\"\")--\u003E\u003C\u002Fform\u003E";
+pug_html = pug_html + "\u003C\u002Fspan\u003E \u003Cspan class=\"indent out\"\u003E\u003C!-- input.txt(size=25,type=\"text\",name=\"q\",placeholder=\" Filter results by search string \",value=searchString,results=\"10\",required)--\u003E\u003C!-- input.btn(type=\"submit\", value=\"filter\")--\u003E\u003C\u002Fspan\u003E \u003C!-- label.lbl.icn.fold(for=\"compactTable\",onclick=\"this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)\",val=\"\")--\u003E\u003C\u002Fform\u003E";
 }
 };
 pug_mixins["bulkTable"] = pug_interp = function(docs, columns, id){
 var block = (this && this.block), attributes = (this && this.attributes) || {};
 if (!docs || docs.length == 0) {
-pug_html = pug_html + "\u003Cp\u003E\u003Cb\u003ENo vulnerabilities here (for any of your PMCs)\u003C\u002Fb\u003E\u003C\u002Fp\u003E";
+pug_html = pug_html + "\u003Cp\u003E\u003Cb\u003ENo CVE entries for your PMCs match the query\u003C\u002Fb\u003E\u003C\u002Fp\u003E";
 }
 else {
 var rowCount = 0;

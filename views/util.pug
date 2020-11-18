@@ -337,15 +337,15 @@ mixin paginate
                         a.btn(href=bs+pages)=pages
         | 
         span.indent.out
-            input.txt(size=25,type="text",name="q",placeholder=" Filter results by search string ",value=searchString,results="10",required)
-            input.btn(type="submit", value="filter")
+            // input.txt(size=25,type="text",name="q",placeholder=" Filter results by search string ",value=searchString,results="10",required)
+            // input.btn(type="submit", value="filter")
         | 
         // label.lbl.icn.fold(for="compactTable",onclick="this.setAttribute('val', document.getElementById(this.getAttribute('for')).checked)",val="")
 
 mixin bulkTable(docs, columns, id)
     if !docs || docs.length == 0
         p
-            b No vulnerabilities here (for any of your PMCs)
+            b No CVE entries for your PMCs match the query
     else
         - var rowCount = 0;
         - var sum = {}, showCheckboxes = false; 
