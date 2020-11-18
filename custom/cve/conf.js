@@ -1,7 +1,8 @@
 module.exports = {
     conf: {
         uri: '/cve/?state=RESERVED,DRAFT,REVIEW,READY',
-        shortcuts: [
+        shortcuts: ["","",""],
+        xshortcuts: [
             {
             label: 'My PMC CVEs',
             href: function(g) {
