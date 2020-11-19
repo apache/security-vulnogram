@@ -46,16 +46,19 @@ block customtabs
         input.tab(name='tabs', type='radio', id='advisoryTab', value="4")
         label.lbl(for='advisoryTab') Advisory
         .wht.fil.bor.pad
-            div(style='float:right')
-                a.icn.btn.email.right(type="button",oncontextmenu='draftEmail(event, this, "render");',onclick='draftEmail(event, this,"render");',value="Email") Email
             div.render(id="render")
         input.tab(name='tabs', type='radio', id='emailTab', value="7")
         label.lbl(for='emailTab') OSS-Email
         .wht.fil.bor.pad
+            div(style='float:right')
+                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(outemail);this.textContent="Copied"')  Copy
             div#outemail
         input.tab(name='tabs', type='radio', id='ASFemailTab', value="8")
         label.lbl(for='ASFemailTab') ASF-Email
         .wht.fil.bor.pad
+            div(style='float:right')
+                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(asfemail);this.textContent="Copied"')  Copy
+        
             div#asfemail
 
 block append customtabs
