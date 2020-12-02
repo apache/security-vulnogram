@@ -98,6 +98,7 @@ reduceJSON: function (cve) {
     if(c.impact && c.impact.cvss && c.impact.cvss.baseScore === 0) {
         delete c.impact;    
     }
+    if(c.who) { delete c.who; }
     return(orderKeys(c));
 },
 

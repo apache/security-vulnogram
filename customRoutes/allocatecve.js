@@ -26,6 +26,7 @@ protected.post('/', csrfProtection, async function(req,res) {
         console.log(res.locals);
         return;
     }
+    var testmode =!conf.cveapiliveservice;
     
     let Document = res.locals.docs.cve.Document;
     let html = "";
@@ -56,13 +57,29 @@ protected.post('/', csrfProtection, async function(req,res) {
                 console.log("ok");
                 var count = 0;
                 for (cveid in body.cve_ids) {
-                    cve = body.cve_ids[cveid].cve_id+"-TEST"
+                    cve = body.cve_ids[cveid].cve_id
+                    if (testmode) {
+                        cve = cve + "-TEST"
+                    }
                     console.log("got a CVE ID "+cve+" reserved for "+req.body.pmc+" for "+req.body.email);
-		    se = email.sendemail({"to":"mjc@apache.org",
-                                          "cc":req.body.email,
-					  "subject":cve+" reserved for "+req.body.pmc,
-					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
+//		    var se = email.sendemail({"to":"mjc@apache.org",
+//                                          "cc":req.body.email,
+//					  "subject":cve+" reserved for "+req.body.pmc,
+//					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
+                    var beta = "Note that we have a beta web based service that can help you handle the process and reduce the burden of the Mitre submission.  You can try it https://cveprocess.apache.org/cve/"+cve+" and if you do decide to use this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\n"
+                    var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the new notification requirements in section 15 of https://www.apache.org/security/committers.html . Once this issue is public you must follow these steps within one business day.  This is a requirement from Mitre.\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
+
+                    var eto = "security@apache.org";
+                    if (!testmode && req.body.pmc !="security") {
+                        eto = "private@"+req.body.pmc+".apache.org"
+                    }                    
+		    var se2 = email.sendemail({"to":eto,
+                                               "cc":"security@apache.org",
+					       "subject":cve+" reserved for "+req.body.pmc,
+					       "text":pmctemplate,
+                                              }).then( (x) => {  console.log("sent CVE notification mail "+x);});
+                    
 		    // probably some better way of doing this for sure; we could render the schema i suppose?
 		    newdoc = { "data_type" : "CVE", "data_format" : "MITRE", "data_version" : "4.0", "generator" : { "engine" : "Vulnogram 0.0.9" }, "CVE_data_meta" : { "ID" : cve, "ASSIGNER" : "security@apache.org", "DATE_PUBLIC" : "", "TITLE" : req.body.cvetitle, "AKA" : "", "STATE" : "RESERVED" }, "source" : { "defect" : [ ], "advisory" : "", "discovery" : "UNKNOWN" }, "affects" : { "vendor" : { "vendor_data" : [ { "vendor_name" : "Apache Software Foundation", "product" : { "product_data" : [ { "product_name" : "", "version" : { "version_data" : [ { "version_name" : "", "version_affected" : "", "version_value" : "", "platform" : "" } ] } } ] } } ] } }, "problemtype" : { "problemtype_data" : [ { "description" : [ { "lang" : "eng", "value" : "" } ] } ] }, "description" : { "description_data" : [ { "value" : "", "lang" : "eng" } ] }, "references" : { "reference_data" : [ { "refsource" : "CONFIRM", "url" : "", "name" : "" } ] }, "configuration" : [ ], "exploit" : [ ], "work_around" : [ ], "solution" : [ ], "credit" : [ ], "CNA_private" : { "owner" : req.body.pmc, "publish" : { "ym" : "", "year" : "", "month" : "" }, "share_with_CVE" : true, "CVE_table_description" : [ ], "CVE_list" : [ ], "internal_comments" : "", "todo" : [ ], "email" : req.body.email } };
 

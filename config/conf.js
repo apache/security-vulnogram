@@ -12,6 +12,7 @@ module.exports = {
     cveapiheaders: secrets.cveapiheaders,
     cveapiurl: "https://cveawg-dev.mitre.org/api/cve-id",
     cveapishortname: "night",
+    cveapiliveservice: false,
     // which PMC is admin group?
     admingroupname: "security",
     

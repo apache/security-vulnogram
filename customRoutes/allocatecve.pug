@@ -2,7 +2,6 @@ extends ../views/layout
 
 block content
  div
-  Note this is connected to the test service and does not allocate actual CVE names
   - var action = '/allocatecve/';
   form.pad2.bor.shd.rnd(method='POST', action=action)
     input(type='hidden', name='_csrf', value=csrfToken)
