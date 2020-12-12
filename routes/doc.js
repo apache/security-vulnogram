@@ -1069,22 +1069,27 @@ module.exports = function (name, opts) {
     /* The Main listing routine */
     router.get('/', csrfProtection, querymen.middleware(qSchema), async function (req, res) {
         try {
+            var mychartCount = chartCount;
 	    //console.log("QUERYMEN:" + JSON.stringify(req.querymen.query));
-	    if (!asf.asfgroupacls(conf.admingroupname,req.user.pmcs)) {
-		tabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
-		chartCount = 0;
-		// MJC because we have to filter them all 
-	    }
-	    
             var pipeLine = normalizeQuery(req.querymen.query);
             // to get the documents
             // get top level tabs aggregated counts
             var tabs = [];
-            if (Object.keys(tabFacet).length != 0) {
-                //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));
+
+	    if (!asf.asfgroupacls(conf.admingroupname,req.user.pmcs)) {
+		mytabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
+		mychartCount = 0;
+		// MJC because we have to filter them all
                 tabs = await Document.aggregate([{
-                                $facet: tabFacet
+                    $facet: mytabFacet
 		}]).exec();
+	    } else {
+                if (Object.keys(tabFacet).length != 0) {
+                    //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));
+                    tabs = await Document.aggregate([{
+                        $facet: tabFacet
+		    }]).exec();
+                }
             }
             
             // get the charts aggregated counts            
@@ -1124,9 +1129,9 @@ module.exports = function (name, opts) {
             var total = 0;
 
 
-            console.log('mjc1:'+chartCount);
+            console.log('mjc1:'+mychartCount);
             
-            if (chartCount > 0) {
+            if (mychartCount > 0) {
                 chartFacet.all = allQuery;
                 pipeLine.push({
                         $facet: chartFacet
