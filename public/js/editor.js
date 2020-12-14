@@ -936,14 +936,10 @@ autoButton.addEventListener('click', function (event) {
             if (ptstring.length == 0) {
                 ptstring = "A"
             }
+	    var dpstring = ptstring + " vulnerability in __COMPONENT__ of " + textUtil.getProductList(docJSON) + " allows an attacker to __IMPACT__.  " + textUtil.getAffectedProductString(docJSON)	    
             desc.push({
                 lang: "eng",
-                value: ptstring + " vulnerability in ____COMPONENT____ of " + textUtil.getProductList(docJSON) +
-                    " allows ____ATTACKER/ATTACK____ to cause ____IMPACT____."
-            });
-            desc.push({
-                lang: "eng",
-                value: textUtil.getAffectedProductString(docJSON)
+                value: dpstring.replace(/\n/g,' ').replace(/:/g,'').replace('/  /g',' ')
             });
             d.setValue(desc);
         } else {

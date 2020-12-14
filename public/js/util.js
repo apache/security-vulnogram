@@ -123,7 +123,7 @@ getProductList: function (cve) {
         for (var product of vendor.product.product_data) {
             pstring.push(product.product_name);
         }
-        lines.push(vendor.vendor_name + " " + pstring.join(", "));
+        lines.push(pstring.join(", "));
     }
     return lines.join("; ");
 },
@@ -183,10 +183,10 @@ getAffectedProductString: function (cve) {
                 if (!status[cat]) {
                     status[cat] = {};
                 }
-                if(!status[cat][vendor_name + ' ' + product.product_name]) {
-                    status[cat][vendor_name + ' ' + product.product_name] = [];
+                if(!status[cat][product.product_name]) {
+                    status[cat][product.product_name] = [];
                 }
-                status[cat][vendor_name + ' ' + product.product_name].push(vv);
+                status[cat][product.product_name].push(vv);
             }
         }
     }
