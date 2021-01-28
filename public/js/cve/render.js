@@ -299,7 +299,7 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = b.value) ? "" : pug_inte
 }).call(this);
 
 }
-pug_html = pug_html + ("\u003Cbr\u002F\u003E\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "Description:") ? "" : pug_interp)));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Description:") ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 pug_mixins["mpara"].call({
 block: function(){
 pug_html = pug_html + " ";
@@ -307,26 +307,26 @@ pug_html = pug_html + " ";
 }, cve.description.description_data);
 if (cve.source) {
 if (sourceText[cve.source.discovery]) {
-pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = sourceText[cve.source.discovery]) ? "" : pug_interp)));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = sourceText[cve.source.discovery]) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 }
 }
 if (CDM.AKA) {
-pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "This issue is also known as "+CDM.AKA) ? "" : pug_interp)));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "This issue is also known as "+CDM.AKA) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 }
 if (cve.source.defect && cve.source.defect.length > 0) {
-pug_html = pug_html + ("\u003Cbr\u002F\u003E" + (pug_escape(null == (pug_interp = "This issue is being tracked as "+cve.source.defect) ? "" : pug_interp)));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "This issue is being tracked as "+cve.source.defect) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 }
 if (cve.work_around && cve.work_around.length > 0) {
-pug_html = pug_html + (pug_escape(null == (pug_interp = "Mitigation:") ? "" : pug_interp));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Mitigation:") ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 pug_mixins["mpara"](cve.work_around);
 }
 pug_html = pug_html + "\u003C!--br--\u003E";
 if (cve.credit && cve.credit.length > 0) {
-pug_html = pug_html + (pug_escape(null == (pug_interp = "Credit:") ? "" : pug_interp));
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Credit:") ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 pug_mixins["mpara"](cve.credit);
 }
 if (cve.references.reference_data && cve.references.reference_data[0].url.length > 0) {
-pug_html = pug_html + (pug_escape(null == (pug_interp = "References:") ? "" : pug_interp)) + "\u003Cbr\u002F\u003E\u003Cbr\u002F\u003E";
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "References:") ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 // iterate cve.references.reference_data
 ;(function(){
   var $$obj = cve.references.reference_data;

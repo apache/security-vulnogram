@@ -31,34 +31,27 @@ block prepend content
                 for d in cve.problemtype.problemtype_data
                     for b in d.description
                         = b.value
-           br
-           br
-           = "Description:"
+           p= "Description:"
            +mpara(cve.description.description_data) 
            //- = textUtil.getAffectedProductString(cve)
            //- br
            if cve.source
                 if sourceText[cve.source.discovery]
-                    br
-                    =sourceText[cve.source.discovery]
+                    p= sourceText[cve.source.discovery]
            if CDM.AKA
-                br
-                = "This issue is also known as "+CDM.AKA
+                p= "This issue is also known as "+CDM.AKA
            if cve.source.defect && cve.source.defect.length > 0
-                br
-                = "This issue is being tracked as "+cve.source.defect
+                p= "This issue is being tracked as "+cve.source.defect
            //- br
            if cve.work_around && cve.work_around.length > 0
-                = "Mitigation:"
+                p= "Mitigation:"
                 +mpara(cve.work_around)
            //br
            if cve.credit && cve.credit.length > 0
-                = "Credit:"
+                p= "Credit:"
                 +mpara(cve.credit)
            if cve.references.reference_data && cve.references.reference_data[0].url.length > 0
-               = "References:"
-               br
-               br
+               p= "References:"
                each r in cve.references.reference_data
                    =r.url
                    br       
