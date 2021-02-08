@@ -31,7 +31,7 @@ module.exports = {
     //CNA contact address
     contact: 'security@apache.org',
 
-    classification: 'This tool is based on Vulnogram and is beta, contact security@apache.org with any queries or problems',
+    classification: 'This tool is based on Vulnogram, contact security@apache.org with any queries or problems',
     copyright: ' ',
     //copyright: 'Made with ' + package.name + ' ' + package.version,
 

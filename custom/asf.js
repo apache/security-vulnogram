@@ -135,7 +135,7 @@ var self = module.exports = {
     
     asfroutes: function (ensureAuthenticated, app) {
         app.get("/users/login", asflogin); // replaces existing
-        app.use('/.well-known', express.static("/home/mjc/server/.well-known", { dotfiles: 'allow' } ));
+        app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
         app.get('/users/setpmc', ensureAuthenticated, setpmc);

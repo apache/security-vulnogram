@@ -67,8 +67,8 @@ protected.post('/', csrfProtection, async function(req,res) {
 //					  "subject":cve+" reserved for "+req.body.pmc,
 //					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
-                    var beta = "Note that we have a beta web based service that can help you handle the process and reduce the burden of the Mitre submission.  You can try it https://cveprocess.apache.org/cve/"+cve+" and if you do decide to use this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\n"
-                    var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the new notification requirements in section 15 of https://www.apache.org/security/committers.html . Once this issue is public you must follow these steps within one business day.  This is a requirement from Mitre.\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
+                    var beta = "Note that we have a web based service that can help you handle the process and reduce the burden of the Mitre submission.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\n"
+                    var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the process at https://www.apache.org/security/committers.html .\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
 
                     var eto = "security@apache.org";
                     if (!testmode && req.body.pmc !="security") {
