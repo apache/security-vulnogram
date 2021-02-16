@@ -1129,8 +1129,6 @@ module.exports = function (name, opts) {
             var total = 0;
 
 
-            console.log('mjc1:'+mychartCount);
-            
             if (mychartCount > 0) {
                 chartFacet.all = allQuery;
                 pipeLine.push({

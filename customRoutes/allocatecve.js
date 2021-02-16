@@ -67,7 +67,7 @@ protected.post('/', csrfProtection, async function(req,res) {
 //					  "subject":cve+" reserved for "+req.body.pmc,
 //					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
-                    var beta = "Note that we have a web based service that can help you handle the process and reduce the burden of the Mitre submission.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\n"
+                    var beta = "Note that you should use our web based service to handle the process.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\nThere is also a video tutorial available at https://s.apache.org/cveprocessvideo\n\n"
                     var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the process at https://www.apache.org/security/committers.html .\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
 
                     var eto = "security@apache.org";
