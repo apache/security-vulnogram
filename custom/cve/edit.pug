@@ -65,17 +65,19 @@ block append customtabs
         input.tab(name='tabs', type='radio', id='aboutTab', value="0")
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
-         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>.  A short <a href='https://s.apache.org/cveprocessvideo'>video overview</a> is available.  This workflow replaces section 15."
+         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available."
          ul
-             li!= "15 a. Fill in the details on <a href='#editor'>'Editor'</a> tab setting the state to 'DRAFT'.  Any field marked optional is not required and it is not given to the CVE project but is used for the advisory previews you may like to use. "
+             li!= "Fill in the details on <a href='#editor'>'Editor'</a> tab setting. Any field marked optional is not required and it is not given to the CVE project but is used for the emails. "
              p=""
-             li!= "15 b. The information you enter is stored when you hit SAVE.  It is only visible to other members of your PMC and the ASF security team.  So you can prepare some of it in advance.  Just be careful if you are part of more than one PMC that you don't change the owning PMC to the wrong one."
+             li!= "The information you enter is stored when you hit SAVE.  It is only visible to other members of your PMC and the ASF security team.  So you can prepare some of it in advance."
              p=""
-             li!= "15 c. Once you go public.  Use the <a href='#email'>'OSS-Email'</a> tab for the email you should send to oss-security. Use the <a href='#ASFemail'>'ASF-Email'</a> tab for the email to Apache lists.  Also update your security page if you have one."
+             li!= "Once you go public.  Use the <a href='#email'>'OSS-Email'</a> tab for the email you should send to oss-security. Use the <a href='#ASFemail'>'ASF-Email'</a> tab for the email to Apache lists.  Also update your security page if you have one."
              p=""
-             li!= "15 d. Fill in a 'reference' type 'CONFIRM' with the URL to your public post about this issue.  Then set the state to 'READY'.  This auto notifies ASF Security who will review and submit to Mitre and then set state to 'PUBLIC'.  state 'REVIEW' is optional, set this if you want ASF Security to be notified to help with this entry."
+             li!= "Fill in a 'reference' type 'CONFIRM' with the URL to your public post about this issue.  Then set the state to 'READY'.  This auto notifies ASF Security who will review and submit to Mitre and then set state to 'PUBLIC'."
+             p=""
+             li =! "'REVIEW' state is optional. Set this if you want ASF Security to be notified to help with this entry."
          p=""
-         p!= "We are still testing this service.  For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
+         p!= "For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 
 block logolink
 
