@@ -282,8 +282,25 @@ module.exports = {
 		    },
 		    
 		},
+	        },
 	    },
-	    },
+            "timeline": {
+                "options": {
+                    "hidden": "true"
+                },                
+                "type": "array",
+                "format": "table",
+                "items": {
+		    "time": { "title": "time", "type":"string" },
+                    "lang": { "title":"language", "type":"string", "default":{ "lang":"eng"}, "options": {"hidden":"true"}},
+                    "value": { "title":"details", "type":"string"},
+                },
+                "properties": {
+		    "time": { "title":"time", "type":"string"    ,  "input_width": "10em",    "grid_columns": 6},
+                    "lang": { "type":"string", "default":"eng", "options": {"hidden":"true"}},
+                    "value": { "type":"string"},
+                },
+            },
 	},
     },
     script: {
