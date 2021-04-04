@@ -23,8 +23,10 @@ block prepend content
            = "Subject: " 
            if cve.source.advisory
                 = cve.source.advisory +": "
-           = cveid +": "            
+           = cveid +": "
            if CDM.TITLE
+                if (!CDM.TITLE.toString().includes("Apache"))
+                    = getProductListNoVendor(cve) + ": "
                 = CDM.TITLE +" "
            else
                 = getProductListNoVendor(cve) + " "

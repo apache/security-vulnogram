@@ -242,6 +242,9 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = cve.source.advisory +": 
 }
 pug_html = pug_html + (pug_escape(null == (pug_interp = cveid +": ") ? "" : pug_interp));
 if (CDM.TITLE) {
+if ((!CDM.TITLE.toString().includes("Apache"))) {
+pug_html = pug_html + (pug_escape(null == (pug_interp = getProductListNoVendor(cve) + ": ") ? "" : pug_interp));
+}
 pug_html = pug_html + (pug_escape(null == (pug_interp = CDM.TITLE +" ") ? "" : pug_interp));
 }
 else {
