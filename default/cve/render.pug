@@ -53,6 +53,9 @@ block pageDef
         p= textUtil.getProductAffected(cve)
 
         h4 PROBLEM:
+        if cve.impact
+               for r in cve.impact
+                  p= "Severity: " + r.other     
         +mpara(cve.description.description_data)
         +mpara(cve.configuration)
         +mpara(cve.exploit)

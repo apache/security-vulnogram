@@ -309,14 +309,14 @@ if (cve.impact) {
   if ('number' == typeof $$obj.length) {
       for (var pug_index9 = 0, $$l = $$obj.length; pug_index9 < $$l; pug_index9++) {
         var r = $$obj[pug_index9];
-pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity:" + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity: " + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
       }
   } else {
     var $$l = 0;
     for (var pug_index9 in $$obj) {
       $$l++;
       var r = $$obj[pug_index9];
-pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity:" + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity: " + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
     }
   }
 }).call(this);
@@ -420,6 +420,26 @@ if (cve.source && cve.source.advisory) {
 pug_html = pug_html + (pug_escape(null == (pug_interp = cve.source.advisory) ? "" : pug_interp)) + " ";
 }
 pug_html = pug_html + (pug_escape(null == (pug_interp = CDM.TITLE + ' (' + cveid + ')') ? "" : pug_interp)) + "\u003C\u002Fh2\u003E\u003Ch4\u003EPRODUCT AFFECTED:\u003C\u002Fh4\u003E\u003Cp\u003E" + (pug_escape(null == (pug_interp = textUtil.getProductAffected(cve)) ? "" : pug_interp)) + "\u003C\u002Fp\u003E\u003Ch4\u003EPROBLEM:\u003C\u002Fh4\u003E";
+if (cve.impact) {
+// iterate cve.impact
+;(function(){
+  var $$obj = cve.impact;
+  if ('number' == typeof $$obj.length) {
+      for (var pug_index12 = 0, $$l = $$obj.length; pug_index12 < $$l; pug_index12++) {
+        var r = $$obj[pug_index12];
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity: " + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+      }
+  } else {
+    var $$l = 0;
+    for (var pug_index12 in $$obj) {
+      $$l++;
+      var r = $$obj[pug_index12];
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity: " + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+    }
+  }
+}).call(this);
+
+}
 pug_mixins["mpara"](cve.description.description_data);
 pug_mixins["mpara"](cve.configuration);
 pug_mixins["mpara"](cve.exploit);
@@ -496,15 +516,15 @@ pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", "http://cve.mi
 ;(function(){
   var $$obj = cve.references.reference_data;
   if ('number' == typeof $$obj.length) {
-      for (var pug_index13 = 0, $$l = $$obj.length; pug_index13 < $$l; pug_index13++) {
-        var r = $$obj[pug_index13];
+      for (var pug_index14 = 0, $$l = $$obj.length; pug_index14 < $$l; pug_index14++) {
+        var r = $$obj[pug_index14];
 pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", r.url, true, false)) + "\u003E" + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003C\u002Fa\u003E\u003C\u002Fli\u003E";
       }
   } else {
     var $$l = 0;
-    for (var pug_index13 in $$obj) {
+    for (var pug_index14 in $$obj) {
       $$l++;
-      var r = $$obj[pug_index13];
+      var r = $$obj[pug_index14];
 pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", r.url, true, false)) + "\u003E" + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003C\u002Fa\u003E\u003C\u002Fli\u003E";
     }
   }
@@ -525,15 +545,15 @@ pug_html = pug_html + "\u003Ch4\u003EACKNOWLEDGEMENTS:\u003C\u002Fh4\u003E\u003C
 ;(function(){
   var $$obj = cve.credit;
   if ('number' == typeof $$obj.length) {
-      for (var pug_index14 = 0, $$l = $$obj.length; pug_index14 < $$l; pug_index14++) {
-        var c = $$obj[pug_index14];
+      for (var pug_index15 = 0, $$l = $$obj.length; pug_index15 < $$l; pug_index15++) {
+        var c = $$obj[pug_index15];
 pug_html = pug_html + "\u003Cli\u003E" + (pug_escape(null == (pug_interp = c.value) ? "" : pug_interp)) + "\u003C\u002Fli\u003E";
       }
   } else {
     var $$l = 0;
-    for (var pug_index14 in $$obj) {
+    for (var pug_index15 in $$obj) {
       $$l++;
-      var c = $$obj[pug_index14];
+      var c = $$obj[pug_index15];
 pug_html = pug_html + "\u003Cli\u003E" + (pug_escape(null == (pug_interp = c.value) ? "" : pug_interp)) + "\u003C\u002Fli\u003E";
     }
   }
