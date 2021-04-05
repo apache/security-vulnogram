@@ -33,6 +33,9 @@ block prepend content
                 for d in cve.problemtype.problemtype_data
                     for b in d.description
                         = b.value
+           if cve.impact
+               for r in cve.impact
+                  p= "Severity: " + r.other
            p= "Description:"
            +mpara(cve.description.description_data) 
            //- = textUtil.getAffectedProductString(cve)

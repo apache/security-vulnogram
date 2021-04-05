@@ -302,6 +302,26 @@ pug_html = pug_html + (pug_escape(null == (pug_interp = b.value) ? "" : pug_inte
 }).call(this);
 
 }
+if (cve.impact) {
+// iterate cve.impact
+;(function(){
+  var $$obj = cve.impact;
+  if ('number' == typeof $$obj.length) {
+      for (var pug_index9 = 0, $$l = $$obj.length; pug_index9 < $$l; pug_index9++) {
+        var r = $$obj[pug_index9];
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity:" + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+      }
+  } else {
+    var $$l = 0;
+    for (var pug_index9 in $$obj) {
+      $$l++;
+      var r = $$obj[pug_index9];
+pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Severity:" + r.other) ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
+    }
+  }
+}).call(this);
+
+}
 pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Description:") ? "" : pug_interp)) + "\u003C\u002Fp\u003E";
 pug_mixins["mpara"].call({
 block: function(){
@@ -334,15 +354,15 @@ pug_html = pug_html + "\u003Cp\u003E" + (pug_escape(null == (pug_interp = "Refer
 ;(function(){
   var $$obj = cve.references.reference_data;
   if ('number' == typeof $$obj.length) {
-      for (var pug_index9 = 0, $$l = $$obj.length; pug_index9 < $$l; pug_index9++) {
-        var r = $$obj[pug_index9];
+      for (var pug_index10 = 0, $$l = $$obj.length; pug_index10 < $$l; pug_index10++) {
+        var r = $$obj[pug_index10];
 pug_html = pug_html + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003Cbr\u002F\u003E";
       }
   } else {
     var $$l = 0;
-    for (var pug_index9 in $$obj) {
+    for (var pug_index10 in $$obj) {
       $$l++;
-      var r = $$obj[pug_index9];
+      var r = $$obj[pug_index10];
 pug_html = pug_html + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003Cbr\u002F\u003E";
     }
   }
@@ -476,15 +496,15 @@ pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", "http://cve.mi
 ;(function(){
   var $$obj = cve.references.reference_data;
   if ('number' == typeof $$obj.length) {
-      for (var pug_index12 = 0, $$l = $$obj.length; pug_index12 < $$l; pug_index12++) {
-        var r = $$obj[pug_index12];
+      for (var pug_index13 = 0, $$l = $$obj.length; pug_index13 < $$l; pug_index13++) {
+        var r = $$obj[pug_index13];
 pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", r.url, true, false)) + "\u003E" + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003C\u002Fa\u003E\u003C\u002Fli\u003E";
       }
   } else {
     var $$l = 0;
-    for (var pug_index12 in $$obj) {
+    for (var pug_index13 in $$obj) {
       $$l++;
-      var r = $$obj[pug_index12];
+      var r = $$obj[pug_index13];
 pug_html = pug_html + "\u003Cli\u003E\u003Ca" + (pug_attr("href", r.url, true, false)) + "\u003E" + (pug_escape(null == (pug_interp = r.url) ? "" : pug_interp)) + "\u003C\u002Fa\u003E\u003C\u002Fli\u003E";
     }
   }
@@ -505,15 +525,15 @@ pug_html = pug_html + "\u003Ch4\u003EACKNOWLEDGEMENTS:\u003C\u002Fh4\u003E\u003C
 ;(function(){
   var $$obj = cve.credit;
   if ('number' == typeof $$obj.length) {
-      for (var pug_index13 = 0, $$l = $$obj.length; pug_index13 < $$l; pug_index13++) {
-        var c = $$obj[pug_index13];
+      for (var pug_index14 = 0, $$l = $$obj.length; pug_index14 < $$l; pug_index14++) {
+        var c = $$obj[pug_index14];
 pug_html = pug_html + "\u003Cli\u003E" + (pug_escape(null == (pug_interp = c.value) ? "" : pug_interp)) + "\u003C\u002Fli\u003E";
       }
   } else {
     var $$l = 0;
-    for (var pug_index13 in $$obj) {
+    for (var pug_index14 in $$obj) {
       $$l++;
-      var c = $$obj[pug_index13];
+      var c = $$obj[pug_index14];
 pug_html = pug_html + "\u003Cli\u003E" + (pug_escape(null == (pug_interp = c.value) ? "" : pug_interp)) + "\u003C\u002Fli\u003E";
     }
   }

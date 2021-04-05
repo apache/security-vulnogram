@@ -204,11 +204,14 @@ module.exports = {
 		},
 	    },
 	    "impact": {
-		"type": "object",
+		"type": "array",
+                "format": "table",
 		"options": {
-		    "hidden": "true"
+		    "xhidden": "false"
 		},
-		"properties": ""
+                "required": ["other"],
+                "items": { "title":"Text description of the severity or impact (optional)", "type":"object", "required":["other"],"other":"Other",
+                           "properties": {"other": {"type":"string", title:"Text description of the severity or impact (such as 'low')"}}},
 	    },
 	    "description": {
 		"properties": {
