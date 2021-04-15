@@ -174,9 +174,10 @@ var self = module.exports = {
 	if (oldDoc != null) {
 	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
 		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
-		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE)) {
+		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
+                    (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.STATE == "REVIEW" )) {
 		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
-		    se = email.sendemail({"from":newDoc.body.CNA_private.email,
+		    se = email.sendemail({"from": newDoc.author+"@apache.org",
 					  "cc":newDoc.body.CNA_private.email,
 					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
 					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
