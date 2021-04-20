@@ -590,6 +590,11 @@ module.exports = function (name, opts) {
     }
 
     router.post('/comment', csrfProtection, async function (req, res) {
+        // we need to load the document so we can get the pmc
+        var q = {};
+        q[idpath] = req.body.id;
+        var ret = await Document.findOne(q).exec();
+        asf.asfhookaddcomment(ret,req);
         if (req.body.slug) {
             var r = await updateComment(req.body.id, req.user.username, req.body.text, req.body.slug, new Date());
             res.json(r);

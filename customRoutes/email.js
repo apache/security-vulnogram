@@ -3,6 +3,16 @@ const nodemailer = require("nodemailer");
 // set from: (default security@) to: subject: text 
 
 module.exports = {
+
+    // TODO: This should figure out if security@ exists etc
+    getpmclist: function (pmc) {
+        var pmcemail = "private@"+pmc+".apache.org";
+        if (pmc == "security") {
+            pmcemail = "security@apache.org";
+        }
+        return pmcemail;
+    },
+    
     sendemail: async function (mailinfo)  {
 	let transporter = nodemailer.createTransport({
 	    sendmail: true,
