@@ -206,12 +206,25 @@ module.exports = {
 	    "impact": {
 		"type": "array",
                 "format": "table",
+                "minItems": 1,
 		"options": {
-		    "xhidden": "false"
+		    "xhidden": "false",
+                    "disable_array_add": "true"
 		},
                 "required": ["other"],
-                "items": { "title":"Text description of the severity or impact (optional)", "type":"object", "required":["other"],"other":"Other",
-                           "properties": {"other": {"type":"string", title:"Text description of the severity or impact (such as 'low')"}}},
+                "items": {
+                    "title":"Text description of the severity or impact (optional)",
+                    "type":"object",
+                    "required":["other"],
+                    "other":"Other",
+                    "properties": {
+                        "other": {
+                            "type":"string",
+                            "title":"Text description of the severity or impact (such as 'low', select from list or free text)",
+                            "examples":["low","moderate","high","critical"]
+                        }
+                    }
+                }
 	    },
 	    "description": {
 		"properties": {
@@ -229,10 +242,13 @@ module.exports = {
 		}
 	    },
 	    "credit": {
+		"type": "array",
+                "format": "table",
 		"items": {
                     "title": "credit statement (optional)",
 		    "properties": {
 			"value": {
+                            "title": "Details of who reported the issue",
 			    "description": "Apache Tomcat would like to thank B Lobby for reporting this issue.",
 			}
 		    }
