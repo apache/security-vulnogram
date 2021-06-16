@@ -787,6 +787,14 @@ header .CVE:before,
     background-position: -67em 0;
 }
 
+.PMC:before {
+    background-position: -47em 0;    
+}
+
+.timeline:before {
+    background-position: -84em 0;
+}
+
 .Current-Status:before,
 .source:before,
 .metadata:before,
