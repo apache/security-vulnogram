@@ -67,7 +67,7 @@ protected.post('/', csrfProtection, async function(req,res) {
 //					  "subject":cve+" reserved for "+req.body.pmc,
 //					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
-                    var beta = "Note that you should use our web based service to handle the process.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 15 of our requirements and full instructions are at that URL.\n\nThere is also a video tutorial available at https://s.apache.org/cveprocessvideo\n\n"
+                    var beta = "Note that you should use our web based service to handle the process.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 16 of our requirements and full instructions are at that URL.\n\nThere is also a video tutorial available at https://s.apache.org/cveprocessvideo\n\n"
                     var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the process at https://www.apache.org/security/committers.html .\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
 
                     var eto = "security@apache.org";
@@ -81,7 +81,85 @@ protected.post('/', csrfProtection, async function(req,res) {
                                               }).then( (x) => {  console.log("sent CVE notification mail "+x);});
                     
 		    // probably some better way of doing this for sure; we could render the schema i suppose?
-		    newdoc = { "data_type" : "CVE", "data_format" : "MITRE", "data_version" : "4.0", "generator" : { "engine" : "Vulnogram 0.0.9" }, "CVE_data_meta" : { "ID" : cve, "ASSIGNER" : "security@apache.org", "DATE_PUBLIC" : "", "TITLE" : req.body.cvetitle, "AKA" : "", "STATE" : "RESERVED" }, "source" : { "defect" : [ ], "advisory" : "", "discovery" : "UNKNOWN" }, "affects" : { "vendor" : { "vendor_data" : [ { "vendor_name" : "Apache Software Foundation", "product" : { "product_data" : [ { "product_name" : "", "version" : { "version_data" : [ { "version_name" : "", "version_affected" : "", "version_value" : "", "platform" : "" } ] } } ] } } ] } }, "problemtype" : { "problemtype_data" : [ { "description" : [ { "lang" : "eng", "value" : "" } ] } ] }, "description" : { "description_data" : [ { "value" : "", "lang" : "eng" } ] }, "references" : { "reference_data" : [ { "refsource" : "CONFIRM", "url" : "", "name" : "" } ] }, "configuration" : [ ], "exploit" : [ ], "work_around" : [ ], "solution" : [ ], "credit" : [ ], "CNA_private" : { "owner" : req.body.pmc, "publish" : { "ym" : "", "year" : "", "month" : "" }, "share_with_CVE" : true, "CVE_table_description" : [ ], "CVE_list" : [ ], "internal_comments" : "", "todo" : [ ], "email" : req.body.email } };
+		    newdoc = { "data_type" : "CVE",
+                               "data_format" : "MITRE",
+                               "data_version" : "4.0",
+                               "generator" : {
+                                   "engine" : "Vulnogram 0.0.9"
+                               },
+                               "CVE_data_meta" : {
+                                   "ID" : cve,
+                                   "ASSIGNER" : "security@apache.org",
+                                   "DATE_PUBLIC" : "",
+                                   "TITLE" : req.body.cvetitle,
+                                   "AKA" : "",
+                                   "STATE" : "RESERVED"
+                               },
+                               "source" : {
+                                   "defect" : [ ],
+                                   "advisory" : "",
+                                   "discovery" : "UNKNOWN"
+                               },
+                               "affects" : {
+                                   "vendor" : {
+                                       "vendor_data" : [ {
+                                           "vendor_name" : "Apache Software Foundation",
+                                           "product" : {
+                                               "product_data" : [ {
+                                                   "product_name" : "",
+                                                   "version" : {
+                                                       "version_data" : [ {
+                                                           "version_name" : "",
+                                                           "version_affected" : "",
+                                                           "version_value" : "",
+                                                           "platform" : ""
+                                                       } ]
+                                                   }
+                                               } ]
+                                           }
+                                       } ]
+                                   }
+                               },
+                               "problemtype" : {
+                                   "problemtype_data" : [ {
+                                       "description" : [ {
+                                           "lang" : "eng",
+                                           "value" : ""
+                                       } ]
+                                   } ]
+                               },
+                               "description" : {
+                                   "description_data" : [ {
+                                       "value" : "",
+                                       "lang" : "eng"
+                                   } ]
+                               }, "references" : {
+                                   "reference_data" : [ {
+                                       "refsource" : "CONFIRM",
+                                       "url" : "",
+                                       "name" : ""
+                                   } ]
+                               },
+                               "configuration" : [ ],
+                               "exploit" : [ ],
+                               "work_around" : [ ],
+                               "solution" : [ ],
+                               "credit" : [ ],
+                               "CNA_private" : {
+                                   "owner" : req.body.pmc,
+                                   "publish" : {
+                                       "ym" : "",
+                                       "year" : "",
+                                       "month" : ""
+                                   },
+                                   "share_with_CVE" : true,
+                                   "CVE_table_description" : [ ],
+                                   "CVE_list" : [ ],
+                                   "internal_comments" : "",
+                                   "todo" : [ ],
+                                   "email" : req.body.email
+                               }
+                             };
 
 		    let entry = new Document({
 			"body": newdoc,
@@ -93,10 +171,16 @@ protected.post('/', csrfProtection, async function(req,res) {
 			} else {
 			    console.log(err,doc);
                             count++;
-                            res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
+                            //res.redirect('/cve/' + cve.slice());
+                            //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
 			}
 		    });
                 }
+                for (cveid in body.cve_ids) {
+                    cve = body.cve_ids[cveid].cve_id
+                    res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
+                }
+                res.end();
             }
         }
     });
