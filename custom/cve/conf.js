@@ -349,8 +349,7 @@ module.exports = {
                 lines.push(pstring.join(", "));
             }
             return lines.join("; ");
-        },
-
+        },        
         loadEmailLists: async function (pmc) {
             var listname = "dev";
 	    try {

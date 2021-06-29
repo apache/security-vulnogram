@@ -177,13 +177,13 @@ var self = module.exports = {
     asfhookaddcomment: function(doc,req) {
 	var url = "https://"+req.client.servername+"/cve/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
-                              "to": email.getpmclist(doc.body.CNA_private.owner),
+                              "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
                               "cc": "security@apache.org",
                               "bcc": req.user.email,
 			      "subject":"Comment added on "+req.body.id,
 			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
     },
-    
+
     asfhookaddhistory: function(oldDoc, newDoc) {
 	if (oldDoc != null) {
 	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
@@ -199,4 +199,16 @@ var self = module.exports = {
 	    }
 	}
     },
+
+    getsecurityemailaddress: function(pmc) {
+        if (pmc == "security") {
+            return "security@apache.org";
+        }
+        if (conf.pmcswithsecurityemails.includes(pmc)) {
+            return "security@"+pmc+".apache.org";
+        } else {
+            return "private@"+pmc+".apache.org";        
+        }
+    },
+    
 }

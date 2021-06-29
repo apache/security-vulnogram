@@ -15,6 +15,9 @@ module.exports = {
     cveapiliveservice: false,
     // which PMC is admin group?
     admingroupname: "security",
+
+    // which PMC have a security@ address?
+    pmcswithsecurityemails: ["commons","couchdb","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","orc","ozone","sentry","shiro","singa","sling","solr","spamassassin","spark","struts","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
     
     // The Mongodb URL where CVE entries and users are stored.
     // WARNING! Configure MongoDB authentication and use a strong password

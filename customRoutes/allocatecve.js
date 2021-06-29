@@ -5,6 +5,7 @@ const csurf = require('csurf');
 var request = require('request');
 const email = require('./email.js');
 const doc = require('../routes/doc.js');
+const asf =  require('../custom/asf.js');
 const optSet = require('../models/set');
 
 var csrfProtection = csurf();
@@ -14,7 +15,7 @@ protected.get('/', csrfProtection, function (req, res) {
     res.render('../customRoutes/allocatecve', {
         title: 'Reserve and Allocate CVE.  Will get IDs from Mitre, create template documents, and send an email',
         number: 1,
-	title: '',
+	title: "",
         year: thisyear,
         csrfToken: req.csrfToken()
     });
@@ -27,6 +28,12 @@ protected.post('/', csrfProtection, async function(req,res) {
         return;
     }
     var testmode =!conf.cveapiliveservice;
+    var pmc = req.body.pmc.toLowerCase();
+
+    var eto = asf.getsecurityemailaddress(pmc);
+    if (pmc =="security" || testmode) {
+        eto = "security@apache.org";
+    }
     
     let Document = res.locals.docs.cve.Document;
     let html = "";
@@ -61,22 +68,18 @@ protected.post('/', csrfProtection, async function(req,res) {
                     if (testmode) {
                         cve = cve + "-TEST"
                     }
-                    console.log("got a CVE ID "+cve+" reserved for "+req.body.pmc+" for "+req.body.email);
+                    console.log("got a CVE ID "+cve+" reserved for "+pmc+" for "+req.body.email);
 //		    var se = email.sendemail({"to":"mjc@apache.org",
 //                                          "cc":req.body.email,
-//					  "subject":cve+" reserved for "+req.body.pmc,
+//					  "subject":cve+" reserved for "+pmc,
 //					  "text":"description: "+req.body.cvetitle+"\n\n"}).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
                     var beta = "Note that you should use our web based service to handle the process.  Please visit https://cveprocess.apache.org/cve/"+cve+" and note this it replaces the whole of section 16 of our requirements and full instructions are at that URL.\n\nThere is also a video tutorial available at https://s.apache.org/cveprocessvideo\n\n"
                     var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the process at https://www.apache.org/security/committers.html .\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
 
-                    var eto = "security@apache.org";
-                    if (!testmode && req.body.pmc !="security") {
-                        eto = "private@"+req.body.pmc+".apache.org"
-                    }                    
 		    var se2 = email.sendemail({"to":eto,
                                                "cc":"security@apache.org",
-					       "subject":cve+" reserved for "+req.body.pmc,
+					       "subject":cve+" reserved for "+pmc,
 					       "text":pmctemplate,
                                               }).then( (x) => {  console.log("sent CVE notification mail "+x);});
                     
@@ -146,7 +149,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                                "solution" : [ ],
                                "credit" : [ ],
                                "CNA_private" : {
-                                   "owner" : req.body.pmc,
+                                   "owner" : pmc,
                                    "publish" : {
                                        "ym" : "",
                                        "year" : "",
