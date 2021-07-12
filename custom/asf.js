@@ -192,7 +192,7 @@ var self = module.exports = {
                     (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.STATE == "REVIEW" )) {
 		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
 		    se = email.sendemail({"from": newDoc.author+"@apache.org",
-					  "cc":newDoc.body.CNA_private.email,
+					  "cc":newDoc.author+"@apache.org",
 					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
 					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
 		}

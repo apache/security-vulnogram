@@ -299,7 +299,7 @@ module.exports = {
 			"title":"Your ASF Email Address",
 			"$ref": "/users/me/json",			
 			"options":{
-			    "hidden":false,
+			    "hidden":true,
 			    "grid_columns":12,
 			},
 		    },
