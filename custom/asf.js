@@ -79,11 +79,11 @@ function userslist (req,res) {
 
 function cvenew (req,res,next) {
     var pmcs = req.user.pmcs;
-    if (pmcs.includes(conf.admingroupname)) {
-        next();
-    } else {
-	res.send("sorry only security team for now");
-    }
+//    if (pmcs.includes(conf.admingroupname)) {
+//        next();
+//    } else {
+	res.redirect("/allocatecve");        
+//    }
 }
 
 // If we are in security team then allow you to assign the CVE to any PMC

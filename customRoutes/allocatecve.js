@@ -10,18 +10,50 @@ const optSet = require('../models/set');
 
 var csrfProtection = csurf();
 
+// Is the PMC allowed to do a live Mitre allocation?
+// Currently only if you are in security group
+
+function allowedtoallocatelive(pmcsiamin, specificpmc) {
+    if (pmcsiamin.includes(conf.admingroupname)) {
+        return true;
+    }
+    if (!pmcsiamin.includes(specificpmc)) {
+        return false; // they're messing with the form
+    }
+    if (conf.pmcstrustedascna.includes(specificpmc)) {
+        return true;
+    }
+    return false;
+}
+
+// use 'number: 1' below if you want to allow more than one CVE to get alocated at once. probably not
+// very useful/likely even though we do support it
+
+// use 'year: thisyear' below if you want to allow the year to be specified.  This is really only useful
+// perhaps at the end of the year when you know something isn't public until the next year, but really this
+// isn't important.
+
+
 protected.get('/', csrfProtection, function (req, res) {
     thisyear = new Date().getFullYear();
+    var title = "This form will request a CVE direct from the CVE project.  It will create a new CVE document here and send an email with the CVE name to the security team and the PMC.";
+    if (req.user.pmcs.length == 1) {
+        if (!allowedtoallocatelive(req.user.pmcs,req.user.pmcs[0])) {
+            title = "This form will request a CVE from the ASF Security team by email.";
+        }
+    } else if (!req.user.pmcs.includes(conf.admingroupname)) {
+        title = "This form will request a CVE either from the ASF Security team, or if your PMC is allowed, direct from the CVE project.  In either case an email will be sent to the security team and the PMC.";
+    }
     res.render('../customRoutes/allocatecve', {
-        title: 'Reserve and Allocate CVE.  Will get IDs from Mitre, create template documents, and send an email',
-        number: 1,
-	title: "",
-        year: thisyear,
+        title: title,
+//        number: 1,
+	cvetitle: "",
+//        year: thisyear,
         csrfToken: req.csrfToken()
     });
 });
 
-// number, year, pmc, email
+// number, year, pm
 protected.post('/', csrfProtection, async function(req,res) {
     if (!res.locals.docs) {
         console.log(res.locals);
@@ -38,12 +70,33 @@ protected.post('/', csrfProtection, async function(req,res) {
     let Document = res.locals.docs.cve.Document;
     let html = "";
 
-    groups = req.user.pmcs;
-    if (!groups.includes(conf.admingroupname)) {
-        req.flash('error',"not allowed");
+    if (!req.body.number) {
+        req.body.number = 1;
+    }
+    if (!req.body.year) {
+        req.body.year = new Date().getFullYear();
+    }
+    if (!req.body.cvetitle || req.body.cvetitle == "") {
+        req.flash('error',"description can not be blank");
         res.render('blank');
         return;
     }
+    
+    if (!allowedtoallocatelive(req.user.pmcs,pmc)) {
+
+        // Not allowed to allocate a CVE live, but requests one from security@
+
+        var s2 = email.sendemail({"to":"security@apache.org",
+                                  "cc":eto,
+                                  "subject":"CVE request for "+pmc,
+                                  "text":"requestor: "+req.user.username+"\npmc: "+pmc+"\n\n"+req.body.cvetitle,
+                                 }).then( (x) => {  console.log("sent CVE request mail "+x);});
+        
+        req.flash('success',"An email has been sent to security@apache.org requesting the CVE name");
+        res.render('blank');
+        return;
+    }
+    console.log("Requesting "+req.body.number+" "+ req.body.year + " CVE for "+req.body.pmc)
     
     var opt = {
         'method' : 'POST',
@@ -68,7 +121,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                     if (testmode) {
                         cve = cve + "-TEST"
                     }
-                    console.log("got a CVE ID "+cve+" reserved for "+pmc+" for "+req.body.email);
+                    console.log("got a CVE ID "+cve+" reserved for "+pmc);
 //		    var se = email.sendemail({"to":"mjc@apache.org",
 //                                          "cc":req.body.email,
 //					  "subject":cve+" reserved for "+pmc,
@@ -160,7 +213,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                                    "CVE_list" : [ ],
                                    "internal_comments" : "",
                                    "todo" : [ ],
-                                   "email" : req.body.email
+                                   "email" : "",
                                }
                              };
 
