@@ -53,7 +53,7 @@ module.exports = function (name, opts) {
             default: 'ID'
         },
         limit: {
-            default: 100,
+            default: 2000,
             max: 22000
         }
     };
@@ -783,6 +783,12 @@ module.exports = function (name, opts) {
         router.delete('/:id(' + idpattern + ')/file/:filename',async function (req, res) {
             var fq = {};
             fq[idpath] = req.params.id;
+
+            if (!req.user.pmcs.includes(conf.admingroupname)) {
+                res.send('not authorized');
+                return;
+            }
+            
             try {
                 var ret = await Document.update(fq,{$pull: {files: {name: req.params.filename}}});
                 res.json({ok:ret.ok, n:ret.n});
@@ -902,6 +908,11 @@ module.exports = function (name, opts) {
         router.delete('/:id(' + idpattern + ')', csrfProtection, function (req, res) {
             let query = {};
             query[idpath] = req.params.id;
+
+            if (!req.user.pmcs.includes(conf.admingroupname)) {
+                res.send('not authorized');
+                return;
+            }
 
             Document.remove(query, function (err) {
                 if (err) {
@@ -1168,6 +1179,7 @@ module.exports = function (name, opts) {
 	    var filtered = docs.filter(function(value,index,arr){
 		return asf.asfgroupacls(value.owner,req.user.pmcs)});
 	    docs = filtered;
+	    total = docs.length;
 
             var currentPage = 1;
             if (req.query.page) {
