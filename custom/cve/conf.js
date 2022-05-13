@@ -221,7 +221,7 @@ module.exports = {
                         "other": {
                             "type":"string",
                             "title":"Text description of the severity or impact (such as 'low', select from list or free text)",
-                            "examples":["low","moderate","high","critical"]
+                            "examples":["low","moderate","important","critical"]
                         }
                     }
                 }

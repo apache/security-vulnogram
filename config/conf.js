@@ -17,7 +17,7 @@ module.exports = {
     admingroupname: "security",
 
     // which PMC have a security@ address?
-    pmcswithsecurityemails: ["commons","couchdb","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","orc","ozone","sentry","shiro","singa","sling","solr","spamassassin","spark","struts","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
+    pmcswithsecurityemails: ["commons","couchdb","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","logging","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","orc","ozone","sentry","shiro","singa","sling","solr","spamassassin","spark","struts","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
     // which PMC are allowed to live allocate a CNA name from CVE Project
     pmcstrustedascna: ["none"],
     
