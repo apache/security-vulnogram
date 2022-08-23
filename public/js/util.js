@@ -122,6 +122,7 @@ reduceJSON: function (cve) {
     if(c.impact && c.impact.cvss && c.impact.cvss.baseScore === 0) {
         delete c.impact;    
     }
+    if(c.who) { delete c.who; }
     return(orderKeys(c));
 },
 
@@ -194,10 +195,10 @@ getAffectedProductString: function (cve) {
                 if (!status[cat]) {
                     status[cat] = {};
                 }
-                if(!status[cat][vendor_name + ' ' + product.product_name]) {
-                    status[cat][vendor_name + ' ' + product.product_name] = [];
+                if(!status[cat][product.product_name]) {
+                    status[cat][product.product_name] = [];
                 }
-                status[cat][vendor_name + ' ' + product.product_name].push(vv);
+                status[cat][product.product_name].push(vv);
             }
         }
     }
