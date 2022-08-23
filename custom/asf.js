@@ -84,6 +84,13 @@ function userslistjson (req, res) {
 
 var self = module.exports = {
     asfinit: function (app) {
+        app.use(function (req, res, next) {
+            if (req.session.user && req.session.user.username) {
+                req.user = req.session.user
+            }
+            res.locals.docs = app.locals.docs;
+            next();
+        });
     },
     asfroutes: function (ensureAuthenticated, app) {
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
