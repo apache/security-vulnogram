@@ -116,6 +116,8 @@ app.use(function (req, res, next) {
 // add this to route for authenticating before certain requests.
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
+        // ASF Just a test until we turn on auth
+        req.user.pmcs = "security";
         return next();
     } else {
         req.session.returnTo = req.originalUrl;
