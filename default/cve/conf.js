@@ -543,71 +543,6 @@ schema: {
     "grid_columns": 12
    }
   },
-   "source": {
-    "type": "object",
-    "format": "grid",
-    "options": {
-     "class": "vgi-info tgap",
-     "grid_columns": 12
- 
-   },   
-    "properties": {
-     "defect": {
-      "title": "Defect",
-      "type": "array",
-      "description": "CNA specific bug tracking IDs",
-      "format": "taglist",
-      "uniqueItems": true,
-      "items": {
-       "type": "string"
-      },
-      "options": {
-         "class": "vgi-bug",
-         "gird_columns": 2,
-         "formClass": "lni"
-      }     
-     },
-     "advisory": {
-      "title": "Advisory-ID",
-      "type": "string",
-      "description": "CNA specific advisory IDs (Optional)",
-      "options": {
-         "class": "vgi-alert",
-         "gird_columns": 2,
-         "formClass": "lni"
-      }
-     },
-     "discovery": {
-         "type": "string",
-         "title": "Source of vulnerability discovery",
-         "format": "radio",
-      "enum": [
-       "INTERNAL",
-       "EXTERNAL",
-       "USER",
-       "UNKNOWN"
-      ],
-      "options": {
-         "class": "vgi-info",
-         "grid_columns": 6,
-         "enum_titles": [
-        "internal",
-        "external",
-        "during use",
-        "unknown"
-       ],
-       "icons": {
-        "INTERNAL":"hardhat",
-        "EXTERNAL": "hat",
-        "USER":"cap",
-        "UPSTREAM":"in",
-        "UNKNOWN":"what"
-      }
-      },
-      "default": "UNKNOWN"
-     }
-    }
-   },   
   "affects": {
    "type": "object",
    "title": "Affected products",
@@ -853,6 +788,71 @@ schema: {
        }
    }
    },
+   "source": {
+    "type": "object",
+    "format": "grid",
+    "options": {
+     "class": "vgi-info tgap",
+     "grid_columns": 12
+ 
+   },   
+    "properties": {
+     "defect": {
+      "title": "Defect",
+      "type": "array",
+      "description": "CNA specific bug tracking IDs",
+      "format": "taglist",
+      "uniqueItems": true,
+      "items": {
+       "type": "string"
+      },
+      "options": {
+         "class": "vgi-bug",
+         "gird_columns": 2,
+         "formClass": "lni"
+      }     
+     },
+     "advisory": {
+      "title": "Advisory-ID",
+      "type": "string",
+      "description": "CNA specific advisory IDs (Optional)",
+      "options": {
+         "class": "vgi-alert",
+         "gird_columns": 2,
+         "formClass": "lni"
+      }
+     },
+     "discovery": {
+         "type": "string",
+         "title": "Source of vulnerability discovery",
+         "format": "radio",
+      "enum": [
+       "INTERNAL",
+       "EXTERNAL",
+       "USER",
+       "UNKNOWN"
+      ],
+      "options": {
+         "class": "vgi-info",
+         "grid_columns": 6,
+         "enum_titles": [
+        "internal",
+        "external",
+        "during use",
+        "unknown"
+       ],
+       "icons": {
+        "INTERNAL":"hardhat",
+        "EXTERNAL": "hat",
+        "USER":"cap",
+        "UPSTREAM":"in",
+        "UNKNOWN":"what"
+      }
+      },
+      "default": "UNKNOWN"
+     }
+    }
+   },   
   "CNA_private": {
    "properties": {
     "owner": {
@@ -963,7 +963,8 @@ validators: [
                 if(data[r].refsource == 'MISC' || data[r].refsource == '') {
                    miscs++; 
                 }
-                if(data[r].refsource == 'CONFIRM' || data[r].refsource == 'MISC') {
+                // ASF we have never done this
+                if(data[r].refsource == 'XXCONFIRM' || data[r].refsource == 'XXMISC') {
                     if(data[r].url != data[r].name && data[r].name != '') {
                         errors.push({
                             path: 'root.references.reference_data.' + r + '.name',
