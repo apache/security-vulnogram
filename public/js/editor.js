@@ -742,12 +742,22 @@ JSONEditor.defaults.themes.customTheme = class customTheme extends JSONEditor.Ab
       }
     getDescription (text) {
         var el = document.createElement('summary');
+        // el.innerHTML = text;
         return el;
     }
   getFormControl(label, input, description, infoText) {
       var el = super.getFormControl(label, input, description, infoText);
+      console.log(label,input,description,infoText)
       if(input.type =='text')
-        input.className = 'txt';
+          input.className = 'txt';
+      if (label && description) {
+          label.setAttribute('title', description.textContent);
+          el.appendChild(label);
+      }
+      if (label && input) {
+          input.setAttribute('title', description ? description.textContent : '');          
+          input.setAttribute('placeholder', description ? description.textContent : '');
+      }
       return el;
   }
     getFormInputLabel(text) {
