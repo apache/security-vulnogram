@@ -2,6 +2,7 @@ const express = require('express');
 const csurf = require('csurf');
 var csrfProtection = csurf();
 const crypto = require('crypto');
+const asf = require('../custom/asf.js');
 
 var random_slug = function () {
     return crypto.randomBytes(13).toString('base64').replace(/[\+\/\=]/g, '-');
@@ -111,6 +112,11 @@ module.exports = function (Document, opts) {
     }
     router = express.Router();
     router.post('/comment', csrfProtection, async function (req, res) {
+        // ASF we need to load the document so we can get the PMC
+        var q = {};
+        q[opts.idpath] = req.body.id;
+        var ret = await Document.findOne(q).exec();
+        asf.asfhookaddcomment(ret,req);
         if (req.body.slug) {
             var r = await updateComment(req.body.id, req.user.username, req.body.text, req.body.slug, new Date());
             res.json(r);

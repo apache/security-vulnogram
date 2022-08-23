@@ -1,5 +1,6 @@
 const express = require('express');
 const csurf = require('csurf');
+const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
 const textUtil = require('../public/js/util.js');
 var jsonpatch = require('json-patch-extended');
@@ -8,6 +9,7 @@ const docModel = require('../models/doc');
 var History;
 
 module.addHistory = function addHistory(oldDoc, newDoc) {
+    asf.asfhookaddhistory(oldDoc, newDoc); 
     if (oldDoc === null) {
         oldDoc = {
             __v: -1,
@@ -187,6 +189,7 @@ module.exports = function (Document, opts) {
         queryNewID[opts.idpath] = inputID;
         queryOldID[opts.idpath] = req.params.id;
         var renaming = (req.params.id != inputID);
+        var dorefresh = false;
         //console.log('req.params.id = ' + req.params.id + ' == ' + inputID)
         Document.findOne(queryNewID).then((existingDoc) => {
             if (existingDoc) {
@@ -199,6 +202,7 @@ module.exports = function (Document, opts) {
                     return;
                 }
             }
+            asf.asfhookupsertdoc(req,dorefresh);
             var d = new Date();
             newDoc = {
                 body: req.body,
@@ -229,7 +233,7 @@ module.exports = function (Document, opts) {
                             msg: 'Error! Document not Updated, ' + err
                         });
                     } else {
-                        if (renaming) {
+                        if (renaming || dorefresh) {
                             res.json({
                                 type: 'go',
                                 to: inputID
@@ -255,6 +259,11 @@ module.exports = function (Document, opts) {
             let query = {};
             query[opts.idpath] = req.params.id;
 
+            if (!req.user.pmcs.includes(conf.admingroupname)) {                               
+                res.send('not authorized');                                                   
+                return;                                                                       
+            }     
+            
             Document.remove(query, function (err) {
                 if (err) {
                     res.send('Error Deleting');
@@ -270,11 +279,14 @@ module.exports = function (Document, opts) {
 
     // GET
 
-    var getSubDocs = async function (subSchema, doc_id) {
+    var getSubDocs = async function (subSchema, doc_id, mypmcs) {
         var q = {}
         q[opts.idpath] = doc_id;
         parentDoc = await Document.findOne(q).exec();
         if (parentDoc) {
+            if (parentDoc.body && parentDoc.body.CNA_private && !asf.asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
+                return { 'message': 'Access Denied' };
+            }
             var subq = {
                 parent_id: parentDoc._id
             }
@@ -292,12 +304,12 @@ module.exports = function (Document, opts) {
         }
     }
     router.get('/log/:id', [checkID], function (req, res) {
-        getSubDocs(History, req.params.id).then(r => {
+        getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });
     });
     router.get('/comment/:id', [checkID], function (req, res) {
-        getSubDocs(History, req.params.id).then(r => {
+        getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });
     });
@@ -311,6 +323,7 @@ module.exports = function (Document, opts) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
             }
+            asf.asfhookshowcveacl(doc, req);
             var ucomments = doc.comments;//await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
