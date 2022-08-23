@@ -472,7 +472,7 @@ async function checkSession() {
             return o;
         }
     } else {
-        cveShowError('Browser not supported!');
+        //cveShowError('Browser not supported!');
     }
     return false;
 }
@@ -834,11 +834,14 @@ async function cveShowError(err) {
         cveLogout();
         mainTabGroup.focus(4);
     }
+    console.log(err);
+    if (document.getElementById('cveErrors')) {
     document.getElementById('cveErrors').innerHTML = cveRender({
         ctemplate: 'cveErrors',
         err: err
     })
-    document.getElementById('cveErrorsModal').showModal();
+        document.getElementById('cveErrorsModal').showModal();
+    }
 }
 
 async function cveGetList() {
