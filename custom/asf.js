@@ -80,14 +80,10 @@ function usersmejson (req, res) {
 function usersprofile (req,res) {
     user = req.user;
     user.group = user.pmcs;
-    admin = '';
-    if (user.group) {
-        admin = user.group.includes(conf.admingroupname)
-    }
     res.render('users/view', {
         title: 'Profile: ' + user.username,
         profile: user,
-        admin: admin,
+        admin: user.group.includes(conf.admingroupname),
         page: 'users',
     });
 }
