@@ -33,6 +33,7 @@
     "mongodb": "^3.7.3",
     "mongoose": "^5.13.14",
     "node-fetch": "^2.6.7",
+    "nodemailer": "^6.4.17",
     "object-path": "^0.11.7",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
