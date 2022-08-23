@@ -4,6 +4,51 @@ const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 
+function asflogin (req, res) {
+    sess = req.session;
+    if (req.query.code) {
+	const userinfo_endpoint= 'https://oauth.apache.org/token'
+	uri = userinfo_endpoint+"?code="+req.query.code
+	request(uri, {json:true},(err,cbres,body) => {
+	    if (err) {res.send(err);}
+	    else if (cbres.statusCode != 200) {res.send(body);}
+	    else if (body.state != sess.state) { res.send("auth is broken") }
+	    else {
+		pmcs = body.pmcs;
+		for (i=0; i< body.projects.length; i++) {
+		    if (!pmcs.includes(body.projects[i])) {
+			// we're a committer to project, but not in the PMC
+			if (conf.pmcswithsecurityemails.includes(body.projects[i])) {
+			    // but this project has a security list
+			    console.log("User "+body.uid+" is committer to "+body.projects[i]+" but not PMC, allowed");
+			    pmcs.push(body.projects[i]);
+			} else {
+			    console.log("User "+body.uid+" is committer to "+body.projects[i]+" but not PMC, ignored");
+			}
+		    }
+		}  
+		sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:pmc};
+		//sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:["airflow"]};		
+		if (sess.returnTo) {
+		    res.redirect(req.session.returnTo);
+		    delete req.session.returnTo;
+		} else {
+		    res.redirect("/");
+		}
+		console.log(body);
+	    }
+	});
+    } else {
+	delete  sess.user;
+	sess.state = uuidv4();
+	const authorization_endpoint= 'https://oauth.apache.org/auth'
+	redirecturl = authorization_endpoint+"?state="+sess.state+"&redirect_uri=https://"+req.get('host')+req.originalUrl;
+	res.redirect(redirecturl)
+    }
+}
+
+
+
 // If you are in security pmc allow you to specify a different pmc for testing
 
 function setpmc(req, res) {
@@ -92,7 +137,10 @@ var self = module.exports = {
             next();
         });
     },
+
     asfroutes: function (ensureAuthenticated, app) {
+        // TODO app.get("/users/login", asflogin); // replaces existing
+        app.get('/cve/new', ensureAuthenticated, cvenew); // replaces existing
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
@@ -104,4 +152,82 @@ var self = module.exports = {
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing
         app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
     },
+
+    asfgroupacls: function (documentacl,yourpmcs) {
+	//console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
+	if (yourpmcs.includes(conf.admingroupname)) {
+	    return true;
+	}
+	for (i=0; i< yourpmcs.length; i++) {
+	    if (yourpmcs[i] == documentacl) {
+		return true;
+	    }
+	}
+	//console.log('mjc9 access denied');
+	return false;
+    },
+    
+    asfhookupsertdoc: function(req,dorefresh) {
+	// mjc enfoce workflow state
+        if (req.body.CVE_data_meta.STATE == "RESERVED") {
+	    // if it's in reserved but someone is editing it, move it to draft
+	    if (!req.user.pmcs.includes(conf.admingroupname)) {
+		console.log("mjc4 reserved but the description changed");
+		req.body.CVE_data_meta.STATE = "DRAFT";
+		dorefresh=true;
+	    }
+	}        
+    },
+
+    asfhookshowcveacl: function(doc, req, res) {
+	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
+	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
+		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
+                console.log("wrong acl");
+                doc = {};
+	    }
+	} else {
+	    req.flash('error','something is wrong');
+        }
+    },
+
+    // Send an email when someone adds a comment to a CVE
+    
+    asfhookaddcomment: function(doc,req) {
+	var url = "https://"+req.client.servername+"/cve/"+req.body.id;
+	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
+                              "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
+                              "cc": "security@apache.org",
+                              "bcc": req.user.email,
+			      "subject":"Comment added on "+req.body.id,
+			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
+    },
+
+    asfhookaddhistory: function(oldDoc, newDoc) {
+	if (oldDoc != null) {
+	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
+		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
+		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
+                    (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.SATE == "REVIEW" )) {
+		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
+		    se = email.sendemail({"from": newDoc.author+"@apache.org",
+					  "cc":newDoc.author+"@apache.org",
+					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
+					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
+		}
+	    }
+	}
+    },
+
+    getsecurityemailaddress: function(pmc) {
+        if (pmc == "security") {
+            return "security@apache.org";
+        }
+        if (conf.pmcswithsecurityemails.includes(pmc)) {
+            return "security@"+pmc+".apache.org";
+        } else {
+            return "private@"+pmc+".apache.org";        
+        }
+    },
+    
 }
