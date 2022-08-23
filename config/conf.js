@@ -48,8 +48,9 @@ module.exports = {
     // $ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
 /*
     httpsOptions: {
-        key: fs.readFileSync("./config/key.pem"),
-        cert: fs.readFileSync("./config/cert.pem"),
+        key: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem', 'utf8');
+        cert: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem', 'utf8');
+        ca: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem', 'utf8');
         minVersion: 'TLSv1.2'
     },
 */
