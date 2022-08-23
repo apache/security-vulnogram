@@ -165,14 +165,17 @@ var self = module.exports = {
     
     asfhookupsertdoc: function(req,dorefresh) {
 	// mjc enfoce workflow state
-        if (req.body.CVE_data_meta.STATE == "RESERVED") {
-	    // if it's in reserved but someone is editing it, move it to draft
-	    if (!req.user.pmcs.includes(conf.admingroupname)) {
-		console.log("mjc4 reserved but the description changed");
-		req.body.CVE_data_meta.STATE = "DRAFT";
-		dorefresh=true;
+        if (req.body.CVE_data_meta) { // CVE 4.0
+            if (req.body.CVE_data_meta.STATE == "RESERVED") {
+	        // if it's in reserved but someone is editing it, move it to draft
+	        if (!req.user.pmcs.includes(conf.admingroupname)) {
+		    console.log("mjc4 reserved but the description changed");
+		    req.body.CVE_data_meta.STATE = "DRAFT";
+		    dorefresh=true;
+	        }
 	    }
-	}        
+        }
+        // TODO cve5 workflow state here
     },
 
     asfhookshowcveacl: function(doc, req, res) {
@@ -201,18 +204,21 @@ var self = module.exports = {
 
     asfhookaddhistory: function(oldDoc, newDoc) {
 	if (oldDoc != null) {
-	    if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
-		console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
-		if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
-                    (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.SATE == "REVIEW" )) {
-		    url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
-		    se = email.sendemail({"from": newDoc.author+"@apache.org",
-					  "cc":newDoc.author+"@apache.org",
-					  "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
-					  "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
-		}
+            if (newDoc.body.CVE_data_meta) { // CVE 4.0
+	        if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
+		    console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
+		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
+                        (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.SATE == "REVIEW" )) {
+		        url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
+		        se = email.sendemail({"from": newDoc.author+"@apache.org",
+					      "cc":newDoc.author+"@apache.org",
+					      "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
+					      "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
+		    }
+	        }
 	    }
-	}
+            // TODO CVE 5.0 version
+        }
     },
 
     getsecurityemailaddress: function(pmc) {
