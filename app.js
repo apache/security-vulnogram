@@ -7,6 +7,10 @@ const mongoose = require('mongoose');
 const flash = require('connect-flash');
 const https = require('https');
 const pug = require('pug');
+
+// ASF
+const asf = require('./custom/asf.js')
+
 // TODO: don't use express-session for large-scale production use
 const session = require('express-session');
 
@@ -95,12 +99,16 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ASF
+asf.asfinit(app);
+
 // Express Messages Middleware
 // This shows error messages on the client
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
     res.locals.user = req.user || null;
-    res.locals.startTime = Date.now();
+    // ASF
+    // res.locals.startTime = Date.now();
     res.locals.messages = require('express-messages')(req, res);
     next();
 });
@@ -128,6 +136,8 @@ app.use(function (req, res, next) {
     next()
 })
 
+// ASF
+asf.asfroutes(ensureAuthenticated, app);
 // set up routes
 let users = require('./routes/users');
 app.use('/users', users.public);
@@ -136,6 +146,8 @@ app.use('/users', ensureAuthenticated, users.protected);
 let docs = require('./routes/doc');
 
 app.locals.confOpts = {};
+// ASF
+app.locals.docs = {};
 
 var defaultSections = fs.readdirSync('./default');
 var customSections = fs.existsSync('./custom') ? fs.readdirSync('./custom') : [];
@@ -145,8 +157,12 @@ for(section of sections) {
     var s = optSet(section, ['default', 'custom']);
     //var s = conf.sections[section];
     if(s.facet && s.facet.ID) {
-        app.locals.confOpts[section] = s;
-        let r = docs(section, app.locals.confOpts[section]);
+        // ASF
+        if (conf.sections.includes(section)){
+            app.locals.confOpts[section] = s;
+        }
+        let r = docs(section, s);
+        app.locals.docs[section] = r;
         app.use('/' + section, ensureAuthenticated, r.router);
     }
 }
