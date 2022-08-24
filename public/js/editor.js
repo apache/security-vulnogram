@@ -750,14 +750,14 @@ JSONEditor.defaults.themes.customTheme = class customTheme extends JSONEditor.Ab
       console.log(label,input,description,infoText)
       if(input.type =='text')
           input.className = 'txt';
-      if (label && description) {
-          label.setAttribute('title', description.textContent);
-          el.appendChild(label);
-      }
-      if (label && input) {
-          input.setAttribute('title', description ? description.textContent : '');          
-          input.setAttribute('placeholder', description ? description.textContent : '');
-      }
+//      if (label && description) {
+//          label.setAttribute('title', description.textContent);
+//          el.appendChild(label);
+//      }
+//      if (label && input) {
+//          input.setAttribute('title', description ? description.textContent : '');          
+//          input.setAttribute('placeholder', description ? description.textContent : '');
+//      }
       return el;
   }
     getFormInputLabel(text) {
