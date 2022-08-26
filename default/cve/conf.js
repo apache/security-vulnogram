@@ -1066,6 +1066,7 @@ module.exports = {
                     }
                     // ASF never done this
                     if (data[r].refsource == 'XXCONFIRM' || data[r].refsource == 'XXMISC') {
+                    if (data[r].refsource == 'CONFIRM' || data[r].refsource == 'MISC') {
                         if (data[r].url != data[r].name && data[r].name != '') {
                             errors.push({
                                 path: 'root.references.reference_data.' + r + '.name',
