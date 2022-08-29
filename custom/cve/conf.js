@@ -46,7 +46,6 @@ module.exports = {
 		"properties": {
 		    "product_name": {
 			"description": "e.g. Apache Tomcat",
-
 			//            "examples": ["Apache Tomcat"]
 			//"$ref":"URL of json document with product names"
 		    },
@@ -76,9 +75,12 @@ module.exports = {
 	    "CVE_data_meta": {
 		"properties": {
 		    "ID": {
-			"description":"CVE-yyyy-nnnnn as allocated to you by ASF Security",
 			"options":{			
 			    "grid_columns":12,
+                            "inputAttributes": {
+                                "placeholder": "CVE-yyyy-nnnnn as allocated to you by ASF Security",
+                            },
+                            
 			},
 		    },
 		    "ASSIGNER": {
@@ -88,17 +90,24 @@ module.exports = {
 			}
 		    },
 		    "TITLE": {
-			"description": "e.g. Apache Tomcat HTTP/2 denial of service (optional, this is not used for the Mitre entry)"
+                        "options": {
+                            "inputAttributes": {
+                                "placeholder": "e.g. Apache Tomcat HTTP/2 denial of service (optional, this is not used for the Mitre entry)"
+                            },
+                        },
 		    },
 		    "AKA": {
-			"description": "e.g. HeartBleed (optional, only use for specifically branded issues, this is not used for the Mitre entry)",
+                        
 			"options": {
-			    "grid_columns":12
+			    "grid_columns":12,
+                            "inputAttributes": {
+			        "placeholder": "e.g. HeartBleed (optional, only use for specifically branded issues, this is not used for the Mitre entry)",
+                            }
 			},
 		    },    
 		    "STATE": {
 			"type": "string",
-			"description": "Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security.  Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
+			"title": "STATE. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security.  Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
 			"default": "RESERVED",
 			"enum": [
 			    "RESERVED",
@@ -108,7 +117,7 @@ module.exports = {
 			    "PUBLIC"],
 			"format": "radio",
 			"options": {
-			    "grid_columns":12
+			    "grid_columns":12,
 			}
 		    },
                     "DATE_PUBLIC": {
@@ -123,10 +132,19 @@ module.exports = {
 	    "source": {
 		"properties": {
 		    "defect": {
-			"description": "Project specific bug ids e.g. TOMCAT-522 (optional, this is not used for the Mitre entry)"
+                        "options": {
+                            "grid_columns": 8,
+                            "inputAttributes": {
+			        "placeholder": "Project specific bug ids e.g. TOMCAT-522 (optional, this is not used for the Mitre entry)"
+                            }
+                        }
 		    },
 		    "advisory": {
-			"description": "Project specific advisory id e.g. TOMCAT-2019-12 (optional, this is not used for the Mitre entry)",
+                        "options": {
+                            "inputAttributes": {
+			        "placeholder": "Project specific advisory id e.g. TOMCAT-2019-12 (optional, this is not used for the Mitre entry)",
+                            }
+                        }
 		    },
 		    "discovery": {
 			"default": "UNKNOWN",
@@ -192,7 +210,7 @@ module.exports = {
 	    },
 	    "work_around": {
 		"items": {
-                    "title": "Mitigation/Work Around (optional, not sent to Mitre)",
+                    "title": "Mitigation/Work Around (optional)",
                 },                
 		"options": {
 		    "xhidden": "false"
