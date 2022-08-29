@@ -9,22 +9,64 @@ module.exports = {
         product: { chart: false },
         ym: { chart: false },
         owner: {bulk: false, class: '',enum: '' },
-        state: {bulk:false },
+        state: { bulk: false  },
         severity: {chart: false},
         date: {hideColumn: true},
         discovery: {chart: false, hideColumn: true},
         Defect: {hideColumn: true},
     },
     schema: {
+        "definitions": {
+            "CNA_private": {
+                "properties": {
+                    "state": {
+                        "enum": [
+                            "RESERVED",
+                            "DRAFT",
+                            "REVIEW",
+                            "READY",                            
+                            "CLOSED",
+                        ],
+                    }
+                }
+            },
+            "cveId" : {
+                "options": {
+                    "inputAttributes": {
+                        "placeholder": "CVE-yyyy-nnnnn as allocated to you by ASF Security",
+                    },
+                }
+            }
+        },
+        
+        "title":" ",
         "properties": {
             "cveMetadata": {
                 "cveId": { },
             },
             "CNA_private": {
+                title: " ",
                 "properties": {
                     "owner": {
                         "title": "Apache PMC",
                         "format": "",
+                    },
+                    "state": {
+                        "enum": [
+                            "RESERVED",
+                            "DRAFT",
+                            "REVIEW",
+                            "READY",                            
+                            "CLOSED",
+                        ],
+                        icons: {
+                            RESERVED: 'inbox',
+                            DRAFT: 'edit',
+                            REVIEW: 'eye',
+                            READY: 'cal',
+                            CLOSED: 'closed'
+                        }        ,                
+                        "default": "RESERVED",
                     },
                     "todo": {
                         "options": {
@@ -38,7 +80,7 @@ module.exports = {
                     }                    
                 }
             },
-            "containers": {
+        "containers": {
                 "properties": {                
                     "cna": {
                         "properties": {
@@ -205,7 +247,7 @@ module.exports = {
 		        }
                     }
                 }
-            }
+            },
         }
     },
     script: {
