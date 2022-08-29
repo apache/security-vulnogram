@@ -202,13 +202,14 @@ var self = module.exports = {
     
     asfhookaddcomment: function(doc,req) {
         var pathcve = "cve";
-        if (newDoc.body.cveMetadata.cveId)
+        if (doc.body.cveMetadata.cveId)
             pathcve = "cve5";
 	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
-                              "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
-                              "cc": "security@apache.org",
-                              "bcc": req.user.email,
+                              // "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
+                              "to": "mjc@apache.org",
+                              //"cc": "security@apache.org",  // CHANGE THIS PRODUCTION TODO
+                              //"bcc": req.user.email,
 			      "subject":"Comment added on "+req.body.id,
 			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
     },
