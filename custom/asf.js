@@ -47,8 +47,6 @@ function asflogin (req, res) {
     }
 }
 
-
-
 // If you are in security pmc allow you to specify a different pmc for testing
 
 function setpmc(req, res) {
@@ -164,7 +162,7 @@ var self = module.exports = {
     },
     
     asfhookupsertdoc: function(req,dorefresh) {
-	// mjc enfoce workflow state
+	// enforce workflow state cve4
         if (req.body.CVE_data_meta) { // CVE 4.0
             if (req.body.CVE_data_meta.STATE == "RESERVED") {
 	        // if it's in reserved but someone is editing it, move it to draft
@@ -175,7 +173,17 @@ var self = module.exports = {
 	        }
 	    }
         }
-        // TODO cve5 workflow state here
+        // cve5 enforce workflow state here
+        if (req.body.CNA_private && req.body.CNA_private.state) { // CVE 5.0
+            if (req.body.CNA_private.state == "RESERVED") {
+	        // if it's in reserved but someone is editing it, move it to draft
+	        if (!req.user.pmcs.includes(conf.admingroupname)) {
+		    console.log("mjc4 reserved but the description changed");
+		    req.body.CNA_private.state = "DRAFT";
+		    dorefresh=true;
+	        }
+	    }
+        }        
     },
 
     asfhookshowcveacl: function(doc, req, res) {
@@ -193,7 +201,10 @@ var self = module.exports = {
     // Send an email when someone adds a comment to a CVE
     
     asfhookaddcomment: function(doc,req) {
-	var url = "https://"+req.client.servername+"/cve/"+req.body.id;
+        var pathcve = "cve";
+        if (newDoc.body.cveMetadata.cveId)
+            pathcve = "cve5";
+	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
                               "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
                               "cc": "security@apache.org",
@@ -218,6 +229,20 @@ var self = module.exports = {
 	        }
 	    }
             // TODO CVE 5.0 version
+            if (newDoc.body.CNA_private && newDoc.body.CNA_private.state) { // CVE 5.0
+	        if (newDoc.body.CNA_private.state != oldDoc.body.CNA_private.state) {
+		    console.log("mjc4 changed state "+newDoc.body.CNA_private.state);
+		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CNA_private.state) ||
+                        (newDoc.body.CNA_private.state == "DRAFT" && oldDoc.body.CNA_private.state == "REVIEW" )) {
+		        url = "https://cveprocess.apache.org/cve5/"+newDoc.body.cveMetadata.cveId;  // hacky
+		        se = email.sendemail({"from": newDoc.author+"@apache.org",
+                                              "to":"mjc@apache.org", // ASF TEST REMOVE THIS LINE IN PRODUCTION
+					      "cc":newDoc.author+"@apache.org",
+					      "subject":newDoc.body.cveMetadata.cveId+" is now "+newDoc.body.CNA_private.state,
+					      "text":newDoc.author+" changed state from "+oldDoc.body.CNA_private.state+" to "+newDoc.body.CNA_private.state+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
+		    }
+	        }
+	    }            
         }
     },
 
