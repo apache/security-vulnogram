@@ -61,8 +61,80 @@ module.exports = {
                                     "hidden": "true"
                                 }
                             },
-                            "source": {},
-                            "affected": { },
+                            "source": {
+                                "properties": {
+		                    "defect": {
+                                        "options": {
+                                            "grid_columns": 8,
+                                            "inputAttributes": {
+			                        "placeholder": "Project specific bug ids e.g. TOMCAT-522 (optional, this is not used for the Mitre entry)"
+                                            }
+                                        }
+                                    },
+                                    "advisory": {
+                                        "options": {
+                                            "inputAttributes": {
+			                        "placeholder": "Project specific advisory id e.g. TOMCAT-2019-12 (optional, this is not used for the Mitre entry)",
+                                            }
+                                        }
+		                    },
+                                    "discovery": {
+                                        "title": "Source of vulnerability discovery (optional)",
+		                    },                                    
+                                }
+                            },
+                            "affected": {
+                                "items":{
+		                    "properties": {
+		                        "vendor": {
+			                    "title": "vendor: Apache Software Foundation",
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "product": {
+                                            "options": {
+                                                "grid_columns": 8,
+                                            }
+                                        },
+                                        "platforms": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "collectionURL": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "packageName": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "repo": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "modules": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "programFiles": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                        "programRoutines": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
+                                    }
+                                }
+                            },
                             "descriptions": {
 				"title": "CVE Description: Please also include the product and version information in the description itself",       
                                 "items": {
