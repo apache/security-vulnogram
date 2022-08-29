@@ -747,7 +747,7 @@ JSONEditor.defaults.themes.customTheme = class customTheme extends JSONEditor.Ab
     }
   getFormControl(label, input, description, infoText) {
       var el = super.getFormControl(label, input, description, infoText);
-      console.log(label,input,description,infoText)
+//      console.log(label,input,description,infoText)
       if(input.type =='text')
           input.className = 'txt';
 //      if (label && description) {

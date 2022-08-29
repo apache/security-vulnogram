@@ -1,4 +1,4 @@
-extends ../../default/cve/edit
+extends ../../default/cve5/edit
 
 block append bannerItemsLeft
       if doc && doc.body && doc.body.CVE_data_meta && doc.body.CVE_data_meta.ID
@@ -9,9 +9,9 @@ block loadEditor
 
     script 
         | var loadEditorWithProducts = async function() {
-        |   docSchema.definitions.product.properties.product_name.examples = await 
-        | //loadProductNames();
-        | loadJSON(initJSON)
+        |   docSchema.definitions.product.properties.product.examples = await
+        |      loadProductNames();
+        |   loadJSON(initJSON)
         | };
         | loadEditorWithProducts();
 
@@ -32,54 +32,63 @@ block loadEditor
         |            replyto = await loadEmailLists( j.CNA_private.owner );
         |            j.CNA_private.userslist = replyto;
         |         }
-        |         var subject = j.source.advisory || ""
+        |         var subject = j.containers.cna.source.advisory || ""
         |         if (subject) {
         |            subject = subject + ": "
         |         }
-        |         subject = subject + j.CVE_data_meta.ID+": "
-        |         if (j.CVE_data_meta.TITLE) {
-        |            if (!(j.CVE_data_meta.TITLE.includes("Apache"))) {
+        |         subject = subject + j.cveMetadata.cveId+": "
+        |         if (j.containers.cna.title) {
+        |            if (!(j.containers.cna.title.includes("Apache"))) {
         |               subject = subject + getProductListNoVendor(j) + ": "
         |            }
-        |            subject = subject + j.CVE_data_meta.TITLE + " "
+        |            subject = subject + j.containers.cna.title + " "
         |         } else {
         |            subject = subject + getProductListNoVendor(j)+": "
-        |            for (d of j.problemtype.problemtype_data) {
-        |                for (b of d.description) {
-        |                   subject = subject + b.value
+        |            for (d of j.containers.cna.problemTypes) {
+        |                for (b of d.descriptions) {
+        |                   subject = subject + b.description
         |                }
         |            }
         |         }
         |         mt = ""
-        |         if (j.impact && j.impact[0] && j.impact[0].other) {
-        |             mt = mt + "Severity: "+j.impact[0].other+"\n\n"
+        |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other) {
+        |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.other+"\n\n"
         |         }
         |         mt = mt + "Description:\n\n"
-        |         for (d of j.description.description_data) {
-        |             mt = mt + d.value + "\n\n"
+        |         for (d of j.containers.cna.descriptions) {
+        |             mt = mt + d.value 
         |         }
-        |         if (j.CVE_data_meta.AKA ) {
+        |         if (j.containers.cna.AKA ) {
         |             mt = mt + "This issue is also known as "+j.CVE_data_meta.AKA +"\n\n"
         |         }
-        |         if (j.source.defect && j.source.defect != "") {
-        |             mt = mt + "This issue is being tracked as "+j.source.defect+"\n\n"
+        |         if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
+        |             mt = mt + "This issue is being tracked as "
+        |             for (d of j.containers.cna.source.defect)
+        |               mt = mt + d
+        |             mt = mt + "\n\n"
         |         }
-        |         if (j.work_around && j.work_around[0]) {
-        |             mt = mt + "Mitigation:\n\n"
-        |             for (d of j.work_around) {
+        |         if (j.containers.cna.solutions && j.containers.cna.solutions[0] ) {
+        |             mt = mt + "Solution:\n\n"
+        |             for (d of j.containers.cna.solutions) {
         |                mt = mt + d.value + "\n\n"
         |             }
         |         }
-        |         if (j.credit && j.credit[0]) {
+        |         if (j.containers.cna.workarounds && j.containers.cna.workarounds[0]) {
+        |             mt = mt + "Work Arounds:\n\n"
+        |             for (d of j.containers.cna.workarounds) {
+        |                mt = mt + d.value + "\n\n"
+        |             }
+        |         }
+        |         if (j.containers.cna.credits) {
         |             mt = mt + "Credit:\n\n"
-        |             for (d of j.credit) {
-        |                mt = mt + d.value + "\n"
+        |             for (d of j.containers.cna.credits) {
+        |                mt = mt + d.value + " ("+d.type+")\n"
         |             }
         |             mt = mt + "\n"
         |         }        
-        |         if (j.references && j.references.reference_data && j.references.reference_data[0].url) {
+        |         if (j.containers.cna.references) {
         |             mt = mt + "References:\n\n"
-        |             for (d of j.references.reference_data) {
+        |             for (d of j.containers.cna.references) {
         |                mt = mt + d.url + "\n"
         |             }
         |             mt = mt + "\n"
@@ -136,8 +145,8 @@ block customtabs
                input(type='hidden',name='emailto1',id='emailto1')
                input(type='hidden',name='emailto2',id='emailto2')               
                - var State = ""
-               if doc && doc.body && doc.body.CVE_data_meta && doc.body.CVE_data_meta.STATE
-                  - State = doc.body.CVE_data_meta.STATE
+               if doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.state
+                  - State = doc.body.CNA_private.state
                if doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.emailed
                   - State = "EMAILED"
                if State == "READY" || State == "REJECTX"                  

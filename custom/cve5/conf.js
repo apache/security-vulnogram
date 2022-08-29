@@ -47,6 +47,11 @@ module.exports = {
             "CNA_private": {
                 title: " ",
                 "properties": {
+                    "userslist": {
+                        "options": {
+                            "hidden": "true"
+                        }
+                    },
                     "owner": {
                         "title": "Apache PMC",
                         "format": "",
@@ -251,8 +256,38 @@ module.exports = {
         }
     },
     script: {
-        testscript: function(cve) {
-            console.log(cve);
-        }
+        loadProductNames: async function () {
+	    var projects = []
+	    try {
+		var pmcs = userPMCS.split(',');
+		var response = await fetch('https://whimsy.apache.org/public/committee-info.json', {
+		    method: 'GET',
+		    credentials: 'omit',
+		    headers: {
+			'Accept': 'application/json, text/plain, */*'
+		    },
+		    redirect: 'error'
+		});
+		if (!response.ok) {
+		    errMsg.textContent = "Failed Apache project list";
+		    infoMsg.textContent = "";
+		    throw Error(id + ' ' + response.statusText);
+		} else {
+		    var res = await response.json();
+		    if (res.committees) {
+			for (var committee in res.committees) {
+			    // or pmcs.includes('security') !
+			    if (pmcs.includes(committee)) {
+				res.committees[committee].display_name &&
+				    projects.push('Apache ' + res.committees[committee].display_name);
+			    }
+			}
+		    }
+		}
+	    } catch (error) {
+		errMsg.textContent = error;
+	    }
+	    return (projects);
+	}
     }
 }
