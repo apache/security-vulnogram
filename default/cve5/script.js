@@ -204,7 +204,14 @@ var additionalTabs = {
         setValue: function() {
 
         }
+    },
+    jsonTab: {
+        title: 'CVE-JSON',
+        setValue: function(j){
+            document.getElementById("outjson").textContent = textUtil.getMITREJSON(textUtil.reduceJSON(j)); 
+        }
     }
+    
 }
 
 /* fullname = vendor . product . platforms . module .others 
