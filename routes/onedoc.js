@@ -322,9 +322,20 @@ module.exports = function (Document, opts) {
             if (!doc) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
+                res.render('blank', {
+                    title: 'Error',
+                });
+                module.router = router;
+                return module;                
             }
-            asf.asfhookshowcveacl(doc, req);
-            var ucomments = doc.comments;//await unifiedComments(req.params.id, doc ? doc.comments : []);
+            if (!asf.asfhookshowcveacl(doc, req)) {
+                res.render('blank', {
+                    title: 'Error',
+                });
+                module.router = router;
+                return module;                                
+            }
+            var ucomments = doc.comments: [];//await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
                 if (doc && doc._doc) {

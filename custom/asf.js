@@ -186,16 +186,19 @@ var self = module.exports = {
         }        
     },
 
-    asfhookshowcveacl: function(doc, req, res) {
+    asfhookshowcveacl: function(doc, req) {
 	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
 	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
 		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
                 console.log("wrong acl");
                 doc = {};
+                return false;
 	    }
 	} else {
-	    req.flash('error','something is wrong');
+	    req.flash('error','ACLs are bad tell security team');
+            return false;
         }
+        return true;
     },
 
     // Send an email when someone adds a comment to a CVE
