@@ -1,12 +1,23 @@
 extends ../../default/cve5/edit
 
-block append bannerItemsLeft
-      if doc && doc.body && doc.body.CVE_data_meta && doc.body.CVE_data_meta.ID
+block bannerItemsRightLoad
+
+block bannerItemsLeft
+    if !min
+        a.fbn(href=(confOpts[schemaName].conf.uri? confOpts[schemaName].conf.uri : '/' + schemaName + '/' ), title=confOpts[schemaName].conf.title) ☰
+    if !confOpts[schemaName].conf.readonly
+        button.fbn.sfe.vgi-put(id="save1") SAVE    
+        block openButton
+            input#importJSON.hid(type="file",accept="application/json",onchange="loadFile(event,this);")
+            a.fbn.vgi-folder(type="file",onclick='importFile(event, this);') Open
+        a.fbn.vgi-download(type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download") Download
+
+        if doc && doc.body && doc.body.CVE_data_meta && doc.body.CVE_data_meta.ID
           a.icn.btn.Search.right(type="button",value="Google",href="https://google.com/search?q=\""+doc.body.CVE_data_meta.ID+"\"",target="_blank") Google
           a.icn.btn.Search.right(type="button",value="CVE",href="https://cve.mitre.org/cgi-bin/cvename.cgi?name="+doc.body.CVE_data_meta.ID,target="_blank") CVE
 
-block loadEditor
-
+block prepend loadEditor
+        
     script 
         | var loadEditorWithProducts = async function() {
         |   docSchema.definitions.product.properties.product.examples = await
@@ -106,7 +117,7 @@ block loadEditor
         |     });
         |   }
         | }        
-        
+
 block customtabs
         input.tab(name='tabs', type='radio', id='jsonTab', value="6")
         label.lbl(for='jsonTab') CVE-JSON
@@ -178,3 +189,4 @@ block append customtabs
          p!= "For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 
 block logolink
+

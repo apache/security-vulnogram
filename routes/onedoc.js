@@ -335,7 +335,7 @@ module.exports = function (Document, opts) {
                 module.router = router;
                 return module;                                
             }
-            var ucomments = doc.comments: [];//await unifiedComments(req.params.id, doc ? doc.comments : []);
+            var ucomments = doc.comments;//await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
                 if (doc && doc._doc) {
