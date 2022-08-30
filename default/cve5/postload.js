@@ -18,10 +18,12 @@ docEditor.on('ready', async ()=> {
         var t = new Date().getTime();
         cveGetList();
     } else {
-        document.getElementById('cvePortal').innerHTML = cveRender({
-            ctemplate: 'cveLoginBox',
-            prevPortal: window.localStorage.getItem('portalType'),
-            prevOrg: window.localStorage.getItem('shortName')
-        })
+        if (document.getElementById('cvePortal')) {
+            document.getElementById('cvePortal').innerHTML = cveRender({
+                ctemplate: 'cveLoginBox',
+                prevPortal: window.localStorage.getItem('portalType'),
+                prevOrg: window.localStorage.getItem('shortName')
+            })
+        }
     }
 });

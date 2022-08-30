@@ -243,7 +243,7 @@ module.exports = {
                             "configurations": { },
 	                    "workarounds": {
 		                "items": {
-                                    "title": "Mitigation/Work Around (optional)",
+                                    "title": "Mitigation/Work Around",
                                 },                
 	                    },
                             "solutions": {},

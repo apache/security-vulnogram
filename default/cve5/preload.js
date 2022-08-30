@@ -7,4 +7,5 @@ async function preloadCve() {
     }
 }
 preloadCve();
-document.getElementById('post1').addEventListener('click', cvePost);
+if (document.getElementById('post1'))
+    document.getElementById('post1').addEventListener('click', cvePost);
