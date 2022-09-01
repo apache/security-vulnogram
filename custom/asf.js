@@ -18,7 +18,7 @@ function asflogin (req, res) {
 		for (i=0; i< body.projects.length; i++) {
 		    if (!pmcs.includes(body.projects[i])) {
 			// we're a committer to project, but not in the PMC
-			if (conf.pmcswithsecurityemails.includes(body.projects[i])) {
+			if (conf.pmcswithsecurityemails.includes(body.projects[i])|| body.projects[i] == "security") {
 			    // but this project has a security list
 			    console.log("User "+body.uid+" is committer to "+body.projects[i]+" but not PMC, allowed");
 			    pmcs.push(body.projects[i]);
