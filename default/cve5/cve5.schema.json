@@ -738,19 +738,12 @@
             "grid_columns": 3
           },
           "links": [
-              {
-                  "class": "lbl vgi-ext",
-                  "href": "'https://www.cve.org/CVERecord?id=' + context.self",
-                  "title": "'CVE.org Entry",
-                  "rel": "'cve.org'"
-              },
-              {
-                  "target": false,
-                  "class": "lbl btn red vgi-no",
-                  "title": "'Reject this ID",
-                  "rel": "'Reject this ID'",
-                  "href":"'javascript:rejectRecord()'"
-              }
+            {
+              "class": "lbl vgi-ext",
+              "href": "'https://www.cve.org/CVERecord?id=' + context.self",
+              "title": "'CVE.org Entry",
+              "rel": "'cve.org'"
+            }
           ]
         },
           "assignerOrgId": {
