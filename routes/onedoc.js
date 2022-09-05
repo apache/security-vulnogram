@@ -319,6 +319,7 @@ module.exports = function (Document, opts) {
         var q = {};
         q[opts.idpath] = req.params.id;
         Document.findOne(q, async function (err, doc) {
+            var ucomments = undefined;
             if (!doc) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
@@ -327,6 +328,8 @@ module.exports = function (Document, opts) {
                 });
                 module.router = router;
                 return module;                
+            } else {
+                ucomments = doc.comments;
             }
             if (!asf.asfhookshowcveacl(doc, req)) {
                 res.render('blank', {
@@ -335,7 +338,6 @@ module.exports = function (Document, opts) {
                 module.router = router;
                 return module;                                
             }
-            var ucomments = doc.comments;//await unifiedComments(req.params.id, doc ? doc.comments : []);
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
                 if (doc && doc._doc) {
