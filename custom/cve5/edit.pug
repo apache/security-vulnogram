@@ -17,7 +17,9 @@ block bannerItemsLeft
           a.icn.btn.Search.right(type="button",value="CVE",href="https://cve.mitre.org/cgi-bin/cvename.cgi?name="+doc.body.CVE_data_meta.ID,target="_blank") CVE
 
 block prepend loadEditor
-        
+    script
+        include asfpreload.js        
+
     script 
         | var loadEditorWithProducts = async function() {
         |   docSchema.definitions.product.properties.product.examples = await
