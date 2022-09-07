@@ -7,6 +7,9 @@ block append bannerItemsLeft
 
 block loadEditor
 
+    script
+        include asfcustom.js
+
     script 
         | var loadEditorWithProducts = async function() {
         |   docSchema.definitions.product.properties.product_name.examples = await 
