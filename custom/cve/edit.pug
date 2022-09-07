@@ -13,7 +13,7 @@ block loadEditor
     script 
         | var loadEditorWithProducts = async function() {
         |   docSchema.definitions.product.properties.product_name.examples = await 
-        | //loadProductNames();
+        | loadProductNames();
         | loadJSON(initJSON)
         | };
         | loadEditorWithProducts();

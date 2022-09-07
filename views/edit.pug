@@ -57,6 +57,7 @@ block scripts
 block content
     div#mainTabGroup
         span.lbl &nbsp;
+        block firsttab
         input.tab(name='tabs', type='radio', id='editorTab', value="1",checked)
         label.lbl#editorLabel(for='editorTab')
             span.flx Editor
@@ -119,6 +120,7 @@ block content
     script(src=conf.basedir + 'js/tablesort.min.js')
 
     block loadEditor
+    block loadEditorloadJSON
         script loadJSON(initJSON);
 
     if doc && doc.body

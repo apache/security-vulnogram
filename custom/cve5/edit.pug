@@ -12,9 +12,12 @@ block bannerItemsLeft
             a.fbn.vgi-folder(type="file",onclick='importFile(event, this);') Open
         a.fbn.vgi-download(type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download") Download
 
-        if doc && doc.body && doc.body.CVE_data_meta && doc.body.CVE_data_meta.ID
-          a.icn.btn.Search.right(type="button",value="Google",href="https://google.com/search?q=\""+doc.body.CVE_data_meta.ID+"\"",target="_blank") Google
-          a.icn.btn.Search.right(type="button",value="CVE",href="https://cve.mitre.org/cgi-bin/cvename.cgi?name="+doc.body.CVE_data_meta.ID,target="_blank") CVE
+block loadEditorloadJSON
+
+block append loadEditor
+    script
+        | selected = "aboutTab";
+        | document.getElementById(selected).checked = true;
 
 block prepend loadEditor
     script
@@ -26,11 +29,7 @@ block prepend loadEditor
         |      loadProductNames();
         |   loadJSON(initJSON)
         | };
-        | loadEditorWithProducts();
-
-    script
-        | selected = "aboutTab";
-        | document.getElementById(selected).checked = true;
+        | loadEditorWithProducts();      
 
     script
         | var tabs = document.getElementsByName("tabs");
@@ -174,7 +173,7 @@ block customtabs
                           = "Button available when entry is in state READY"
 
 block append customtabs
-        input.tab(name='tabs', type='radio', id='aboutTab', value="0")
+        input.tab(name='tabs', type='radio', id='aboutTab', value="999")
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
          p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available."
