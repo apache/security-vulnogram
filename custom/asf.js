@@ -187,6 +187,8 @@ var self = module.exports = {
     },
 
     asfhookshowcveacl: function(doc, req) {
+        if (!doc)
+            return false;
 	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
 	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
 		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);

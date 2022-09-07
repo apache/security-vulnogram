@@ -323,11 +323,6 @@ module.exports = function (Document, opts) {
             if (!doc) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
-                res.render('blank', {
-                    title: 'Error',
-                });
-                module.router = router;
-                return module;                
             } else {
                 ucomments = doc.comments;
             }
