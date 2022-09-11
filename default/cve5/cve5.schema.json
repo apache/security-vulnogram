@@ -212,7 +212,7 @@
     "orgId": {
       "description": "A UUID for an organization participating in the CVE program. This UUID can be used to lookup the organization record in the user registry service.",
       "$ref": "#/definitions/uuidType",
-      "template": "cveApi && cveApi.org?cveApi.org.UUID:'00000000-0000-4000-9000-000000000000'"
+      "template": "csCache && csCache.orgInfo ?csCache.orgInfo.UUID:'00000000-0000-4000-9000-000000000000'"
     },
     "userId": {
       "description": "A UUID for a user participating in the CVE program. This UUID can be used to lookup the user record in the user registry service.",
@@ -914,7 +914,7 @@
           "options": {
             "hidden": true
           },
-          "template": "cveApi.org?cveApi.org.UUID:'00000000-0000-4000-9000-000000000000'"
+          "template": "csCache.orgInfo?csCache.orgInfo.UUID:'00000000-0000-4000-9000-000000000000'"
         },
         "shortName": {
           "$ref": "#/definitions/shortName",
@@ -998,7 +998,18 @@
                 "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR]"
               }
             ]
-          }
+          },
+          "links": [
+            {
+              "place": "header",
+              "class": "btn sfe indent vgi-magic",
+              "style": "",
+              "target": false,
+              "href": "'javascript:autoText()'",
+              "title": "Auto Generate CVE description based on other input",
+              "rel": "'Auto Generate'"
+            }
+          ]        
         },
         "references": {
           "$ref": "#/definitions/references"
@@ -1974,8 +1985,8 @@
                 },
                 "links": [
                   {
-                    "href": "'http://cvssjs.github.io/#' + context.self",
-                    "title": "'CVSS Calculator'",
+                    "href": "'https://cvss.js.org/#' + context.self",
+                    "title": "CVSS Calculator",
                     "rel": "' Open in CVSS Calculator'"
                   }
                 ]
@@ -2695,6 +2706,26 @@
         "cveMetadata",
         "containers"
       ],
+      "links": [
+        {
+          "append": "container",
+          "class": "btn sfe vgi-put gap2",
+          "style": "",
+          "target": false,
+          "href": "'javascript:cvePost()'",
+          "title": "'Publish this record to CVE.org'",
+          "rel": "'Post to CVE.org'"
+        },
+        {
+          "append": "container",
+          "class": "lbl gap2 tred fbn vgi-no flr",
+          "style": "",
+          "target": false,
+          "href": "'javascript:rejectRecord()'",
+          "title": "'Reject this CVE ID'",
+          "rel": "'Reject this ID'"
+        }
+      ],
       "additionalProperties": false
     },
     {
@@ -2733,7 +2764,18 @@
         "cveMetadata",
         "containers"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "links" : [
+        {
+          "append": "container",
+          "class": "btn sfe vgi-put gap2",
+          "style": "",
+          "target": false,
+          "href": "'javascript:cvePost()'",
+          "title": "'Publish this record to CVE.org'",
+          "rel": "'Post to CVE.org'"
+        }
+      ]
     }
   ]
 }
