@@ -1965,7 +1965,7 @@
                 }
               },
               "vectorString": {
-                "title": "Vector · ",
+                "title": "Vector",
                 "type": "string",
                 "options": {
                   "grid_columns": 7,
@@ -1985,6 +1985,8 @@
                 },
                 "links": [
                   {
+                    "place": "header",
+                    "class": "vgi-ext indent",
                     "href": "'https://cvss.js.org/#' + context.self",
                     "title": "CVSS Calculator",
                     "rel": "' Open in CVSS Calculator'"
@@ -2186,7 +2188,7 @@
                 }
               },
               "vectorString": {
-                "title": "Vector · ",
+                "title": "Vector",
                 "type": "string",
                 "options": {
                   "grid_columns": 7,
@@ -2708,7 +2710,7 @@
       ],
       "links": [
         {
-          "append": "container",
+          "place": "container",
           "class": "btn sfe vgi-put gap2",
           "style": "",
           "target": false,
@@ -2717,7 +2719,7 @@
           "rel": "'Post to CVE.org'"
         },
         {
-          "append": "container",
+          "place": "container",
           "class": "lbl gap2 tred fbn vgi-no flr",
           "style": "",
           "target": false,
@@ -2767,7 +2769,7 @@
       "additionalProperties": false,
       "links" : [
         {
-          "append": "container",
+          "place": "container",
           "class": "btn sfe vgi-put gap2",
           "style": "",
           "target": false,
