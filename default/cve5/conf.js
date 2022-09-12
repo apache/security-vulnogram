@@ -271,7 +271,7 @@ module.exports = {
                         errors.push({
                             path: path,
                             property: 'format',
-                            message: 'Enter a vendor and product OR a package and a collection'
+                            message: 'Enter a product name'
                         });
                     }
                 }
