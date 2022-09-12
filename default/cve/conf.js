@@ -149,7 +149,7 @@ module.exports = {
         },
         "definitions": {
             "cve_id": {
-                "title": "CVE ID",                
+                "title": "CVE ID",
                 "type": "string",
                 "pattern": "^CVE-[0-9]{4}-[0-9A-Za-z._-]{4,}$",
                 "options": {
@@ -955,7 +955,7 @@ module.exports = {
                 "title": "CNA Private Info (not exported)",
                 "options": {
                     "class": "vgi-lock tgap",
-                    "containerClass": "bor pad rnd sec gap"                    
+                    "containerClass": "bor pad rnd sec gap"
                 },
                 "properties": {
                     "owner": {

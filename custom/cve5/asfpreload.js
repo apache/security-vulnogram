@@ -72,4 +72,3 @@ async function loadProductNames() {
     }
     return (projects);
 }
-

@@ -257,8 +257,6 @@ function versionStatusTable5(affected) {
                     unknown: []
                 };
                 var major = undefined; //major ? major[1] : '';
-                // var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
-                // nameAndPlatforms[pFullName] = pFullName;
                 if (v.version) {
                     showCols[v.status] = true;
                     if (!v.changes) {  // simple range versions 
@@ -311,9 +309,6 @@ function versionStatusTable5(affected) {
                 t[pFullName].push(rows);
             }
         }
-        // var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
-        // nameAndPlatforms[pFullName] = pFullName;
-        // var rows = {};
     }
     return ({ groups: nameAndPlatforms, vals: t, show: showCols });
 }
