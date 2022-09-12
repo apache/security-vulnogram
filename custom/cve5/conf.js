@@ -263,10 +263,11 @@ module.exports = {
                                 // }
                             } ,
                             "metrics": {
-                                "items": {
-                                    "required": ["other"],
-                                    "title": "Other" 
-                                }
+                                "title": { "default": "Other" },
+//                                "items": {
+//                                    "required": ["other"],
+//                                    "title": "Other" 
+//                                }
                             },
                             "configurations": { },
 	                    "workarounds": {
