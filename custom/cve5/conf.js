@@ -180,7 +180,7 @@ module.exports = {
                                 "items":{
 		                    "properties": {
 		                        "vendor": {
-			                    "title": "vendor: Apache Software Foundation",
+                                            "default": "Apache Software Foundation",
                                             "options": {
                                                 "hidden": "true",
                                             }

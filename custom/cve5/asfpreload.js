@@ -1,13 +1,9 @@
 function getProductListNoVendor(cve) {
     var lines = [];
-    for (var vendor of cve.affects.vendor.vendor_data) {
-        var pstring = [];
-        for (var product of vendor.product.product_data) {
-            pstring.push(product.product_name);
-        }
-        lines.push(pstring.join(", "));
+    for (var affected of cve.containers.cna.affected) {
+        lines.push(affected.product);
     }
-    return lines.join("; ");
+    return lines.join(", ");
 }
 
 async function loadEmailLists(pmc) {
