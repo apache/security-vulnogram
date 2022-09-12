@@ -2621,15 +2621,6 @@
       "links": [
         {
           "place": "container",
-          "class": "btn sfe vgi-put gap2",
-          "style": "",
-          "target": false,
-          "href": "'javascript:cvePost()'",
-          "title": "'Publish this record to CVE.org'",
-          "rel": "'Post to CVE.org'"
-        },
-        {
-          "place": "container",
           "class": "lbl gap2 tred fbn vgi-no flr",
           "style": "",
           "target": false,
