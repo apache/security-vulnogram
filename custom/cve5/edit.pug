@@ -127,7 +127,17 @@ block prepend loadEditor
         |         emailto = "announce@apache.org, "+replyto
         |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
         |         document.getElementById("asfemail").innerHTML = "<pre>"+jmt+mt+"</pre>\n"
-        |         document.getElementById("emailto2").value = emailto        
+        |         document.getElementById("emailto2").value = emailto
+        |         if (j.CNA_private.emailed) {
+        |             document.getElementById("emailbutton").disabled= true
+        |             document.getElementById("emailbuttonnote").innerHTML = "You have already sent the emails"
+        |         } else if (j.CNA_private.state == "READY" || j.CNA_private.state == "PUBLIC") {
+        |             document.getElementById("emailbutton").disabled= false
+        |             document.getElementById("emailbuttonnote").innerHTML = ""
+        |         } else {
+        |             document.getElementById("emailbutton").disabled= true
+        |             document.getElementById("emailbuttonnote").innerHTML = "State must be READY to send emails"
+        |         }
         |     });
         |   }
         | }        
@@ -141,7 +151,7 @@ block customtabs
                 | 
                 a.icn.right.download.btn(onclick='downloadText(outjson, this);') Download
             .pre#outjson
-        input.tab(name='tabs', type='radio', id='advisoryTab', value="4")
+        input.tab(name='tabs', type='radio', id='advisoryTab', value="7")
         label.lbl(for='advisoryTab') Advisory
         .wht.fil.bor.pad
             div.render(id="render")
@@ -170,23 +180,11 @@ block customtabs
                input(type='hidden',name='emailreplyto',id='emailreplyto')
                input(type='hidden',name='emailto1',id='emailto1')
                input(type='hidden',name='emailto2',id='emailto2')               
-               - var State = ""
-               if doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.state
-                  - State = doc.body.CNA_private.state
-               if doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.emailed
-                  - State = "EMAILED"
-               if State == "READY" || State == "REJECTX"                  
-                      button.btn.sfe(type='submit', value='Email') Send these Emails
-               else
-                      if State == "EMAILED"
-                          button.btn.sfe(disabled='true', type='submit', value='Email') Send these Emails                      
-                          = "You have already sent the emails"                      
-                      else
-                          button.btn.sfe(disabled='true', type='submit', value='Email') Send these Emails
-                          = "Button available when entry is in state READY"
+               button.btn.sfe(disabled='true', type='submit', value='Email', id='emailbutton') Send these Emails
+               div#emailbuttonnote               
 
 block append customtabs
-        input.tab(name='tabs', type='radio', id='aboutTab', value="999")
+        input.tab(name='tabs', type='radio', id='aboutTab')
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
          p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available."
