@@ -256,8 +256,7 @@ function versionStatusTable5(affected) {
                     unaffected: [],
                     unknown: []
                 };
-
-                var major = undefined;//major ? major[1] : '';
+                var major = undefined; //major ? major[1] : '';
                 // var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
                 // nameAndPlatforms[pFullName] = pFullName;
                 if (v.version) {

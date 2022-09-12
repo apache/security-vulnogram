@@ -78,7 +78,7 @@ mixin cvssList(cvssList)
                                 b=x
                     div
                         if cvss.version >= "3"
-                            a.vgi-dial(href="https://cvss.js.io/#" + cvss.vectorString target="_blank") Open CVSS Calc
+                            a.vgi-dial(href="https://cvss.js.org/#" + cvss.vectorString target="_blank") Open CVSS Calc
                         else
                             a.vgi-dial(href='https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector='+cvss.vectorString target="_blank") Open CVSS Calc
 
