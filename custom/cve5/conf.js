@@ -151,7 +151,8 @@ module.exports = {
                             "impacts": {
                                 "options": {
                                     "hidden": "true"
-                                }
+                                },
+                                "default": [],
                             },
                             "source": {
                                 title: "ASF-specific source",
