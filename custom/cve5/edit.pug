@@ -79,6 +79,12 @@ block prepend loadEditor
         |               mt = mt + d
         |             mt = mt + "\n\n"
         |         }
+        |         if (j.containers.cna.configurations && j.containers.cna.configurations[0]) {
+        |             mt = mt + "Required Configurations:\n\n"
+        |             for (d of j.containers.cna.configurations) {
+        |                mt = mt + d.value + "\n\n"
+        |             }
+        |         }        
         |         if (j.containers.cna.solutions && j.containers.cna.solutions[0] ) {
         |             mt = mt + "Solution:\n\n"
         |             for (d of j.containers.cna.solutions) {
@@ -105,6 +111,13 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }
+        |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {
+        |             mt = mt + "Timeline:\n\n"
+        |             for (d of j.containers.cna.timeline) {
+        |                mt = mt + d.time + ": " + d.value + "\n"
+        |             }
+        |             mt = mt + "\n"
+        |         }        
         |         var jmt = "To: "+emailto+"\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
         |         document.getElementById("outemail").innerHTML = "<pre>"+jmt+mt+"</pre>\n"
         |         document.getElementById("emailtext").value = mt
