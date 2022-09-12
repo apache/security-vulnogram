@@ -16,14 +16,14 @@ module.exports = {
                      "DRAFT",
                      "REVIEW",
                      "READY",                            
-                     "CLOSED",
+                     "PUBLIC",
                  ],
                  icons: {
                      RESERVED: 'inbox',
                      DRAFT: 'edit',
                      REVIEW: 'eye',
                      READY: 'wait',
-                     CLOSED: 'closed'
+                     PUBLIC: 'closed'
                  }
                },
         type: {hideColumn: true, bulk: false, tabs: false},
@@ -46,7 +46,7 @@ module.exports = {
                             "DRAFT",
                             "REVIEW",
                             "READY",                            
-                            "CLOSED",
+                            "PUBLIC",
                         ],
                     }
                 }
@@ -83,19 +83,20 @@ module.exports = {
                         "format": "",
                     },
                     "state": {
+                        "title": "state. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
                         "enum": [
                             "RESERVED",
                             "DRAFT",
                             "REVIEW",
                             "READY",                            
-                            "CLOSED",
+                            "PUBLIC",
                         ],
                         icons: {
                             RESERVED: 'inbox',
                             DRAFT: 'edit',
                             REVIEW: 'eye',
                             READY: 'cal',
-                            CLOSED: 'closed'
+                            PUBLIC: 'closed'
                         }        ,                
                         "default": "RESERVED",
                     },
