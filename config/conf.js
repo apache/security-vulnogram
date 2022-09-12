@@ -1,6 +1,6 @@
 const fs = require("fs");
 var package = require('../package.json');
-var secrets = require('./secrets.js');
+var secrets = require('./customsecrets.js');
 
 module.exports = {
 

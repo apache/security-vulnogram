@@ -4,11 +4,9 @@ npm-debug.log
 .env
 .vscode
 .jshintrc
-secret*
+custom*
 package-lock.json
 *.swp
 ignore
 tmp
 standalone
-*~
-*#
