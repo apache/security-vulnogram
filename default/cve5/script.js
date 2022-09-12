@@ -83,18 +83,8 @@ async function rejectRecord() {
             }
         }, id, 'Rejcting ' + id, rejectEditorOption);
     }
-    document.getElementById("alertMessage").innerText = msg;
-    if (smallmsg)
-        document.getElementById("smallAlert").innerText = smallmsg;
-    else
-        document.getElementById("smallAlert").innerText = " ";
-    if (!document.getElementById("alertDialog").hasAttribute("open"))
-        document.getElementById("alertDialog").showModal();
-    if (timer)
-        setTimeout(function () {
-            document.getElementById("alertDialog").close();
-        }, timer);
 }
+
 async function draftEmail(event, link, renderId) {
     var subject = ''
     if (typeof (mainTabGroup) !== 'undefined') {
@@ -218,7 +208,7 @@ var additionalTabs = {
 /* fullname = vendor . product . platforms . module .others . default status 
 /* table --> [ fullname ][version][affected|unaffected|unknown] = [ list of ranges ] */
 function versionStatusTable5(affected) {
-    var t = {};
+    var t = {}; // resulting table structure
     nameAndPlatforms = {};
     var showCols = {
         platforms: false,
@@ -250,7 +240,6 @@ function versionStatusTable5(affected) {
         if (p.programRoutines) {
             others.programRoutines = p.programRoutines;
         }
-        //pname = pname + platforms;
         var modules = p.modules ? p.modules.join(', ') : '';
         var pFullName = [
             (p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''),
@@ -267,10 +256,10 @@ function versionStatusTable5(affected) {
                     unaffected: [],
                     unknown: []
                 };
-                //var major = v.version != 'unspecified' ? v.version: undefined;//? v.version.match(/^(.*)\./): null;
+
                 var major = undefined;//major ? major[1] : '';
-                var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
-                nameAndPlatforms[pFullName] = pFullName;
+                // var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
+                // nameAndPlatforms[pFullName] = pFullName;
                 if (v.version) {
                     showCols[v.status] = true;
                     if (!v.changes) {  // simple range versions 
@@ -288,7 +277,7 @@ function versionStatusTable5(affected) {
                                 rangeEnd = "";
                             rows[v.status].push(rangeStart + rangeEnd);
                         } else {
-                            rows[v.status].push('= ' + v.version);
+                            rows[v.status].push(v.version);
                         }
                     } else {
                         var ver = v.version;
@@ -323,13 +312,12 @@ function versionStatusTable5(affected) {
                 t[pFullName].push(rows);
             }
         }
-        var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
-        nameAndPlatforms[pFullName] = pFullName;
-        var rows = {};
+        // var pFullName = [(p.vendor ? p.vendor + ' ' : '') + pname + (major ? ' ' + major : ''), platforms, modules, others];
+        // nameAndPlatforms[pFullName] = pFullName;
+        // var rows = {};
     }
     return ({ groups: nameAndPlatforms, vals: t, show: showCols });
 }
-
 
 function getProductAffected(cve) {
     var lines = [];

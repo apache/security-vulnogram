@@ -4,3 +4,4 @@ docEditor.on('ready', async () => {
         res = cveFixForVulnogram(res);
         return res;
     };
+});
