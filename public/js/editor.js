@@ -153,6 +153,9 @@ JSONEditor.defaults.editors.object = class mystring extends JSONEditor.defaults.
                 this.title.className = this.title.className + ' req'; 
             }    
         }
+        if(this.container && this.options.containerClass) {
+            this.container.className = this.container.className + ' ' + this.options.containerClass;
+        }
     }
     getValue () {
         if (!this.dependenciesFulfilled) {
@@ -773,22 +776,12 @@ JSONEditor.defaults.themes.customTheme = class customTheme extends JSONEditor.Ab
       }
     getDescription (text) {
         var el = document.createElement('summary');
-        // el.innerHTML = text;
         return el;
     }
   getFormControl(label, input, description, infoText) {
       var el = super.getFormControl(label, input, description, infoText);
-//      console.log(label,input,description,infoText)
       if(input.type =='text')
-          input.className = 'txt';
-//      if (label && description) {
-//          label.setAttribute('title', description.textContent);
-//          el.appendChild(label);
-//      }
-//      if (label && input) {
-//          input.setAttribute('title', description ? description.textContent : '');          
-//          input.setAttribute('placeholder', description ? description.textContent : '');
-//      }
+        input.className = 'txt';
       return el;
   }
     getFormInputLabel(text) {
@@ -925,8 +918,8 @@ JSONEditor.defaults.themes.customTheme = class customTheme extends JSONEditor.Ab
         return select;
     }*/
     setGridColumnSize(el, size) {
-      el.className = 'col s' + size;
-    }
+      el.className = el.className + ' col s' + size;
+    } 
     getSwitcher (options) {
         const switcher = this.getSelectInput(options, false);
         switcher.classList.add('je-switcher');
@@ -1001,6 +994,7 @@ if (typeof(defaultTab) !== 'undefined') {
     }
 }
 var insync = false;
+
 function Tabs(tabGroupId, tabOpts, primary) {
     var elem = document.getElementById(tabGroupId);
     var tg = {
@@ -1027,7 +1021,7 @@ function Tabs(tabGroupId, tabOpts, primary) {
     }
     tg.changeIndex[0] = 1;
     tg.select = function (event, elem) {
-        errMsg.textContent = "";
+        //errMsg.textContent = "";
         var selected = elem._tgIndex;
         //Does the tab need an update?
         //console.log('===CLICK====' + selected + ' cI '  + tg.changeIndex);
@@ -1146,6 +1140,7 @@ if (document.getElementById('remove')) {
                     errMsg.textContent = "";
                     window.location = "./";
                 } else {
+                    showAlert("Error " + response.statusText);
                     errMsg.textContent = "Error " + response.statusText;
                     infoMsg.textContent = "";
                 }
@@ -1238,6 +1233,7 @@ var defaultTabs = {
     sourceTab: {
         setValue: function (val) {
             if (sourceEditor == undefined) {
+                ace.config.set('basePath', '/js/')
                 sourceEditor = ace.edit("output");
                 sourceEditor.getSession().setMode("ace/mode/json");
                 sourceEditor.getSession().on('change', function () {
@@ -1273,11 +1269,13 @@ var defaultTabs = {
                 } else {
                     sourceEditor.moveCursorTo(firsterror.row, firsterror.column, false);
                     sourceEditor.clearSelection();
+                    showAlert('Please fix error: ' + firsterror.text);
                     errMsg.textContent = 'Please fix error: ' + firsterror.text;
                     document.getElementById("sourceTab").checked = true;
                     return -1;
                 }
             } catch (err) {
+                showAlert(err.message);
                 errMsg.textContent = err.message;
                 document.getElementById("sourceTab").checked = true;
                 return -1;
@@ -1291,18 +1289,20 @@ var defaultTabs = {
 if(typeof additionalTabs !== 'undefined') {
     Object.assign(defaultTabs, additionalTabs);
 }
+
 var mainTabGroup = new Tabs('mainTabGroup', defaultTabs, 0);
-function loadJSON(res, id, message) {
+
+function loadJSON(res, id, message, editorOptions) {
     // workaround for JSON Editor issue with clearing arrays
     // https://github.com/jdorn/json-editor/issues/617
     if (docEditor) {
         docEditor.destroy();
     }
-    docEditor = new JSONEditor(document.getElementById('docEditor'), docEditorOptions);
+    docEditor = new JSONEditor(document.getElementById('docEditor'), editorOptions ? editorOptions : docEditorOptions);
     docEditor.on('ready', async function () {
         await docEditor.root.setValue(res, true);
         infoMsg.textContent = message ? message : '';
-        errMsg.textContent = "";
+        //errMsg.textContent = "";
         if(id) {
             document.title = id;
         } else {
@@ -1374,6 +1374,7 @@ function save() {
             if (res.type == "go") {
                 window.location.href = res.to;
             } else if (res.type == "err") {
+                showAlert(res.msg);
                 errMsg.textContent = res.msg;
                 infoMsg.textContent = "";
             } else if (res.type == "saved") {
@@ -1391,6 +1392,7 @@ function save() {
             changes = 0;
         })
         .catch(function (error) {
+            showAlert(error + ' Try reloading the page.');
             errMsg.textContent = error + ' Try reloading the page.';
         });
     // This is a trick for brower auto completion to work
@@ -1439,6 +1441,7 @@ function loadFile(event, elem) {
             loadJSON(JSON.parse(evt.target.result), null, "Imported file");
         };
         reader.onerror = function (evt) {
+            showAlert("Error reading file");
             errMsg.textContent = "Error reading file";
         };
     }
@@ -1487,4 +1490,27 @@ function downloadHtml(title, element, link) {
     });
     link.href = URL.createObjectURL(file);
     link.download = file.name;
+}
+
+function showAlert(msg, smallmsg, timer, showCancel) {
+    errMsg.textContent="";
+    infoMsg.textContent="";
+    if (showCancel) {
+        document.getElementById("alertCancel").style.display = "inline-block";
+    } else {
+        var temp1 = document.getElementById("alertOk");
+        temp1.setAttribute("onclick", "document.getElementById('alertDialog').close();");
+        document.getElementById("alertCancel").style.display = "none";
+    }
+    document.getElementById("alertMessage").innerText = msg;
+    if (smallmsg)
+        document.getElementById("smallAlert").innerText = smallmsg;
+    else
+        document.getElementById("smallAlert").innerText = " ";
+    if (!document.getElementById("alertDialog").hasAttribute("open"))
+        document.getElementById("alertDialog").showModal();
+    if (timer)
+        setTimeout(function () {
+            document.getElementById("alertDialog").close();
+        }, timer);
 }
