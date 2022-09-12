@@ -264,11 +264,17 @@ module.exports = {
                                 // }
                             } ,
                             "metrics": {
-                                "title": { "default": "Other" },
-//                                "items": {
-//                                    "required": ["other"],
-//                                    "title": "Other" 
-//                                }
+                                "title":"Metrics. Note use of CVSS is not required by ASF Security",
+                                "default": [
+                                    {
+                                        "other": {
+                                            "type": "TODO test",
+                                            "content": {
+                                                "text":"TODO critical"
+                                            }
+                                        }
+                                    }
+                                ],
                             },
                             "configurations": { },
 	                    "workarounds": {
