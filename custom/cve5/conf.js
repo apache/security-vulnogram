@@ -265,12 +265,41 @@ module.exports = {
                             } ,
                             "metrics": {
                                 "title":"Metrics. Note use of CVSS is not required by ASF Security",
+                                "items": {
+                                    "properties": {
+                                        "other": {
+                                            "title": "Text version of Severity level",
+                                            "properties": {
+                                                "type" : {
+                                                    "options": {
+                                                        "hidden": "true",
+                                                    }
+                                                },
+                                                "content": {
+                                                    "title": " ",
+                                                    "properties": {
+                                                        "text": {
+                                                            "title": " ",
+                                                            "type": "string",
+                                                            "examples": ["low","moderate","important","critical"],
+                                                            "options": {
+                                                                "inputAttributes": {
+                                                                    "placeholder": "Use pulldown or free text"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                },
                                 "default": [
                                     {
                                         "other": {
-                                            "type": "TODO test",
+                                            "type": "Textual description of severity",
                                             "content": {
-                                                "text":"TODO critical"
+                                                "text":""
                                             }
                                         }
                                     }
