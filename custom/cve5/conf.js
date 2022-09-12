@@ -128,13 +128,32 @@ module.exports = {
                                     "hidden": "true"
                                 }                                
                             },
-                            "problemTypes": { },
+                            "problemTypes": {
+                                "items": {
+                                    "properties": {
+                                        "descriptions": {
+                                            "items": {
+                                                "properties": {
+                                                    "description": {
+                                                        "options": {
+                                                            "inputAttributes": {
+                                                                "placeholder": "Vulnerability type: can be a pull-down CWE or free text"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "impacts": {
                                 "options": {
                                     "hidden": "true"
                                 }
                             },
                             "source": {
+                                title: "ASF-specific source",
                                 "properties": {
 		                    "defect": {
                                         "options": {
@@ -168,6 +187,9 @@ module.exports = {
                                         "product": {
                                             "options": {
                                                 "grid_columns": 8,
+                                                "inputAttributes": {
+                                                    "placeholder": "eg., Apache Tomcat"
+                                                }
                                             }
                                         },
                                         "platforms": {
@@ -234,10 +256,10 @@ module.exports = {
                                 }
                             },
                             "references": {
-                                "title" : "references: use 'vendor-advisory' tag for pointer to ASF mailing list announcement",
-                                "options": {
-                                        "infoText": "test"
-                                }
+                                "title" : "references: use 'vendor-advisory' tag for pointer to ASF mailing list announcement once public",
+                                // "options": {
+                                //         "infoText": "test"
+                                // }
                             } ,
                             "metrics": {
                                 "items": {
