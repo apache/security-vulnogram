@@ -64,6 +64,11 @@ module.exports = {
         "properties": {
             "cveMetadata": {
                 "cveId": { },
+                "properties": {
+                    "cveId": {
+                        "links": [],
+                    },
+                }
             },
             "CNA_private": {
                 title: " ",
