@@ -78,7 +78,6 @@ module.exports = function (Document, opts) {
                 for (a in req.querymen.query) {
                     _.set(doc, a, req.querymen.query[a]);
                 };
-                //console.log(JSON.stringify(req.querymen.query));
                 res.render(opts.edit, {
                     title: 'New',
                     doc: doc,
@@ -256,7 +255,7 @@ module.exports = function (Document, opts) {
             let query = {};
             query[opts.idpath] = req.params.id;
 
-            if (!req.user.pmcs.includes(conf.admingroupname)) {                               
+            if (!req.user.pmcs.includes(opts.conf.admingroupname)) {                               
                 res.send('not authorized');                                                   
                 return;                                                                       
             }     
