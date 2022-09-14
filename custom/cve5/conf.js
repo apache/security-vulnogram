@@ -1,5 +1,7 @@
 module.exports = {
     conf: {
+        uri: '/cve5/?state=RESERVED,DRAFT,REVIEW,READY',        
+        name: 'CVE 5.0',
         shortcuts: ["","",""],
     },
     facet: {

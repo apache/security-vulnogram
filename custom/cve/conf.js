@@ -1,6 +1,7 @@
 module.exports = {
     conf: {
         uri: '/cve/?state=RESERVED,DRAFT,REVIEW,READY',
+        name: 'CVE (old)',
         shortcuts: ["","",""],
         unusedshortcuts: [
             {

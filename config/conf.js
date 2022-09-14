@@ -79,7 +79,7 @@ module.exports = {
         'cve',
         'cve5',
     ],
-    homepage: '/cve',
+    homepage: '/cve5',
 
     // Configure addional custom ExpressJS routes.
 /*
