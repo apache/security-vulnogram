@@ -64,7 +64,7 @@ block prepend loadEditor
         |         }
         |         mt = ""
         |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other) {
-        |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.other+"\n\n"
+        |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.text+"\n\n"
         |         }
         |         mt = mt + "Description:\n\n"
         |         for (d of j.containers.cna.descriptions) {
@@ -147,7 +147,7 @@ block customtabs
         label.lbl(for='jsonTab') CVE-JSON
         .wht.fil.bor.pad
             div(style='float:right')
-                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(outjson);this.textContent="Copied"') Copy
+                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(outjson);this.textContent="Copied";infoMsg.textContent="Copied to clipboard"') Copy
                 | 
                 a.icn.right.download.btn(onclick='downloadText(outjson, this);') Download
             .pre#outjson
@@ -162,13 +162,13 @@ block customtabs
             h1!= "OSS Email"
             p!= "Use the button below to send these mails, or copy, paste, and send the email yourself. Subscription not required. Use a separate email for this, don't cc or bcc."
             div(style='float:right')
-                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(outemail);this.textContent="Copied"')  Copy
+                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(outemail);this.textContent="Copied";infoMsg.textContent="Copied to Clipboard"')  Copy
             .indent.bor.pad
                 div#outemail
             h1!= "ASF Email"               
             p!= "Use the button below to send these mails, or copy, paste, and send the email yourself."
             div(style='float:right')
-                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(asfemail);this.textContent="Copied"')  Copy
+                a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(asfemail);this.textContent="Copied";infoMsg.textContent="Copied to Clipboard"')  Copy
             .indent.bor.pad
                 div#asfemail
 
