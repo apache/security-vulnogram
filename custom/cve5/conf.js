@@ -176,6 +176,14 @@ module.exports = {
 		                    },
                                     "discovery": {
                                         "title": "Source of vulnerability discovery (optional)",
+                                        "enum": [
+                                            "INTERNAL", "EXTERNAL", "UNKNOWN"
+                                        ],
+                                        "options": {
+                                            "enum_titles": [
+                                                "internal", "external", "undefined"
+                                            ]
+                                        }
 		                    },                                    
                                 }
                             },
