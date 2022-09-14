@@ -1,6 +1,8 @@
 const express = require('express');
 const csurf = require('csurf');
+// ASF
 const asf =  require('../custom/asf.js');
+// END ASF
 var csrfProtection = csurf();
 const textUtil = require('../public/js/util.js');
 var jsonpatch = require('json-patch-extended');
@@ -9,7 +11,9 @@ const docModel = require('../models/doc');
 var History;
 
 module.addHistory = function addHistory(oldDoc, newDoc) {
-    asf.asfhookaddhistory(oldDoc, newDoc); 
+    // ASF
+    asf.asfhookaddhistory(oldDoc, newDoc);
+    // END ASF
     if (oldDoc === null) {
         oldDoc = {
             __v: -1,
@@ -78,6 +82,7 @@ module.exports = function (Document, opts) {
                 for (a in req.querymen.query) {
                     _.set(doc, a, req.querymen.query[a]);
                 };
+                //console.log(JSON.stringify(req.querymen.query));                
                 res.render(opts.edit, {
                     title: 'New',
                     doc: doc,
@@ -185,7 +190,9 @@ module.exports = function (Document, opts) {
         queryNewID[opts.idpath] = inputID;
         queryOldID[opts.idpath] = req.params.id;
         var renaming = (req.params.id != inputID);
+        // ASF
         var dorefresh = false;
+        // END ASF
         //console.log('req.params.id = ' + req.params.id + ' == ' + inputID)
         Document.findOne(queryNewID).then((existingDoc) => {
             if (existingDoc) {
@@ -198,7 +205,9 @@ module.exports = function (Document, opts) {
                     return;
                 }
             }
+            // ASF
             asf.asfhookupsertdoc(req,dorefresh);
+            // END ASF
             var d = new Date();
             newDoc = {
                 body: req.body,
@@ -229,7 +238,9 @@ module.exports = function (Document, opts) {
                             msg: 'Error! Document not Updated, ' + err
                         });
                     } else {
+                        // ASF
                         if (renaming || dorefresh) {
+                        // END ASF
                             res.json({
                                 type: 'go',
                                 to: inputID
@@ -255,11 +266,12 @@ module.exports = function (Document, opts) {
             let query = {};
             query[opts.idpath] = req.params.id;
 
+            // ASF
             if (!req.user.pmcs.includes(opts.conf.admingroupname)) {                               
                 res.send('not authorized');                                                   
                 return;                                                                       
             }     
-            
+            // END ASF
             Document.remove(query, function (err) {
                 if (err) {
                     res.send('Error Deleting');
@@ -275,14 +287,18 @@ module.exports = function (Document, opts) {
 
     // GET
 
+    // ASF
     var getSubDocs = async function (subSchema, doc_id, mypmcs) {
+    // END ASF
         var q = {}
         q[opts.idpath] = doc_id;
         parentDoc = await Document.findOne(q).exec();
         if (parentDoc) {
+            // ASF
             if (parentDoc.body && parentDoc.body.CNA_private && !asf.asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
                 return { 'message': 'Access Denied' };
             }
+            // END ASF
             var subq = {
                 parent_id: parentDoc._id
             }
@@ -300,14 +316,18 @@ module.exports = function (Document, opts) {
         }
     }
     router.get('/log/:id', [checkID], function (req, res) {
+        // ASF
         getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });
+        // END ASF
     });
     router.get('/comment/:id', [checkID], function (req, res) {
+        // ASF
         getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });
+        // END ASF
     });
     router.get('/:id', csrfProtection, [checkID], function (req, res) {
 
@@ -319,9 +339,11 @@ module.exports = function (Document, opts) {
             if (!doc) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
+
             } else {
                 ucomments = doc.comments;
             }
+            // ASF
             if (!asf.asfhookshowcveacl(doc, req)) {
                 res.render('blank', {
                     title: 'Error',
@@ -329,6 +351,7 @@ module.exports = function (Document, opts) {
                 module.router = router;
                 return module;                                
             }
+            // END ASF
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
                 if (doc && doc._doc) {

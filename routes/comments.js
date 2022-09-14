@@ -2,7 +2,9 @@ const express = require('express');
 const csurf = require('csurf');
 var csrfProtection = csurf();
 const crypto = require('crypto');
+// ASF
 const asf = require('../custom/asf.js');
+// END ASF
 
 var random_slug = function () {
     return crypto.randomBytes(13).toString('base64').replace(/[\+\/\=]/g, '-');
@@ -117,6 +119,7 @@ module.exports = function (Document, opts) {
         q[opts.idpath] = req.body.id;
         var ret = await Document.findOne(q).exec();
         asf.asfhookaddcomment(ret,req);
+        // END ASF
         if (req.body.slug) {
             var r = await updateComment(req.body.id, req.user.username, req.body.text, req.body.slug, new Date());
             res.json(r);

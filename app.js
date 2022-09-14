@@ -10,6 +10,7 @@ const pug = require('pug');
 
 // ASF
 const asf = require('./custom/asf.js')
+// END ASF
 
 // TODO: don't use express-session for large-scale production use
 const session = require('express-session');
@@ -101,6 +102,7 @@ app.use(passport.session());
 
 // ASF
 asf.asfinit(app);
+// END ASF
 
 // Express Messages Middleware
 // This shows error messages on the client
@@ -109,6 +111,7 @@ app.use(function (req, res, next) {
     res.locals.user = req.user || null;
     // ASF
     // res.locals.startTime = Date.now();
+    // END ASF
     res.locals.messages = require('express-messages')(req, res);
     next();
 });
@@ -116,8 +119,9 @@ app.use(function (req, res, next) {
 // add this to route for authenticating before certain requests.
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        // ASF Just a test until we turn on auth
+        // ASF TODO Just a test until we turn on auth
         req.user.pmcs = ["security"];
+        // END ASF
         return next();
     } else {
         req.session.returnTo = req.originalUrl;
@@ -140,6 +144,7 @@ app.use(function (req, res, next) {
 
 // ASF
 asf.asfroutes(ensureAuthenticated, app);
+// END ASF
 // set up routes
 let users = require('./routes/users');
 app.use('/users', users.public);
@@ -150,6 +155,7 @@ let docs = require('./routes/doc');
 app.locals.confOpts = {};
 // ASF
 app.locals.docs = {};
+// END ASF
 
 var defaultSections = fs.readdirSync('./default');
 var customSections = fs.existsSync('./custom') ? fs.readdirSync('./custom') : [];
@@ -165,6 +171,7 @@ for(section of sections) {
         }
         let r = docs(section, s);
         app.locals.docs[section] = r;
+        // END ASF
         app.use('/' + section, ensureAuthenticated, r.router);
     }
 }

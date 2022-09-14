@@ -122,7 +122,9 @@ reduceJSON: function (cve) {
     if(c.impact && c.impact.cvss && c.impact.cvss.baseScore === 0) {
         delete c.impact;    
     }
+    // ASF
     if(c.who) { delete c.who; }
+    // END ASF
     return(orderKeys(c));
 },
 
@@ -195,10 +197,12 @@ getAffectedProductString: function (cve) {
                 if (!status[cat]) {
                     status[cat] = {};
                 }
+                // ASF
                 if(!status[cat][product.product_name]) {
                     status[cat][product.product_name] = [];
                 }
                 status[cat][product.product_name].push(vv);
+                // END ASF
             }
         }
     }
@@ -281,7 +285,6 @@ affectedTable: function (cve) {
                 if(!status[vendor_name][product_name][vn]) {
                     status[vendor_name][product_name][vn] = {};
                 }
-                
                 if (!status[vendor_name][product_name][vn][cat]) {
                     status[vendor_name][product_name][vn][cat] = [];
                 }

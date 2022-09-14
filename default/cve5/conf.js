@@ -271,7 +271,9 @@ module.exports = {
                         errors.push({
                             path: path,
                             property: 'format',
+                            // ASF
                             message: 'Enter a product name'
+                            // END ASF
                         });
                     }
                 }

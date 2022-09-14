@@ -206,6 +206,8 @@ function getProductAffected(cve) {
         }
         lines.push(pstring.join(" "));
     }
+    // ASF
     var x = lines.join();
     return x.replace(" .",".");
+    // END ASF
 };

@@ -6,6 +6,7 @@ async function preloadCve() {
     }
 }
 preloadCve();
+// ASF
 if (document.getElementById('post1'))
     document.getElementById('post1').addEventListener('click', cvePost);
 console.log(docEditorOptions);
@@ -24,4 +25,4 @@ console.log(docSchema);
 //} else {
 //    docEditorOptions = publicEditorOption;
 //}
-
+// END ASF

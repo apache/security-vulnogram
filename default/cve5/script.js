@@ -196,13 +196,14 @@ var additionalTabs = {
 
         }
     },
+    // ASF
     jsonTab: {
         title: 'CVE-JSON',
         setValue: function(j){
             document.getElementById("outjson").textContent = textUtil.getMITREJSON(textUtil.reduceJSON(j)); 
         }
     }
-    
+    // END ASF
 }
 
 /* fullname = vendor . product . platforms . module .others . default status 
