@@ -291,6 +291,7 @@ module.exports = {
                                                         "text": {
                                                             "title": " ",
                                                             "type": "string",
+                                                            "default": "",
                                                             "examples": ["low","moderate","important","critical"],
                                                             "options": {
                                                                 "inputAttributes": {

@@ -211,7 +211,6 @@ var self = module.exports = {
     // Send an email when someone adds a comment to a CVE
     
     asfhookaddcomment: function(doc,req) {
-        console.log(doc);
         var pathcve = "cve";
         if (doc.body.cveMetadata.cveId)
             pathcve = "cve5";
@@ -226,7 +225,6 @@ var self = module.exports = {
     },
 
     asfhookaddhistory: function(oldDoc, newDoc) {
-        console.log(conf);
 	if (oldDoc != null) {
             if (newDoc.body.CVE_data_meta) { // CVE 4.0
 	        if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
