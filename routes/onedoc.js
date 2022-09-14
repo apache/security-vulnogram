@@ -267,7 +267,7 @@ module.exports = function (Document, opts) {
             query[opts.idpath] = req.params.id;
 
             // ASF
-            if (!req.user.pmcs.includes(opts.conf.admingroupname)) {                               
+            if (!asf.asfallowedtodelete(req, opts)) {                               
                 res.send('not authorized');                                                   
                 return;                                                                       
             }     

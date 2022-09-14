@@ -135,6 +135,7 @@ var self = module.exports = {
     asfroutes: function (ensureAuthenticated, app) {
         // TODO app.get("/users/login", asflogin); // replaces existing
         app.get('/cve/new', ensureAuthenticated, cvenew); // replaces existing
+        app.get('/cve5/new', ensureAuthenticated, cvenew); // replaces existing        
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
@@ -148,7 +149,7 @@ var self = module.exports = {
     },
 
     asfgroupacls: function (documentacl,yourpmcs) {
-	//console.log('mjc9 doc owner is '+documentacl+" and you are "+yourpmcs);
+	//console.log('asf9 doc owner is '+documentacl+" and you are "+yourpmcs);
 	if (yourpmcs.includes(conf.admingroupname)) {
 	    return true;
 	}
@@ -157,9 +158,11 @@ var self = module.exports = {
 		return true;
 	    }
 	}
-	//console.log('mjc9 access denied');
+	//console.log('asf9 access denied');
 	return false;
     },
+
+    // When a CVE record is changed this hook is called
     
     asfhookupsertdoc: function(req,dorefresh) {
 	// enforce workflow state cve4
@@ -167,21 +170,23 @@ var self = module.exports = {
             if (req.body.CVE_data_meta.STATE == "RESERVED") {
 	        // if it's in reserved but someone is editing it, move it to draft
 	        if (!req.user.pmcs.includes(conf.admingroupname)) {
-		    console.log("mjc4 reserved but the description changed");
+		    console.log("asf4 reserved but the description changed");
 		    req.body.CVE_data_meta.STATE = "DRAFT";
 		    dorefresh=true;
 	        }
 	    }
         }
-        // cve5 enforce workflow state here
+        // enforce workflow state cve5
         if (req.body.CNA_private && req.body.CNA_private.state) { // CVE 5.0
             if (req.body.CNA_private.state == "RESERVED") {
 	        // if it's in reserved but someone is editing it, move it to draft
 	        if (!req.user.pmcs.includes(conf.admingroupname)) {
-		    console.log("mjc4 reserved but the description changed");
+		    console.log("asf4 RESERVED but the description changed");
 		    req.body.CNA_private.state = "DRAFT";
 		    dorefresh=true;
-	        }
+	        } else {
+		    console.log("asf4 RESERVED but saved by security, no change");
+                }
 	    }
         }        
     },
@@ -197,7 +202,7 @@ var self = module.exports = {
                 return false;
 	    }
 	} else {
-	    req.flash('error','ACLs are bad tell security team');
+	    req.flash('error','ACLs are bad tell security team "missing CNA_private.owner"');
             return false;
         }
         return true;
@@ -206,6 +211,7 @@ var self = module.exports = {
     // Send an email when someone adds a comment to a CVE
     
     asfhookaddcomment: function(doc,req) {
+        console.log(doc);
         var pathcve = "cve";
         if (doc.body.cveMetadata.cveId)
             pathcve = "cve5";
@@ -220,10 +226,11 @@ var self = module.exports = {
     },
 
     asfhookaddhistory: function(oldDoc, newDoc) {
+        console.log(conf);
 	if (oldDoc != null) {
             if (newDoc.body.CVE_data_meta) { // CVE 4.0
 	        if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
-		    console.log("mjc4 changed state "+newDoc.body.CVE_data_meta.STATE);
+		    console.log("asf4 changed state "+newDoc.body.CVE_data_meta.STATE);
 		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
                         (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.SATE == "REVIEW" )) {
 		        url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
@@ -234,15 +241,14 @@ var self = module.exports = {
 		    }
 	        }
 	    }
-            // TODO CVE 5.0 version
             if (newDoc.body.CNA_private && newDoc.body.CNA_private.state) { // CVE 5.0
 	        if (newDoc.body.CNA_private.state != oldDoc.body.CNA_private.state) {
-		    console.log("mjc4 changed state "+newDoc.body.CNA_private.state);
+		    console.log("asf4 changed state "+newDoc.body.CNA_private.state);
 		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CNA_private.state) ||
                         (newDoc.body.CNA_private.state == "DRAFT" && oldDoc.body.CNA_private.state == "REVIEW" )) {
 		        url = "https://cveprocess.apache.org/cve5/"+newDoc.body.cveMetadata.cveId;  // hacky
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
-                                              "to":"mjc@apache.org", // ASF TEST REMOVE THIS LINE IN PRODUCTION
+                                              "to":"mjc@apache.org", // ASF TODO REMOVE THIS LINE IN PRODUCTION
 					      "cc":newDoc.author+"@apache.org",
 					      "subject":newDoc.body.cveMetadata.cveId+" is now "+newDoc.body.CNA_private.state,
 					      "text":newDoc.author+" changed state from "+oldDoc.body.CNA_private.state+" to "+newDoc.body.CNA_private.state+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
@@ -252,6 +258,10 @@ var self = module.exports = {
         }
     },
 
+    asfallowedtodelete: function(req, opts) {
+        return req.user.pmcs.includes(opts.conf.admingroupname);
+    },
+    
     getsecurityemailaddress: function(pmc) {
         if (pmc == "security") {
             return "security@apache.org";
