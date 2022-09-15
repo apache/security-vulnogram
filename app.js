@@ -157,9 +157,7 @@ app.locals.confOpts = {};
 app.locals.docs = {};
 // END ASF
 
-var defaultSections = fs.readdirSync('./default');
-var customSections = fs.existsSync('./custom') ? fs.readdirSync('./custom') : [];
-var sections = new Set([...defaultSections, ...customSections]);
+var sections = require('./models/sections.js')();
 
 for(section of sections) {
     var s = optSet(section, ['default', 'custom']);
