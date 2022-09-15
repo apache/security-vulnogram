@@ -266,8 +266,10 @@ module.exports = function (Document, opts) {
             let query = {};
             query[opts.idpath] = req.params.id;
 
+            console.log("ASF1 remove document",query);
             // ASF
-            if (!asf.asfallowedtodelete(req, opts)) {                               
+            if (!asf.asfallowedtodelete(req)) {
+                console.log("ASF1 no delete as "+req.user.pmcs + " is not in "+ opts.conf.admingroupname)
                 res.send('not authorized');                                                   
                 return;                                                                       
             }     
@@ -278,6 +280,7 @@ module.exports = function (Document, opts) {
                     return;
                 } else {
                     res.send('Deleted');
+                    return;
                 }
             });
         });

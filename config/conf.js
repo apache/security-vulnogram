@@ -76,8 +76,8 @@ module.exports = {
 
     usernameRegex: '[a-zA-Z0-9]{3,}',
     sections: [
-        'cve',
         'cve5',
+        'cve',
     ],
     homepage: '/cve5',
 

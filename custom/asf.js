@@ -256,8 +256,8 @@ var self = module.exports = {
         }
     },
 
-    asfallowedtodelete: function(req, opts) {
-        return req.user.pmcs.includes(opts.conf.admingroupname);
+    asfallowedtodelete: function(req) {
+        return req.user.pmcs.includes(conf.admingroupname);
     },
     
     getsecurityemailaddress: function(pmc) {
