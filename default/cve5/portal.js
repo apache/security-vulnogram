@@ -45,8 +45,8 @@ function showPortalLogin(message) {
     }
     window.localStorage.removeItem('cveApi');
 
-    if (document.getElementById('cvePortal'))
-    document.getElementById('cvePortal').innerHTML = cveRender({
+    if (document.getElementById('port'))
+    document.getElementById('port').innerHTML = cveRender({
         ctemplate: 'cveLoginBox',
         message: message,
         prevPortal: window.localStorage.getItem('portalType'),
@@ -69,7 +69,7 @@ async function showPortalView(orgInfo, userInfo) {
         if (!userInfo) {
             userInfo = await csClient.getOrgUser(csCache.user);
         }
-        document.getElementById('cvePortal').innerHTML = cveRender({
+        document.getElementById('port').innerHTML = cveRender({
             portalType: csCache.portalType,
             portalURL: csCache.url,
             ctemplate: 'portal',
@@ -141,6 +141,12 @@ async function portalLogin(elem, credForm) {
         portalErrorHandler(e);
     }
 }
+
+function resetPortalLoginErr() {
+    console.log('changed form');
+    document.getElementById("loginErr").innerText = '';
+}
+
 
 function portalErrorHandler(e) {
     if (e.error && (e.error == 'NO_SESSION' || e.error == 'UNAUTHORIZED' || e.error.message == 'Failed to fetch')) {
