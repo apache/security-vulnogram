@@ -347,10 +347,7 @@ module.exports = function (Document, opts) {
                 ucomments = doc.comments;
             }
             // ASF
-            if (!asf.asfhookshowcveacl(doc, req)) {
-                res.render('blank', {
-                    title: 'Error',
-                });
+            if (!asf.asfhookshowcveacl(doc, req, res)) {
                 module.router = router;
                 return module;                                
             }

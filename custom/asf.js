@@ -191,18 +191,37 @@ var self = module.exports = {
         }        
     },
 
-    asfhookshowcveacl: function(doc, req) {
-        if (!doc)
+    asfhookshowcveacl: function(doc, req, res) {
+        if (!doc) {
+            if (req._parsedOriginalUrl.query == 'r') {
+                res.render('blank', {
+                    title: 'Error',
+                });
+                return false;
+            }
+            req.flash('error','');
+            if (req.originalUrl.startsWith('/cve5/')) {
+                res.redirect(req.originalUrl.replace("/cve5/","/cve/")+"?r");
+            } else {
+                res.redirect(req.originalUrl.replace("/cve/","/cve5/")+"?r");
+            }
             return false;
+        }
 	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
 	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
 		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
                 console.log("wrong acl");
                 doc = {};
+                res.render('blank', {
+                    title: 'Error',
+                });
                 return false;
 	    }
 	} else {
 	    req.flash('error','ACLs are bad tell security team "missing CNA_private.owner"');
+            res.render('blank', {
+                title: 'Error',
+            });
             return false;
         }
         return true;
