@@ -45,6 +45,7 @@ function showPortalLogin(message) {
     }
     window.localStorage.removeItem('cveApi');
 
+    if (document.getElementById('cvePortal'))
     document.getElementById('cvePortal').innerHTML = cveRender({
         ctemplate: 'cveLoginBox',
         message: message,

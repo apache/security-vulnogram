@@ -39,7 +39,7 @@ block prepend loadEditor
         |   if (t.id == "emailTab") {
         |     t.addEventListener('change',async function() {
         |         var j = docEditor.getValue();
-        |         var emailto = "oss-security@lists.openwall.com"
+        |         var emailto = "oss-security@lists.openwall.com";
         |         var replyto = j.CNA_private.userslist;
         |         if (!replyto) {
         |            replyto = await loadEmailLists( j.CNA_private.owner );
@@ -64,12 +64,15 @@ block prepend loadEditor
         |            }
         |         }
         |         mt = ""
-        |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other) {
+        |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other && j.containers.cna.metrics[0].other.content && j.containers.cna.metrics[0].other.content.text) {
         |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.text+"\n\n"
         |         }
         |         mt = mt + "Description:\n\n"
         |         for (d of j.containers.cna.descriptions) {
         |             mt = mt + d.value 
+        |         }
+        |         if (!mt.endsWith('\n')) {
+        |             mt = mt + "\n\n"
         |         }
         |         if (j.containers.cna.AKA ) {
         |             mt = mt + "This issue is also known as "+j.CVE_data_meta.AKA +"\n\n"
@@ -104,7 +107,7 @@ block prepend loadEditor
         |                mt = mt + d.value + " ("+d.type+")\n"
         |             }
         |             mt = mt + "\n"
-        |         }        
+        |         }
         |         if (j.containers.cna.references) {
         |             mt = mt + "References:\n\n"
         |             for (d of j.containers.cna.references) {
