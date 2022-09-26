@@ -360,39 +360,17 @@ module.exports = {
             },
         }
     },
-    script: {
-        loadProductNames: async function () {
-	    var projects = []
-	    try {
-		var pmcs = userPMCS.split(',');
-		var response = await fetch('https://whimsy.apache.org/public/committee-info.json', {
-		    method: 'GET',
-		    credentials: 'omit',
-		    headers: {
-			'Accept': 'application/json, text/plain, */*'
-		    },
-		    redirect: 'error'
-		});
-		if (!response.ok) {
-		    errMsg.textContent = "Failed Apache project list";
-		    infoMsg.textContent = "";
-		    throw Error(id + ' ' + response.statusText);
-		} else {
-		    var res = await response.json();
-		    if (res.committees) {
-			for (var committee in res.committees) {
-			    // or pmcs.includes('security') !
-			    if (pmcs.includes(committee)) {
-				res.committees[committee].display_name &&
-				    projects.push('Apache ' + res.committees[committee].display_name);
-			    }
-			}
-		    }
-		}
-	    } catch (error) {
-		errMsg.textContent = error;
-	    }
-	    return (projects);
-	}
-    }
+    validators: [
+        function (schema, value, path) {
+            var errors = [];
+            if (path.includes('references')) {
+                if (value.url != undefined) {
+                    if (value.url.includes("dist.apache.org")) {
+                        errors.push({path: path, property: 'format', message: 'do not use dist.apache.org should be downloads.apache.org'});
+                    }                    
+                }
+            }
+            return errors;
+        }
+    ],
 }
