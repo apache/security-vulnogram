@@ -4,6 +4,12 @@ const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 
+function asflogout (req, res) {
+    req.logout();
+    req.session.returnTo = null;
+    res.redirect('/users/login');    
+}
+
 function asflogin (req, res) {
     sess = req.session;
     if (req.query.code) {
@@ -27,7 +33,7 @@ function asflogin (req, res) {
 			}
 		    }
 		}  
-		sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:pmc};
+		sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:pmcs};
 		//sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:["airflow"]};		
 		if (sess.returnTo) {
 		    res.redirect(req.session.returnTo);
@@ -133,7 +139,8 @@ var self = module.exports = {
     },
 
     asfroutes: function (ensureAuthenticated, app) {
-        // TODO app.get("/users/login", asflogin); // replaces existing
+        app.get("/users/login", asflogin); // replaces existing
+        app.get("/users/logout", asflogout); // replaces existing        
         app.get('/cve/new', ensureAuthenticated, cvenew); // replaces existing
         app.get('/cve5/new', ensureAuthenticated, cvenew); // replaces existing        
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
@@ -237,7 +244,7 @@ var self = module.exports = {
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
                               // "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
                               "to": "mjc@apache.org",
-                              //"cc": "security@apache.org",  // CHANGE THIS PRODUCTION TODO
+                              //"cc": "security@apache.org",  // CHANGE THIS PRODUCTION ASF TODO
                               //"bcc": req.user.email,
 			      "subject":"Comment added on "+req.body.id,
 			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
