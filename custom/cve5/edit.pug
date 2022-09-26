@@ -40,11 +40,12 @@ block prepend loadEditor
         |     t.addEventListener('change',async function() {
         |         var j = docEditor.getValue();
         |         var emailto = "oss-security@lists.openwall.com";
-        |         var replyto = j.CNA_private.userslist;
-        |         if (!replyto) {
-        |            replyto = await loadEmailLists( j.CNA_private.owner );
-        |            j.CNA_private.userslist = replyto;
+        |         var projectannounce = j.CNA_private.userslist;
+        |         if (!projectannounce) {
+        |            projectannounce = await loadEmailLists( j.CNA_private.owner );
+        |            j.CNA_private.userslist = projectannounce;
         |         }
+        |         var replyto = projectannounce.split(',')[0]
         |         var subject = j.containers.cna.source.advisory || ""
         |         if (subject) {
         |            subject = subject + ": "
@@ -128,7 +129,7 @@ block prepend loadEditor
         |         document.getElementById("emailsubject").value = subject
         |         document.getElementById("emailreplyto").value = replyto
         |         document.getElementById("emailto1").value = emailto
-        |         emailto = "announce@apache.org, "+replyto
+        |         emailto = "announce@apache.org, "+projectannounce
         |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
         |         document.getElementById("asfemail").innerHTML = "<pre>"+jmt+mt+"</pre>\n"
         |         document.getElementById("emailto2").value = emailto
