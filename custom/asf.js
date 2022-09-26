@@ -4,6 +4,25 @@ const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 
+async function asfemaillists (req, res) {
+    try {
+	request('https://lists.apache.org/api/preferences.lua', {json:true},(err,cbres,body) => {
+	    if (err) {res.send(err);}
+	    else if (cbres.statusCode != 200) {res.send(body);}
+            else {
+	        pmc = req.query.pmc;
+                if (body.lists && pmc) {
+                    res.send(body.lists[pmc+".apache.org"]);
+                } else{
+                    res.send({});
+                }
+            }
+        });           
+    } catch (error) {
+        res.json({"error": error});
+    }
+}
+
 function asflogout (req, res) {
     req.logout();
     req.session.returnTo = null;
@@ -153,6 +172,7 @@ var self = module.exports = {
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing
         app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
+        app.get('/asfemaillists', ensureAuthenticated, asfemaillists); // work around CORS
     },
 
     asfgroupacls: function (documentacl,yourpmcs) {

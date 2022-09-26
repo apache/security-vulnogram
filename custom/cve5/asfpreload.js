@@ -7,38 +7,21 @@ function getProductListNoVendor(cve) {
 }
 
 async function loadEmailLists(pmc) {
-            var listname = "dev";
-	    try {
-		var response = await fetch('https://lists.apache.org/api/preferences.lua', {
-		    method: 'GET',
-		    credentials: 'omit',
-		    headers: {
-			'Accept': 'application/json, text/plain, */*'
-		    },
-		    redirect: 'follow'
-		});
-		if (!response.ok) {
-                    console.log(response.statusText);
-		    errMsg.textContent = "Failed Apache list of email lists";
-		    infoMsg.textContent = "";
-		    throw Error(response.statusText);
-		} else {
-		    var res = await response.json();
-                    if (res.lists) {
-                        tlp = res.lists[pmc+".apache.org"]
-                        console.log(tlp);
-                        if (tlp && tlp["users"]) {
-                            listname = "users";
-                        } else if (tlp && tlp["user"]) {
-                            listname = "user";
-                        }
-		    }
-		}
-	    } catch (error) {
-                //		errMsg.textContent = error;
-                return "unknown@unknown.apache.org";
-	    }
-            return (listname+"@"+pmc+".apache.org");
+    var listname = "dev";
+    try {
+	var response = await fetch('/asfemaillists?pmc='+pmc, { method: 'GET' });
+	if (response.ok) {
+	    var tlp = await response.json();
+            if (tlp && tlp["users"]) {
+                listname = "users";
+            } else if (tlp && tlp["user"]) {
+                listname = "user";
+            }
+	}
+    } catch (error) {
+        return "security@apache.org";
+    }
+    return (listname+"@"+pmc+".apache.org");
 }
 
 async function loadProductNames() {
