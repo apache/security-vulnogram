@@ -120,7 +120,7 @@ app.use(function (req, res, next) {
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         // ASF TODO Just a test until we turn on auth
-        req.user.pmcs = ["security"];
+        // req.user.pmcs = ["security"];
         // END ASF
         return next();
     } else {
