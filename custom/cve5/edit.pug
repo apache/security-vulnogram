@@ -52,7 +52,7 @@ block prepend loadEditor
         |         }
         |         subject = subject + j.cveMetadata.cveId+": "
         |         if (j.containers.cna.title) {
-        |            if (!(j.containers.cna.title.includes("Apache"))) {
+        |            if (!(j.containers.cna.title.substring(0,40).includes("Apache"))) {
         |               subject = subject + getProductListNoVendor(j) + ": "
         |            }
         |            subject = subject + j.containers.cna.title + " "
