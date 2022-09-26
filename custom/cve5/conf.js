@@ -75,15 +75,23 @@ module.exports = {
             "CNA_private": {
                 title: " ",
                 "properties": {
-                    "userslist": {
+                    "emailed": {
                         "options": {
                             "hidden": "true"
                         }
-                    },
+                    },                    
                     "owner": {
                         "title": "Apache PMC",
                         "format": "",
                     },
+                    "userslist": {
+                        "title": "Announcement emails go to this list (or lists)",
+                        "type": "string",
+                        "options": {
+                            "xhidden": "true"
+                        }
+                    },
+                    
                     "state": {
                         "title": "state. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
                         "enum": [
