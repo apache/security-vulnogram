@@ -122,7 +122,7 @@ module.exports = {
                     }                    
                 }
             },
-        "containers": {
+            "containers": {
                 "properties": {                
                     "cna": {
                         "properties": {
@@ -277,6 +277,7 @@ module.exports = {
                             },
                             "references": {
                                 "title" : "references: use 'vendor-advisory' tag for pointer to ASF mailing list announcement once public",
+                                "minItems": 0,
                                 // "options": {
                                 //         "infoText": "test"
                                 // }
@@ -363,11 +364,28 @@ module.exports = {
     validators: [
         function (schema, value, path) {
             var errors = [];
-            if (path.includes('references')) {
+            if (path == 'root') {
+                console.log(value);
+                if (value && value.CNA_private && value.CNA_private.state) {
+                    var asf = 0;
+                    console.log("ASF STATE",value.CNA_private.state);
+                    for (ref of value.containers.cna.references) {
+                        if (ref.tags && ref.tags.includes("vendor-advisory") && ref.url && ref.url.includes("apache.org/")) {
+                            asf+=1;
+                        }
+                    }
+                    if (asf == 0 && value.CNA_private.state == 'PUBLIC') {
+                        errors.push({path: path, property: 'format', message: 'In state PUBLIC you must include a vendor-advisory reference pointing to your advisory or mailing list post at an apache.org URL'});
+                    }
+                }
+            } else if (path.startsWith('root.containers.cna.references')) {
                 if (value.url != undefined) {
                     if (value.url.includes("dist.apache.org")) {
-                        errors.push({path: path, property: 'format', message: 'do not use dist.apache.org should be downloads.apache.org'});
-                    }                    
+                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'do not use dist.apache.org should be downloads.apache.org'});
+                    }
+                    if (value.tags && value.tags.includes("vendor-advisory") && !value.url.includes("apache.org/")) {
+                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'vendor-advisory tag must point to a URL at apache.org'});
+                    }
                 }
             }
             return errors;
