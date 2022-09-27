@@ -147,6 +147,12 @@ block prepend loadEditor
         |   }
         | }        
 
+
+        | <!--        input.tab(name='tabs', type='radio', id='advisoryTab', value="7") -->
+        | <!--        label.lbl(for='advisoryTab') Advisory -->
+        | <!--        .wht.fil.bor.pad -->
+        | <!--            div.render(id="render") -->
+
 block customtabs
         input.tab(name='tabs', type='radio', id='jsonTab', value="6")
         label.lbl(for='jsonTab') CVE-JSON
@@ -156,10 +162,6 @@ block customtabs
                 | 
                 a.icn.right.download.btn(onclick='downloadText(outjson, this);') Download
             .pre#outjson
-        input.tab(name='tabs', type='radio', id='advisoryTab', value="7")
-        label.lbl(for='advisoryTab') Advisory
-        .wht.fil.bor.pad
-            div.render(id="render")
 
         input.tab(name='tabs', type='radio', id='emailTab', value="7")
         label.lbl(for='emailTab') OSS/ASF Emails
