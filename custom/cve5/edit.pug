@@ -137,8 +137,13 @@ block prepend loadEditor
         |             document.getElementById("emailbutton").disabled= true
         |             document.getElementById("emailbuttonnote").innerHTML = "You have already sent the emails"
         |         } else if (j.CNA_private.state == "READY" || j.CNA_private.state == "PUBLIC") {
-        |             document.getElementById("emailbutton").disabled= false
-        |             document.getElementById("emailbuttonnote").innerHTML = ""
+        |             if(docEditor.validation_results && docEditor.validation_results.length > 0) {
+        |                document.getElementById("emailbutton").disabled= true        
+        |                document.getElementById("emailbuttonnote").innerHTML = "Correct errors before you can send emails"
+        |             } else {
+        |                document.getElementById("emailbutton").disabled= false
+        |                document.getElementById("emailbuttonnote").innerHTML = ""        
+        |             }
         |         } else {
         |             document.getElementById("emailbutton").disabled= true
         |             document.getElementById("emailbuttonnote").innerHTML = "State must be READY to send emails"
@@ -196,15 +201,17 @@ block append customtabs
         .wht.fil.bor.pad
          p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available."
          ul
-             li!= "Fill in the details on <a href='#editor'>'Editor'</a> tab setting. Any field marked optional is not required to submit an entry to the CVE project, but some are used in emails. "
+             li!= "Fill in the details on <a href='#editor'>'Editor'</a> tab setting. Any field marked optional is not required, but are used in emails."
              p=""
-             li!= "The information you enter is stored when you hit SAVE.  It is only visible to other members of your PMC and the ASF security team.  So you can prepare some of it in advance."
+             li!= "Make sure you use 'SAVE' button to save your changes  Your entry is only visible to other members of your PMC and the ASF security team until it's set to state 'PUBLIC' later."
+             p=""
+             li!= "Make sure you fix any errors that are shown."
+             p=""
+             li!= "'REVIEW' state is optional. Set this if you want ASF Security to be notified to help with this entry. They will move it back to 'DRAFT' once done."
              p=""
              li!= "Once you go public set the state to 'READY'.  Use the <a href='#email'>'OSS/ASF Emails'</a> tab for the emails you should send to oss-security and to Apache lists.  Also update your security page if you have one."
              p=""
-             li!= "Fill in a 'reference' with tag 'vendor advisory' with the URL to your public post about this issue.  ASF Security will be notified and will submit to the CVE project and then set state to 'PUBLIC'."
-             p=""
-             li!= "'REVIEW' state is optional. Set this if you want ASF Security to be notified to help with this entry. They will move it back to 'DRAFT' once done."
+             li!= "Set the state to 'PUBLIC' and fill in a 'reference' with tag 'vendor advisory' with the URL to your public post about this issue.  ASF Security will be notified and will submit to the CVE project."
          p=""
          p!= "For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 

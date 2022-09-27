@@ -361,10 +361,8 @@ module.exports = {
         function (schema, value, path) {
             var errors = [];
             if (path == 'root') {
-                console.log(value);
                 if (value && value.CNA_private && value.CNA_private.state && value.containers.cna.references) {
                     var asf = 0;
-                    console.log("ASF STATE",value.CNA_private.state);
                     for (ref of value.containers.cna.references) {
                         if (ref.tags && ref.tags.includes("vendor-advisory") && ref.url && ref.url.includes("apache.org/")) {
                             asf+=1;

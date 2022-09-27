@@ -166,7 +166,7 @@ protected.post('/', csrfProtection, async function(req,res) {
 			if (err || !doc._id) {
 			    req.flash('error',JSON.stringify(err));
 			} else {
-			    console.log(err,doc);
+			    console.log("saved",doc);
                             //res.redirect('/cve/' + cve.slice());
                             //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
 			}
