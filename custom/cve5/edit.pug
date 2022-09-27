@@ -109,7 +109,7 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }
-        |         if (j.containers.cna.references) {
+        |         if (j.containers.cna.references && j.containers.cna.references[0]) {
         |             mt = mt + "References:\n\n"
         |             for (d of j.containers.cna.references) {
         |                mt = mt + d.url + "\n"
