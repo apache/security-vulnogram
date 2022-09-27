@@ -362,7 +362,7 @@ module.exports = {
             var errors = [];
             if (path == 'root') {
                 console.log(value);
-                if (value && value.CNA_private && value.CNA_private.state) {
+                if (value && value.CNA_private && value.CNA_private.state && value.containers.cna.references) {
                     var asf = 0;
                     console.log("ASF STATE",value.CNA_private.state);
                     for (ref of value.containers.cna.references) {
