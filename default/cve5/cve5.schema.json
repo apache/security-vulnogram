@@ -1480,7 +1480,7 @@
       "items": {
         "$ref": "#/definitions/reference"
       },
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 512,
       "uniqueItems": true
     },

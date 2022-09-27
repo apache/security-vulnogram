@@ -265,12 +265,11 @@ module.exports = {
 				        "value": {
 				            "title": "description: Note that Mitre request that we please include the product and version information in the description itself as well as in the version section line in our submissions)",
 				            "description": "e.g. While investigating bug 60718, it was noticed that some calls to application listeners in Apache Tomcat versions 9.0.0.M1 to 9.0.0.M17, 8.5.0 to 8.5.11, 8.0.0.RC1 to 8.0.41 and 7.0.0 to 7.0.75 did not use the appropriate facade object. When running an untrusted application under a SecurityManager, it was therefore possible for that untrusted application to retain a reference to the request or response object and thereby access and/or modify information associated with another web application.",
-                                    "options": {
-                                        "inputAttributes": {
-                                            "placeholder": "e.g. Apache Tomcat HTTP/2 denial of service (this is used for email subject)"
-                                        }                                        ,
-                                    },
-                                            
+                                            "options": {
+                                                "inputAttributes": {
+                                                    "placeholder": "e.g. Apache Tomcat HTTP/2 denial of service (this is used for email subject)"
+                                                }                                        ,
+                                            },
                                         }
                                     }
                                 }
@@ -278,10 +277,7 @@ module.exports = {
                             "references": {
                                 "title" : "references: use 'vendor-advisory' tag for pointer to ASF mailing list announcement once public",
                                 "minItems": 0,
-                                // "options": {
-                                //         "infoText": "test"
-                                // }
-                            } ,
+                            },
                             "metrics": {
                                 "title":"Metrics. Note use of CVSS is not required by ASF Security",
                                 "items": {
