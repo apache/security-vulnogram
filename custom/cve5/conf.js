@@ -1,3 +1,4 @@
+var conf = require('../../config/conf');
 module.exports = {
     conf: {
         uri: '/cve5/?state=RESERVED,DRAFT,REVIEW,READY',        
@@ -59,7 +60,10 @@ module.exports = {
                         "placeholder": "CVE-yyyy-nnnnn as allocated to you by ASF Security",
                     },
                 }
-            }
+            },
+            "orgId" : {
+                "template": conf.cveorgid
+            },
         },
         
         "title":" ",
@@ -126,7 +130,13 @@ module.exports = {
                 "properties": {                
                     "cna": {
                         "properties": {
-                            "providerMetadata": { },
+                            "providerMetadata": {
+                                "properties": {
+                                    "orgId": {
+                                        "template": conf.cveorgid
+                                    },
+                                }
+                            },
                             "title": {
                                 "options": {
                                     "inputAttributes": {

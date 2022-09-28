@@ -3,8 +3,8 @@ var package = require('../package.json');
 var secrets = require('./customsecrets.js');
 
 module.exports = {
-
     // CVE automation configuration and CNA name
+    cveorgid: "'8888-8888'",
     cveapiheaders: secrets.cveapiheaders,
     cveapiurl: "https://cveawg.mitre.org/api/cve-id",
     cveapishortname: "night",
