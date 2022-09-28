@@ -43,9 +43,17 @@ block prepend loadEditor
         |         var projectannounce = j.CNA_private.userslist;
         |         if (!projectannounce) {
         |            projectannounce = await loadEmailLists( j.CNA_private.owner );
+        |            save();
         |            j.CNA_private.userslist = projectannounce;
         |         }
-        |         var replyto = projectannounce.split(',')[0]
+        |         var replyto = "";
+        |         if (projectannounce) {
+        |             replyto = projectannounce.split(',')[0]
+        |         }
+        |         var replyto = "";
+        |         if (projectannounce) {
+        |             replyto = projectannounce.split(',')[0]
+        |         }
         |         var subject = j.containers.cna.source.advisory || ""
         |         if (subject) {
         |            subject = subject + ": "

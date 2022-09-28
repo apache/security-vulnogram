@@ -6,24 +6,6 @@ function getProductListNoVendor(cve) {
     return lines.join(", ");
 }
 
-async function loadEmailLists(pmc) {
-    var listname = "dev";
-    try {
-	var response = await fetch('/asfemaillists?pmc='+pmc, { method: 'GET' });
-	if (response.ok) {
-	    var tlp = await response.json();
-            if (tlp && tlp["users"]) {
-                listname = "users";
-            } else if (tlp && tlp["user"]) {
-                listname = "user";
-            }
-	}
-    } catch (error) {
-        return "security@apache.org";
-    }
-    return (listname+"@"+pmc+".apache.org");
-}
-
 async function loadProductNames() {
     var projects = []
     try {
@@ -54,4 +36,17 @@ async function loadProductNames() {
 	errMsg.textContent = error;
     }
     return (projects);
+}
+
+async function loadEmailLists(pmc) {
+    try {
+       var response = await fetch('/asfemaillists?pmc='+pmc, { method: 'GET' });
+       if (response.ok) {
+           return await response.text();
+       } else {
+           return "";
+       }
+    } catch (error) {
+        return "";
+    }
 }

@@ -95,8 +95,11 @@ protected.post('/', csrfProtection, async function(req,res) {
         res.render('blank');
         return;
     }
-    console.log("Requesting "+req.body.number+" "+ req.body.year + " CVE for "+req.body.pmc)
+
+    var emaillist = await new Promise( res => { asf.getemaillistforpmc(req.body.pmc, res)});
     
+    console.log("Requesting "+req.body.number+" "+ req.body.year + " CVE for "+req.body.pmc+ " email list "+emaillist)
+
     var opt = {
         'method' : 'POST',
         //        'url': conf.cveapiurl+'?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
@@ -148,6 +151,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                                },
                                "CNA_private": {
                                    "owner": pmc,
+                                   "userslist": emaillist,
                                    "state": "RESERVED",
                                },
                                "containers": {

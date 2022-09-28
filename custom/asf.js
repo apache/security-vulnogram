@@ -5,22 +5,8 @@ const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 
 async function asfemaillists (req, res) {
-    try {
-	request('https://lists.apache.org/api/preferences.lua', {json:true},(err,cbres,body) => {
-	    if (err) {res.send(err);}
-	    else if (cbres.statusCode != 200) {res.send(body);}
-            else {
-	        pmc = req.query.pmc;
-                if (body.lists && pmc) {
-                    res.send(body.lists[pmc+".apache.org"]);
-                } else{
-                    res.send({});
-                }
-            }
-        });           
-    } catch (error) {
-        res.json({"error": error});
-    }
+    var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
+    res.send(emaillist)
 }
 
 function asflogout (req, res) {
@@ -192,6 +178,16 @@ var self = module.exports = {
     // When a CVE record is changed this hook is called
     
     asfhookupsertdoc: function(req,dorefresh) {
+        // in case we have an old record with no email list set CVE 5.0
+        if (req.body.CNA_private) {
+            if (!req.body.CNA_private.userslist || req.body.CNA_private.userslist == "") {
+                //self.getemaillistforpmc(req.body.CNA_private.owner,function(res) {
+                //    req.body.CNA_private.userslist = res;
+                //    dorefresh = true;
+                //    console.log(res);
+                //});
+            }
+        }
 	// enforce workflow state cve4
         if (req.body.CVE_data_meta) { // CVE 4.0
             if (req.body.CVE_data_meta.STATE == "RESERVED") {
@@ -316,5 +312,28 @@ var self = module.exports = {
             return "private@"+pmc+".apache.org";        
         }
     },
-    
+
+    getemaillistforpmc: function(pmc, cb) {
+        var pmcfull = pmc+".apache.org"
+        var listname = "dev@"+pmcfull;
+        try {
+	    request('https://lists.apache.org/api/preferences.lua', {json:true},(err,cbres,body) => {
+	        if (err) {console.log(err);}
+	        else if (cbres.statusCode != 200) {console.log(cbres); }
+                else {
+                    if (body.lists && body.lists[pmcfull]) {
+                        if (body.lists[pmcfull]["users"]) {
+                            listname = "users@"+pmcfull;
+                        } else if (body.lists[pmcfull]["user"]) {
+                            listname = "user@"+pmcfull;                            
+                        }
+                    }
+                }
+                cb(listname);
+            });           
+        } catch (error) {
+            console.log(error);
+            cb(listname);
+        }    
+    }
 }
