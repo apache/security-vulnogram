@@ -9,6 +9,24 @@ async function asfemaillists (req, res) {
     res.send(emaillist)
 }
 
+async function asfpublicjson(req, res) {
+    var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
+    let Document = res.locals.docs.cve5.Document;
+    var q = {};
+    q["body.cveMetadata.cveId"] = ids[0];
+    Document.findOne(q, async function (err, docs) {
+        if (err) {
+            res.json({"error":"nodoc"})
+        } else {
+            if (docs && docs.body && docs.body.CNA_private && docs.body.CNA_private.state != "PUBLIC") {
+                res.json({"error":"nodoc"})
+            } else {
+                res.json(docs.body)
+            }
+        }
+    });
+}
+
 function asflogout (req, res) {
     req.logout();
     req.session.returnTo = null;
@@ -159,6 +177,7 @@ var self = module.exports = {
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing
         app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
         app.get('/asfemaillists', ensureAuthenticated, asfemaillists); // work around CORS
+        app.get('/publicjson/:id', asfpublicjson);
     },
 
     asfgroupacls: function (documentacl,yourpmcs) {
