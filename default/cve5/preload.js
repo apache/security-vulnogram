@@ -7,10 +7,8 @@ async function preloadCve() {
 }
 preloadCve();
 // ASF
-if (document.getElementById('post1'))
-    document.getElementById('post1').addEventListener('click', cvePost);
-//console.log(docEditorOptions);
-//console.log(docSchema);
+//if (document.getElementById('post1'))
+//    document.getElementById('post1').addEventListener('click', cvePost);
 
 //var publicEditorOption = cloneJSON(docEditorOptions);
 //Object.assign(publicEditorOption.schema, docSchema.oneOf[0]);
@@ -20,12 +18,13 @@ if (document.getElementById('post1'))
 //Object.assign(rejectEditorOption.schema, docSchema.oneOf[1]);
 //delete rejectEditorOption.schema.oneOf;
 
-delete docSchema.oneOf[1]
-docSchema.oneOf[0].title="Entry"
+docSchema.oneOf.pop()
+docSchema.oneOf[0].title="Editor"
 
 //if (initJSON && initJSON.cveMetadata && initJSON.cveMetadata.state == 'REJECTED') {
 //    docEditorOptions = rejectEditorOption;
 //} else {
 //    docEditorOptions = publicEditorOption;
 //}
+
 // END ASF
