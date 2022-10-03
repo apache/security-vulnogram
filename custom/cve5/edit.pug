@@ -26,8 +26,7 @@ block prepend loadEditor
 
     script 
         | var loadEditorWithProducts = async function() {
-        |   docSchema.definitions.product.properties.product.examples = await
-        |      loadProductNames();
+        |   docSchema.definitions.product.properties.product.examples = await loadProductNames();
         |   loadJSON(initJSON)
         | };
         | loadEditorWithProducts();
@@ -43,9 +42,15 @@ block prepend loadEditor
         |         var projectannounce = j.CNA_private.userslist;
         |         if (!projectannounce) {
         |            projectannounce = await loadEmailLists( j.CNA_private.owner );
-        |            save();
         |            j.CNA_private.userslist = projectannounce;
+        |            save();
         |         }
+        |         var projecturl = j.CNA_private.projecturl;
+        |         if (!projecturl) {
+        |            projecturl = await loadProjectUrl( j.CNA_private.owner );
+        |            j.CNA_private.projecturl = projecturl;
+        |            save();
+        |         }        
         |         var replyto = "";
         |         if (projectannounce) {
         |             replyto = projectannounce.split(',')[0]
@@ -117,11 +122,12 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }
-        |         if (j.containers.cna.references && j.containers.cna.references[0]) {
+        |         if ((j.containers.cna.references && j.containers.cna.references[0]) || projecturl != "") {
         |             mt = mt + "References:\n\n"
         |             for (d of j.containers.cna.references) {
         |                mt = mt + d.url + "\n"
         |             }
+        |             mt = mt + projecturl
         |             mt = mt + "\n"
         |         }
         |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {

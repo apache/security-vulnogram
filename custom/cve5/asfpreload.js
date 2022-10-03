@@ -38,6 +38,33 @@ async function loadProductNames() {
     return (projects);
 }
 
+
+
+async function loadProjectUrl(pmc) {
+    var url = ""
+    try {
+	var response = await fetch('https://whimsy.apache.org/public/committee-info.json', {
+	    method: 'GET',
+	    credentials: 'omit',
+	    headers: {
+		'Accept': 'application/json, text/plain, */*'
+	    },
+	    redirect: 'error'
+	});
+	if (!response.ok) {
+            return url
+	} else {
+	    var res = await response.json();
+	    if (res.committees && res.committees[pmc]) {
+                url = res.committees[pmc].site
+                return url.replace('http:','https:')
+	    }
+	}
+    } catch (error) {
+        return url
+    }
+}
+
 async function loadEmailLists(pmc) {
     try {
        var response = await fetch('/asfemaillists?pmc='+pmc, { method: 'GET' });

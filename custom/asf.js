@@ -11,17 +11,22 @@ async function asfemaillists (req, res) {
 
 async function asfpublicjson(req, res) {
     var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
+    allerr = {"error":"nodoc"};
+    if (!ids || !ids[0]) {
+        res.json(allerr)
+        return;
+    }
     let Document = res.locals.docs.cve5.Document;
     var q = {};
     q["body.cveMetadata.cveId"] = ids[0];
     Document.findOne(q, async function (err, docs) {
         if (err) {
-            res.json({"error":"nodoc"})
+            res.json(allerr)
         } else {
-            if (docs && docs.body && docs.body.CNA_private && docs.body.CNA_private.state != "PUBLIC") {
-                res.json({"error":"nodoc"})
-            } else {
+            if (docs && docs.body && docs.body.CNA_private && docs.body.CNA_private.state == "PUBLIC") {
                 res.json(docs.body)
+            } else {
+                res.json(allerr)
             }
         }
     });
