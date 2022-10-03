@@ -4,7 +4,7 @@ var secrets = require('./customsecrets.js');
 
 module.exports = {
     // CVE automation configuration and CNA name
-    cveorgid: "'8888-8888'",
+    cveorgid: "'f0158376-9dc2-43b6-827c-5f631a4d8d09'",
     cveapiheaders: secrets.cveapiheaders,
     cveapiurl: "https://cveawg.mitre.org/api/cve-id",
     cveapishortname: "night",
