@@ -97,7 +97,7 @@ module.exports = {
                     },
                     
                     "state": {
-                        "title": "state. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
+                        "title": "State. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
                         "enum": [
                             "RESERVED",
                             "DRAFT",
@@ -138,6 +138,7 @@ module.exports = {
                                 }
                             },
                             "title": {
+                                "title": "Title (Short issue description, also used in email subject lines)",
                                 "options": {
                                     "inputAttributes": {
                                         "placeholder": "e.g. Apache Tomcat HTTP/2 denial of service (this is used for email subject)"
@@ -175,7 +176,7 @@ module.exports = {
                                 "default": [],
                             },
                             "source": {
-                                title: "ASF-specific source",
+                                title: "ASF-specific details",
                                 "properties": {
 		                    "defect": {
                                         "options": {
@@ -285,11 +286,11 @@ module.exports = {
                                 }
                             },
                             "references": {
-                                "title" : "references: use 'vendor-advisory' tag for pointer to ASF mailing list announcement once public",
+                                "title" : "References: use 'vendor-advisory' tag for pointer to ASF mailing list announcement once public",
                                 "minItems": 0,
                             },
                             "metrics": {
-                                "title":"Metrics. Note use of CVSS is not required by ASF Security",
+                                "title":"Metrics. A text severity level is required (additional CVSS rating is optional)",
                                 "items": {
                                     "properties": {
                                         "other": {
@@ -331,20 +332,27 @@ module.exports = {
                                     }
                                 ],
                             },
-                            "configurations": { },
+                            "configurations": {
+                                "title":"Configurations required for exploiting this vulnerability (optional)",
+                            },
 	                    "workarounds": {
+                                "title":"Workarounds and mitigations for this vulnerability (optional)",
 		                "items": {
                                     "title": "Mitigation/Work Around",
                                 },                
 	                    },
-                            "solutions": {},
+                            "solutions": {
+                                "title":"Information about solutions or remediations available (optional, such as 'upgrade to version 5')",
+                            },
                             "exploits": {
                                 "options": {
 			            "hidden": "true"
                                 }
                             },
                             "timeline": {},
-                            "credits": {},
+                            "credits": {
+                                "title": "Credits (recommended, but optional)",
+                            },
                             "tags": {
                                 "options": {
 			            "hidden": "true"
