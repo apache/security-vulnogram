@@ -122,12 +122,13 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }
-        |         if ((j.containers.cna.references && j.containers.cna.references[0]) || projecturl != "") {
+        |         if ((j.containers.cna.references && j.containers.cna.references[0]) || projecturl != "" || 1) {
         |             mt = mt + "References:\n\n"
         |             for (d of j.containers.cna.references) {
         |                mt = mt + d.url + "\n"
         |             }
-        |             mt = mt + projecturl
+        |             mt = mt + projecturl + "\n"
+        |             mt = mt + "https://cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
         |             mt = mt + "\n"
         |         }
         |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {
