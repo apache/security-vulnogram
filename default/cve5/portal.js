@@ -149,7 +149,7 @@ async function portalLogin(elem, credForm) {
 }
 
 function resetPortalLoginErr() {
-    console.log('changed form');
+    //console.log('changed form');
     document.getElementById("loginErr").innerText = '';
 }
 
@@ -366,7 +366,7 @@ async function cveRenderList(l, refreshEditor) {
         document.getElementById('cveList').innerHTML = cveRender({
             ctemplate: 'listIds',
             cveIds: l,
-            editable: (csCache.portalType == 'test')
+            editable: true//(csCache.portalType == 'test')
         })
         if (l.length > 0) {
             new Tablesort(document.getElementById('cveListTable'));
@@ -599,7 +599,7 @@ async function cveLoad(cveId) {
             }
         } else {
             //console.log(e);
-            showAlert('Error getting the record.' + e);
+            portalErrorHandler(e);
         }
     }
 }
@@ -631,7 +631,7 @@ async function cvePost() {
             await save();
         }*/
         try {
-            if (csCache.portalType === 'test') {
+            //if (csCache.portalType === 'test') {
                 //console.log('uploading...');
                 var j = await mainTabGroup.getValue();
                 var j = textUtil.reduceJSON(j);
@@ -682,9 +682,9 @@ async function cvePost() {
                     infoMsg.innerText = ret.message;
                     hideJSONerrors();
                 }
-            } else {
-                showAlert('CVE posting is not currently supported by production CVE services! Try Logging to Test Portal instance');
-            }
+            //} else {
+            //    showAlert('CVE posting is not currently supported by production CVE services! Try Logging to Test Portal instance');
+            //}
         } catch (e) {
             portalErrorHandler(e);
         }
