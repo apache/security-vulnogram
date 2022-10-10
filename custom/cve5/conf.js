@@ -83,7 +83,12 @@ module.exports = {
                         "options": {
                             "hidden": "true"
                         }
-                    },                    
+                    },
+                    "projecturl": {
+                        "options": {
+                            "hidden": "true"
+                        }
+                    },                                        
                     "owner": {
                         "title": "Apache PMC",
                         "format": "",
