@@ -413,7 +413,11 @@ module.exports = function (name, opts) {
             var tabs = [];
             // ASF
             if (!asf.asfgroupacls(conf.admingroupname,req.user.pmcs)) {
-                mytabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
+                if (res.locals.schemaName == "cve5") {
+                    mytabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CNA_private.state", count: {$sum:1}}}]};
+                } else {
+                    mytabFacet = {"state":[ {"$match":{"body.CNA_private.owner":{"$in":req.user.pmcs}}}, {"$group":{ _id:"$body.CVE_data_meta.STATE", count: {$sum:1}}}]};
+                }
                 mychartCount = 0;
                 // ASF because we have to filter them all
                 tabs = await Document.aggregate([{
