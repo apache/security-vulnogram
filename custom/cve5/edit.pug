@@ -214,9 +214,9 @@ block append customtabs
         input.tab(name='tabs', type='radio', id='aboutTab')
         label.lbl(for='aboutTab') Instructions
         .wht.fil.bor.pad
-         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available."
+         p!= "This site is designed to help you handle vulnerabilities according to the <a href='https://www.apache.org/security/committers.html' target='_blank'>ASF CVE process</a>, step 16.  A short <a href='https://s.apache.org/cveprocessvideo' target='_blank'>video overview</a> is also available, but note the interface has changed a little since the video was created."
          ul
-             li!= "Fill in the details on <a href='#editor'>'Editor'</a> tab setting. Any field marked optional is not required, but are used in emails."
+             li!= "Fill in the details on 'Editor' tab. Any field marked optional is not required, but are used in emails."
              p=""
              li!= "Make sure you use 'SAVE' button to save your changes  Your entry is only visible to other members of your PMC and the ASF security team until it's set to state 'PUBLIC' later."
              p=""
@@ -224,7 +224,7 @@ block append customtabs
              p=""
              li!= "'REVIEW' state is optional. Set this if you want ASF Security to be notified to help with this entry. They will move it back to 'DRAFT' once done."
              p=""
-             li!= "Once you go public set the state to 'READY'.  Use the <a href='#email'>'OSS/ASF Emails'</a> tab for the emails you should send to oss-security and to Apache lists.  Also update your security page if you have one."
+             li!= "Once you go public set the state to 'READY'.  Use the 'OSS/ASF Emails' tab for the emails you should send to oss-security and to Apache lists.  Also update your security page if you have one."
              p=""
              li!= "Set the state to 'PUBLIC' and fill in a 'reference' with tag 'vendor advisory' with the URL to your public post about this issue.  ASF Security will be notified and will submit to the CVE project."
          p=""
