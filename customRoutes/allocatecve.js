@@ -134,12 +134,11 @@ protected.post('/', csrfProtection, async function(req,res) {
                     var beta = "Note that you should use our web based service to handle the process.  Please visit https://cveprocess.apache.org/cve5/"+cve+" and note this it replaces the whole of section 16 of our requirements and full instructions are at that URL.\n\nThere is also a video tutorial available at https://s.apache.org/cveprocessvideo\n\n"
                     var pmctemplate = "Thank you for requesting a CVE name for your issue.  We suggest you copy and paste the name below as mistakes are easy to make and cumbersome to correct.\n\n"+cve+"\n"+req.body.cvetitle+"\n\n"+beta+"Note the process at https://www.apache.org/security/committers.html .\n\nIf you decide not to use the CVE name, or have any questions, please let us know asap.\n\nRegards, ASF Security Team"
 
-//		    var se2 = email.sendemail({"to":eto,
-//                                               "cc":"security@apache.org",
-//					       "subject":cve+" reserved for "+pmc,
-//					       "text":pmctemplate,
-//                                              }).then( (x) => {  console.log("sent CVE notification mail "+x);});
-                    //  MJC TODO
+		    var se2 = email.sendemail({"to":eto,
+                                               "cc":"security@apache.org",
+					       "subject":cve+" reserved for "+pmc,
+					       "text":pmctemplate,
+                                              }).then( (x) => {  console.log("sent CVE notification mail "+x);});
 
 		    // probably some better way of doing this for sure; we could render the schema i suppose?
 		    newdoc = { "dataType" : "CVE_RECORD",

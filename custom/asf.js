@@ -282,10 +282,9 @@ var self = module.exports = {
             pathcve = "cve5";
 	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
-                              // "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
-                              "to": "mjc@apache.org",
-                              //"cc": "security@apache.org",  // CHANGE THIS PRODUCTION ASF TODO
-                              //"bcc": req.user.email,
+                              "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
+                              "cc": "security@apache.org", 
+                              "bcc": req.user.email,
 			      "subject":"Comment added on "+req.body.id,
 			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
     },
@@ -312,7 +311,7 @@ var self = module.exports = {
                         (newDoc.body.CNA_private.state == "DRAFT" && oldDoc.body.CNA_private.state == "REVIEW" )) {
 		        url = "https://cveprocess.apache.org/cve5/"+newDoc.body.cveMetadata.cveId;  // hacky
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
-                                              "to":"mjc@apache.org", // ASF TODO REMOVE THIS LINE IN PRODUCTION
+                                              "to":"security@apache.org",
 					      "cc":newDoc.author+"@apache.org",
 					      "subject":newDoc.body.cveMetadata.cveId+" is now "+newDoc.body.CNA_private.state,
 					      "text":newDoc.author+" changed state from "+oldDoc.body.CNA_private.state+" to "+newDoc.body.CNA_private.state+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});

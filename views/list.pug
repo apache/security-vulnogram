@@ -97,7 +97,7 @@ mixin paginate
 mixin bulkTable(docs, columns, id)
     if !docs || docs.length == 0
         p
-            b No CVE entries for your PMCs match the query
+            b No CVE entries for your PMCs match the query. Try the CVE (old) tab as well.
     else
         - var rowCount = 0;
         - var sum = {}, showCheckboxes = false; 
