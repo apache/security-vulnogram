@@ -146,7 +146,7 @@ module.exports = {
                                 "title": "Title (Short issue description, also used in email subject lines)",
                                 "options": {
                                     "inputAttributes": {
-                                        "placeholder": "e.g. Apache Tomcat HTTP/2 denial of service (this is used for email subject)"
+                                        "placeholder": "e.g. HTTP/2 denial of service (this is used for email subject)"
                                     }
                                 }
                             },
@@ -356,7 +356,7 @@ module.exports = {
                             },
                             "timeline": {},
                             "credits": {
-                                "title": "Credits (recommended, but optional)",
+                                "title": "Credits (optional, please use if externally reported issue)",
                             },
                             "tags": {
                                 "options": {

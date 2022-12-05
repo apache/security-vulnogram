@@ -94,7 +94,7 @@ block prepend loadEditor
         |         if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
         |             mt = mt + "This issue is being tracked as "
         |             for (d of j.containers.cna.source.defect)
-        |               mt = mt + d
+        |               mt = mt + d + " "
         |             mt = mt + "\n\n"
         |         }
         |         if (j.containers.cna.configurations && j.containers.cna.configurations[0]) {
@@ -112,7 +112,11 @@ block prepend loadEditor
         |         if (j.containers.cna.workarounds && j.containers.cna.workarounds[0]) {
         |             mt = mt + "Work Arounds:\n\n"
         |             for (d of j.containers.cna.workarounds) {
-        |                mt = mt + d.value + "\n\n"
+        |                mt = mt + d.value
+        |                if (!mt.endsWith('\n')) {
+        |                  mt = mt + "\n"
+        |                }
+        |                mt = mt + "\n"
         |             }
         |         }
         |         if (j.containers.cna.credits) {
@@ -129,6 +133,10 @@ block prepend loadEditor
         |             }
         |             mt = mt + projecturl + "\n"
         |             mt = mt + "https://cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
+        |             if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
+        |               for (d of j.containers.cna.source.defect)
+        |                 mt = mt + "https://issues.apache.org/jira/browse/"+ d + "\n"
+        |             }        
         |             mt = mt + "\n"
         |         }
         |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {
