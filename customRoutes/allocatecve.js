@@ -10,7 +10,8 @@ const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
 
 // Is the PMC allowed to do a live Mitre allocation?
-// Currently only if you are in security group
+// Currently only if you are in security group or if you're listed in the config,
+// or if the config allows all (*) but you're not listed as an exception
 
 function allowedtoallocatelive(pmcsiamin, specificpmc) {
     if (pmcsiamin.includes(conf.admingroupname)) {
@@ -19,6 +20,12 @@ function allowedtoallocatelive(pmcsiamin, specificpmc) {
     if (!pmcsiamin.includes(specificpmc)) {
         return false; // they're messing with the form
     }
+    if (conf.pmcstrustedascna.includes("*")) {
+        if (conf.pmcstrustedascna.includes("-"+specificpmc)) {
+            return false;
+        }        
+        return true;
+    }    
     if (conf.pmcstrustedascna.includes(specificpmc)) {
         return true;
     }
