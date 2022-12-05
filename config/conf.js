@@ -7,8 +7,8 @@ module.exports = {
     cveorgid: "'f0158376-9dc2-43b6-827c-5f631a4d8d09'",
     cveapiheaders: secrets.cveapiheaders,
     cveapiurl: "https://cveawg.mitre.org/api/cve-id",
-    cveapishortname: "night",
-    cveapiliveservice: false,
+    cveapishortname: "apache",
+    cveapiliveservice: true,
     // which PMC is admin group?
     admingroupname: "security",
     // which PMC have a security@ address?
@@ -39,7 +39,7 @@ module.exports = {
 
     // port where this tool is running
     serverHost: process.env.VULNOGRAM_HOST || '0.0.0.0',
-    serverPort: process.env.VULNOGRAM_PORT || 50000,
+    serverPort: process.env.VULNOGRAM_PORT || 443,
     basedir: '/',
 
     //Uncomment this block to enable HTTPs. Configure paths for valid SSL certificates.

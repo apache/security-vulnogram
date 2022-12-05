@@ -109,13 +109,15 @@ protected.post('/', csrfProtection, async function(req,res) {
 
     var opt = {
         'method' : 'POST',
-        //        'url': conf.cveapiurl+'?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
-        'url': "https://cveprocess.apache.org/notfound",
+        'url': conf.cveapiurl+'?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
+        //'url': "https://cveprocess.apache.org/notfound",
         'json': true,
         'headers': conf.cveapiheaders,
     };
     await request(opt, async function (error, response, body) {
-        body = {"cve_ids":[{"requested_by":{"cna":"address","user":"joshuaburton@address.com"},"cve_id":"CVE-2021-20252","cve_year":"2021","state":"RESERVED","owning_cna":"address","reserved":"2020-10-26T17:20:04.291Z"}]};
+	if (testmode) {
+            body = {"cve_ids":[{"requested_by":{"cna":"address","user":"joshuaburton@address.com"},"cve_id":"CVE-2021-20252","cve_year":"2021","state":"RESERVED","owning_cna":"address","reserved":"2020-10-26T17:20:04.291Z"}]};
+	}
         if (error) {
             req.flash('error',error);
             res.render('blank');
@@ -126,8 +128,10 @@ protected.post('/', csrfProtection, async function(req,res) {
             } else {
                 console.log("ok");
                 for (cveid in body.cve_ids) {
-                    body.cve_ids[cveid].cve_id = "CVE-2000-" + (Math.floor(Math.random()*9999)+10000)
-                    cve = body.cve_ids[cveid].cve_id
+		    if (testmode) {
+                        body.cve_ids[cveid].cve_id = "CVE-2000-" + (Math.floor(Math.random()*9999)+10000)
+		    }
+		    cve = body.cve_ids[cveid].cve_id
                     // MJC TEST
 //                    if (testmode) {
 //                        cve = cve + "-TEST"

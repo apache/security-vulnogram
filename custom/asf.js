@@ -170,7 +170,7 @@ var self = module.exports = {
         app.get("/users/login", asflogin); // replaces existing
         app.get("/users/logout", asflogout); // replaces existing        
         app.get('/cve/new', ensureAuthenticated, cvenew); // replaces existing
-        app.get('/cve5/new', ensureAuthenticated, cvenew); // replaces existing        
+// TODO        app.get('/cve5/new', ensureAuthenticated, cvenew); // replaces existing        
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
