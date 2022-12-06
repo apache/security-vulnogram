@@ -106,7 +106,10 @@ block prepend loadEditor
         |         if (j.containers.cna.solutions && j.containers.cna.solutions[0] ) {
         |             mt = mt + "Solution:\n\n"
         |             for (d of j.containers.cna.solutions) {
-        |                mt = mt + d.value + "\n\n"
+        |                mt = mt + d.value + "\n"
+        |                if (!mt.endsWith('\n')) {
+        |                  mt = mt + "\n"
+        |                }        
         |             }
         |         }
         |         if (j.containers.cna.workarounds && j.containers.cna.workarounds[0]) {
