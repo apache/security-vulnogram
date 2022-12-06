@@ -137,7 +137,7 @@ block prepend loadEditor
         |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {
         |             mt = mt + "Timeline:\n\n"
         |             for (d of j.containers.cna.timeline) {
-        |                mt = mt + d.time + ": " + d.value + "\n"
+        |                mt = mt + d.time.substring(0,10) + ": " + d.value + "\n"
         |             }
         |             mt = mt + "\n"
         |         }        
