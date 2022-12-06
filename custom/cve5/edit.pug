@@ -127,7 +127,7 @@ block prepend loadEditor
         |             if (projecturl) {
         |                 mt = mt + projecturl + "\n"
         |             }
-        |             mt = mt + "https://cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
+        |             mt = mt + "https://www.cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
         |             if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
         |               for (d of j.containers.cna.source.defect)
         |                 mt = mt + "https://issues.apache.org/jira/browse/"+ d + "\n"
