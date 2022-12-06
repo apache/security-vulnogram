@@ -83,10 +83,7 @@ block prepend loadEditor
         |         }
         |         mt = mt + "Description:\n\n"
         |         for (d of j.containers.cna.descriptions) {
-        |             mt = mt + d.value 
-        |         }
-        |         if (!mt.endsWith('\n')) {
-        |             mt = mt + "\n\n"
+        |             mt = mt + d.value.trim() + "\n\n"
         |         }
         |         if (j.containers.cna.AKA ) {
         |             mt = mt + "This issue is also known as "+j.CVE_data_meta.AKA +"\n\n"
@@ -106,20 +103,13 @@ block prepend loadEditor
         |         if (j.containers.cna.solutions && j.containers.cna.solutions[0] ) {
         |             mt = mt + "Solution:\n\n"
         |             for (d of j.containers.cna.solutions) {
-        |                mt = mt + d.value + "\n"
-        |                if (!mt.endsWith('\n')) {
-        |                  mt = mt + "\n"
-        |                }        
+        |                mt = mt + d.value.trim() + "\n\n"
         |             }
         |         }
         |         if (j.containers.cna.workarounds && j.containers.cna.workarounds[0]) {
         |             mt = mt + "Work Arounds:\n\n"
         |             for (d of j.containers.cna.workarounds) {
-        |                mt = mt + d.value
-        |                if (!mt.endsWith('\n')) {
-        |                  mt = mt + "\n"
-        |                }
-        |                mt = mt + "\n"
+        |                mt = mt + d.value.trim() + "\n\n"
         |             }
         |         }
         |         if (j.containers.cna.credits) {
