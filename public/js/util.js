@@ -124,6 +124,11 @@ reduceJSON: function (cve) {
     }
     // ASF
     if(c.who) { delete c.who; }
+    if(c.containers.cna.title) {
+        if (!(c.containers.cna.title.substring(0,40).includes("Apache"))) {
+            c.containers.cna.title = getProductListNoVendor(c) + ": " + c.containers.cna.title
+	}
+    }
     // END ASF
     return(orderKeys(c));
 },
