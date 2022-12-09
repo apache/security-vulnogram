@@ -65,6 +65,7 @@ const validator = require('validator');
 
 module.exports = function (Document, opts) {
     History = module.History = docModel(opts.schemaName + '_history');
+    
     var router = express.Router();
     var queryMW = querymw(opts.facet);
     if (!opts.conf.readonly) {
@@ -321,6 +322,7 @@ module.exports = function (Document, opts) {
     }
     router.get('/log/:id', [checkID], function (req, res) {
         // ASF
+        console.log(History, opts.schemaName);
         getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);
         });

@@ -243,6 +243,24 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
+                                        "versions": {
+                                            "items":{
+		                                "properties": {
+                                                    "status": { },
+                                                    "version": { },
+                                                    "lessThan": { },
+                                                    "lessThanOrEqual": { },
+                                                    "changes": {
+                                                        "options": {
+                                                            "hidden": "true",
+                                                        }                                                        
+                                                    },
+                                                    "versionType": {
+                                                       "default": "custom",
+                                                    },
+                                                },
+                                            },
+                                        },
                                         "repo": {
                                             "options": {
                                                 "hidden": "true",
