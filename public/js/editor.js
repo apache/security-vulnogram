@@ -432,12 +432,14 @@ function tzOffset(x) {
 
 // The time is displayed/set in local times in the input,
 //  but setValue, getValue use UTC. JSON output will be in UTC.
-const localTZ = (new Date).toLocaleString("en", {timeZoneName: "short"}).split(" ").pop();
+const localTZ = "UTC";
+// ASF: (new Date).toLocaleString("en", {timeZoneName: "short"}).split(" ").pop();
 JSONEditor.defaults.editors.dateTime = class dateTime extends JSONEditor.defaults.editors.string{
     getValue() {
         if (this.value && this.value.length > 0) {
             if (this.value.match(/^\d{4}-\d{2}-\d{2}T[\d\:\.]+$/)) {
-                this.value = this.value + tzOffset(this.value);
+// ASF               this.value = this.value + tzOffset(this.value);
+                this.value = this.value + "+00:00";
             }
             var d = new Date(this.value);
             if (d instanceof Date && !isNaN(d.getTime())) {
@@ -467,7 +469,8 @@ JSONEditor.defaults.editors.dateTime = class dateTime extends JSONEditor.default
         this.schema.format = "datetime-local";
         super.build();
         this.input.className = "txt";
-        this.input.setAttribute("tz", localTZ);
+        /* ASF */
+        this.input.setAttribute("tz", "UTC");
     }
 };
 
