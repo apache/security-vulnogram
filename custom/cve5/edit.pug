@@ -142,7 +142,7 @@ block prepend loadEditor
         |             mt = mt + "\n"
         |         }        
         |         var jmt = "To: "+emailto+"\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
-        |         document.getElementById("outemail").innerHTML = "<pre>"+jmt+mt+"</pre>\n"
+        |         document.getElementById("outemail").innerHTML = "<pre>"+jmt+mt.replace(/</g, '&lt;').replace(/>/g,'&gt;')+"</pre>\n"
         |         document.getElementById("emailtext").value = mt
         |         document.getElementById("emailsubject").value = subject
         |         document.getElementById("emailreplyto").value = replyto

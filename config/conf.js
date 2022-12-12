@@ -39,7 +39,7 @@ module.exports = {
 
     // port where this tool is running
     serverHost: process.env.VULNOGRAM_HOST || '0.0.0.0',
-    serverPort: process.env.VULNOGRAM_PORT || 443,
+    serverPort: process.env.VULNOGRAM_PORT || 3555,
     basedir: '/',
 
     //Uncomment this block to enable HTTPs. Configure paths for valid SSL certificates.
