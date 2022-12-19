@@ -71,6 +71,7 @@ async function showPortalView(orgInfo, userInfo) {
         if (!userInfo) {
             userInfo = await csClient.getOrgUser(csCache.user);
         }
+        if (document.getElementById('port'))        
         document.getElementById('port').innerHTML = cveRender({
             portalType: csCache.portalType,
             portalURL: csCache.url,
@@ -263,6 +264,7 @@ async function cveUpdateUser(f) {
                     portalLogout();
                     return;
                 }
+                if (document.getElementById('cveUser'))                
                 document.getElementById("cveUser").innerHTML =
                     cveRender({
                         ctemplate: 'userstats',
