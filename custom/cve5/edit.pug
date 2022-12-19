@@ -155,7 +155,7 @@ block prepend loadEditor
         |         document.getElementById("emailto1").value = emailto
         |         emailto = "announce@apache.org, "+projectannounce
         |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
-        |         document.getElementById("asfemail").innerHTML = "<pre>"+jmt+mt+"</pre>\n"
+        |         document.getElementById("asfemail").innerHTML = "<pre>"+jmt+mt.replace(/</g, '&lt;').replace(/>/g,'&gt;')+"</pre>\n"
         |         document.getElementById("emailto2").value = emailto
         |         if (j.CNA_private.emailed) {
         |             document.getElementById("emailbutton").disabled= true
