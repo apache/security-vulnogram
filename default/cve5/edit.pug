@@ -16,7 +16,7 @@ block append scripts
         include cve.js
         //include csaf.js
         include portal.js
-    - var compileScript = pugLib.compileFileClient('default/cve5/cvelist.pug', {name: "cveRender", basedir: '', compileDebug: false,inlineRuntimeFunctions: true})
+    - var compileScript = pugLib.compileFileClient('custom/cve5/cvelist.pug', {name: "cveRender", basedir: '', compileDebug: false,inlineRuntimeFunctions: true})
             script !{compileScript}
 
 block prepend loadEditor

@@ -16,9 +16,11 @@ block loadEditorloadJSON
 
 block append loadEditor
     script
-        | selected = "aboutTab";
-        | document.getElementById(selected).checked = true;
-        | //mainTabGroup.focus(4);
+        | if !(userPMCS.split(',').includes('security')) {
+        |   selected = "aboutTab";
+        |   document.getElementById(selected).checked = true;
+        |   //mainTabGroup.focus(4);
+        | }
 
 block prepend loadEditor
     script
@@ -233,5 +235,12 @@ block append customtabs
          p=""
          p!= "For further help contact <a href='mailto:security@apache.org' target='_blank'>security@apache.org</a>."
 
-block logolink
+block append customtabs
+        - var pmcs = user.pmcs
+        - var security = pmcs.includes("security")
+        if security
+          input.tab(name='tabs', type='radio', id='cvePortalTab', value="6")
+          label.lbl(for='cvePortalTab') CVE Portal
+          .wht.fil.rnd.bor#port
 
+block logolink
