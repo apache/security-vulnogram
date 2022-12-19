@@ -11,12 +11,16 @@ block bannerItemsLeft
             input#importJSON.hid(type="file",accept="application/json",onchange="loadFile(event,this);")
             a.fbn.vgi-folder(type="file",onclick='importFile(event, this);') Open
         a.fbn.vgi-download(type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download") Download
+    - var pmcs = user.pmcs
+    - var security = pmcs.includes("security")
+    if security        
+       button.fbn.sfe.vgi-put(id="post1") Post to CVE.org        
 
 block loadEditorloadJSON
 
 block append loadEditor
     script
-        | if !(userPMCS.split(',').includes('security')) {
+        | if (!userPMCS.split(',').includes('security')) {
         |   selected = "aboutTab";
         |   document.getElementById(selected).checked = true;
         |   //mainTabGroup.focus(4);
