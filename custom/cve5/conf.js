@@ -366,6 +366,9 @@ module.exports = {
 	                    },
                             "solutions": {
                                 "title":"Information about solutions or remediations available (optional, such as 'upgrade to version 5')",
+                                "options": {
+			            "hidden": "true"
+                                }                                
                             },
                             "exploits": {
                                 "options": {
