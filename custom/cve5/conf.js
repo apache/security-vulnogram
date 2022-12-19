@@ -256,7 +256,7 @@ module.exports = {
                                                         }                                                        
                                                     },
                                                     "versionType": {
-                                                       "default": "custom",
+                                                       "default": "semver",
                                                     },
                                                 },
                                             },
