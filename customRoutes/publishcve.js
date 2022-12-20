@@ -6,6 +6,16 @@ var request = require('request');
 const email = require('./email.js');
 const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
+var textUtil = require('../public/js/util.js');
+
+// We have to duplicate this from custom/cve5/asfpreload.js
+global.getProductListNoVendor = function getProductListNoVendor(c) {
+    var lines = [];
+    for (var affected of c.containers.cna.affected) {
+        lines.push(affected.product);
+    }
+    return lines.join(", ");
+}
 
 // Is the PMC allowed to do a live CVE.org push?
 // Currently only if you are in security group or if you're listed in the config,
@@ -46,13 +56,20 @@ protected.post('/', csrfProtection, async function(req,res) {
         res.end();
         return;
     }
-    var cvepmcowner  = doc.body.CNA_private.owner;
+
+    // We now have a loaded document for the given CVE ID
     
+    var cvepmcowner  = doc.body.CNA_private.owner;
     if (!allowedtopushlive(req.user.pmcs,cvepmcowner)) {
         res.json({"body":"Sorry the PMC "+cvepmcowner+" has no push rights"});
         res.end();    
         return true;        
     }
+
+    // We now know that the user trying to push it is allowed to do so
+    j = textUtil.reduceJSON(doc.body);
+
+    // We now have the document the same as the CVE-JSON tab had
     
     res.json({"body":"Push is authorised for you, but not yet implemented. ("+req.body.cve+" "+doc.body.CNA_private.state+")"});
     res.end();    
