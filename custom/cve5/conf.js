@@ -94,7 +94,7 @@ module.exports = {
                         "format": "",
                     },
                     "userslist": {
-                        "title": "This is your PMC list (or lists) such as users@ or dev@ where you also want security announcement emails go to",
+                        "title": "This is your PMC list such as users@ or dev@ where you also want security announcement emails go to.  More than one list is okay, separate with commas",
                         "type": "string",
                         "options": {
                             "xhidden": "true"
