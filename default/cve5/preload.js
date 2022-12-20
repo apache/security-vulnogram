@@ -7,8 +7,8 @@ async function preloadCve() {
 }
 preloadCve();
 // ASF
-//if (document.getElementById('post1'))
-//    document.getElementById('post1').addEventListener('click', cvePost);
+if (document.getElementById('post1'))
+    document.getElementById('post1').addEventListener('click', cvePost);
 
 //var publicEditorOption = cloneJSON(docEditorOptions);
 //Object.assign(publicEditorOption.schema, docSchema.oneOf[0]);

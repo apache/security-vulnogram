@@ -632,10 +632,10 @@ async function cveReject(elem, event) {
 
 async function cvePost() {
     // ASF
-    showAlert('Not currently enabled, will be done by ASF security team');
+    showAlert('Not currently enabled');
     return;
     // END ASF
-    
+
     if (docEditor.validation_results && docEditor.validation_results.length == 0) {
         /*if (save != undefined) {
             await save();
