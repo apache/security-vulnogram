@@ -7,6 +7,33 @@ const email = require('./email.js');
 const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
 
+// Is the PMC allowed to do a live CVE.org push?
+// Currently only if you are in security group or if you're listed in the config,
+// or if the config allows all (*) but you're not listed as an exception
+
+function allowedtopushlive(pmcsiamin, specificpmc) {
+    if (pmcsiamin.includes(conf.admingroupname)) {
+        return true;
+    }
+    if (!pmcsiamin.includes(specificpmc)) {
+        return false; // they're messing with the form
+    }
+    return false;
+    // This isn't implemented yet
+    //
+    if (conf.pmcstrustedascna.includes("*")) {
+        if (conf.pmcstrustedascna.includes("-"+specificpmc)) {
+            return false;
+        }        
+        return true;
+    }    
+    if (conf.pmcstrustedascna.includes(specificpmc)) {
+        return true;
+    }
+    return false;
+}
+
+
 protected.post('/', csrfProtection, async function(req,res) {
     var q = {};
     var opts = {"idpath":"body.cveMetadata.cveId"};
@@ -19,7 +46,15 @@ protected.post('/', csrfProtection, async function(req,res) {
         res.end();
         return;
     }
-    res.json({"body":"Push is not yet implemented. ("+req.body.cve+" "+doc.body.CNA_private.state+")"});
+    var cvepmcowner  = doc.body.CNA_private.owner;
+    
+    if (!allowedtopushlive(req.user.pmcs,cvepmcowner)) {
+        res.json({"body":"Sorry the PMC "+cvepmcowner+" has no push rights"});
+        res.end();    
+        return true;        
+    }
+    
+    res.json({"body":"Push is authorised for you, but not yet implemented. ("+req.body.cve+" "+doc.body.CNA_private.state+")"});
     res.end();    
     return true;
 });
