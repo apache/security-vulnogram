@@ -65,7 +65,6 @@ const validator = require('validator');
 
 module.exports = function (Document, opts) {
     History = module.History = docModel(opts.schemaName + '_history');
-    
     var router = express.Router();
     var queryMW = querymw(opts.facet);
     if (!opts.conf.readonly) {
@@ -83,7 +82,7 @@ module.exports = function (Document, opts) {
                 for (a in req.querymen.query) {
                     _.set(doc, a, req.querymen.query[a]);
                 };
-                //console.log(JSON.stringify(req.querymen.query));                
+                //console.log(JSON.stringify(req.querymen.query));
                 res.render(opts.edit, {
                     title: 'New',
                     doc: doc,
@@ -345,7 +344,7 @@ module.exports = function (Document, opts) {
             if (!doc) {
                 req.flash('error', 'ID not found: ' + req.params.id);
                 //console.log('GOT doc/' + idpath + req.params.id + doc);
-
+                
             } else {
                 ucomments = doc.comments;
             }
