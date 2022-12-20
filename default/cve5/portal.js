@@ -632,7 +632,20 @@ async function cveReject(elem, event) {
 
 async function cvePost() {
     // ASF
-    showAlert('Not currently enabled');
+    var j = await mainTabGroup.getValue();
+    res = await fetch('/publishcve', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+        },
+        redirect: 'error',
+        body: JSON.stringify({cve:j.cveMetadata.cveId})
+    });
+    const out = await res.json();
+    cveShowError(out.body);
     return;
     // END ASF
 

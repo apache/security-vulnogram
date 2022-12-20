@@ -174,6 +174,8 @@ var self = module.exports = {
         app.use('/.well-known', express.static("/opt/cveprocess/.well-known", { dotfiles: 'allow' } ));
         let ac = require('../customRoutes/allocatecve');
         app.use('/allocatecve', ensureAuthenticated, ac.protected);
+        let publishcve = require('../customRoutes/publishcve');        
+        app.use('/publishcve', ensureAuthenticated, publishcve.protected);        
         let semail = require('../customRoutes/sendemails');
         app.use('/sendemails', ensureAuthenticated, semail.protected);
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
