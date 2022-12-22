@@ -43,6 +43,28 @@ function allowedtopushlive(pmcsiamin, specificpmc) {
     return false;
 }
 
+function getCveIdState(cveid, cb) {
+    var opt = {
+        'method' : 'GET',
+        'url': conf.cveapiurl+'/'+ cveid,
+        'json': true,
+        'headers': conf.cveapiheaders,
+    };
+    var lateststate = "";
+    try {
+        request(opt, (error, response, body) => {
+            if (error) {
+                console.warn(error);
+                cb("");
+            } else {
+                cb(body.state);
+            }
+        });
+    } catch (error) {
+        console.warn(error);
+        cb("");
+    }
+}
 
 protected.post('/', csrfProtection, async function(req,res) {
     var q = {};
@@ -70,8 +92,42 @@ protected.post('/', csrfProtection, async function(req,res) {
     j = textUtil.reduceJSON(doc.body);
 
     // We now have the document the same as the CVE-JSON tab had
+
+    if (doc.body.CNA_private.state != "PUBLIC" && doc.body.CNA_private.state != "READY" ) {
+        res.json({"body":req.body.cve+" is not in state PUBLIC or READY"});
+        res.end();
+        return true;
+    }
+
+    // We now have something we're allowed to push
     
-    res.json({"body":"Push is authorised for you, but not yet implemented. ("+req.body.cve+" "+doc.body.CNA_private.state+")"});
+    // portal.js does a getCveId(j.cveMetadata.cveId) and looks at the state so we know if
+    // we're doing a first push or an update push
+
+    var lateststate = await new Promise( res => { getCveIdState(req.body.cve, res)})
+    //console.log("According to cve.org "+req.body.cve+" is state "+lateststate);
+    
+    if (lateststate == "RESERVED") {
+        if (j.cveMetadata.state == "PUBLISHED") {
+            res.json({"body":"Push is authorised for you, but 'publish new cve' not yet implemented."});
+            res.end();    
+            return true;            
+        } else if (j.cveMetadata.state == "REJECTED") {
+            res.json({"body":"Push is authorised for you, but 'reject new cve' not yet implemented."});
+            res.end();    
+            return true;                        
+        }
+    } else {
+        if (j.cveMetadata.state == "PUBLISHED") {
+            res.json({"body":"Push is authorised for you, but 'update public cve' not yet implemented."});
+            res.end();    
+            return true;                        
+        } else if (j.cveMetadata.state == "REJECTED") {
+            res.json({"body":"Push is authorised for you, but 'update rejected cve' not yet implemented."});
+            res.end();    
+            return true;                                    
+        }
+    }
     res.end();    
     return true;
 });
