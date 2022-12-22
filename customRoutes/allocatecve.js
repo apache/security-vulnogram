@@ -109,7 +109,7 @@ protected.post('/', csrfProtection, async function(req,res) {
 
     var opt = {
         'method' : 'POST',
-        'url': conf.cveapiurl+'?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
+        'url': conf.cveapiurl+'/cve-id?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
         //'url': "https://cveprocess.apache.org/notfound",
         'json': true,
         'headers': conf.cveapiheaders,

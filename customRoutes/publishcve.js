@@ -46,11 +46,10 @@ function allowedtopushlive(pmcsiamin, specificpmc) {
 function getCveIdState(cveid, cb) {
     var opt = {
         'method' : 'GET',
-        'url': conf.cveapiurl+'/'+ cveid,
+        'url': conf.cveapiurl+'/cve-id/'+ cveid,
         'json': true,
         'headers': conf.cveapiheaders,
     };
-    var lateststate = "";
     try {
         request(opt, (error, response, body) => {
             if (error) {
@@ -109,6 +108,7 @@ protected.post('/', csrfProtection, async function(req,res) {
     
     if (lateststate == "RESERVED") {
         if (j.cveMetadata.state == "PUBLISHED") {
+            // push cve j.cveMetadata.cveId, cnaContainer: j.containers.cna
             res.json({"body":"Push is authorised for you, but 'publish new cve' not yet implemented."});
             res.end();    
             return true;            
