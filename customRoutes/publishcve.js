@@ -65,6 +65,33 @@ function getCveIdState(cveid, cb) {
     }
 }
 
+function createCve(cveid, container, cb) {
+    var opt = {
+        'method' : 'POST',
+        'url': conf.cveapiurl+'/cve/'+ cveid,
+        'json': container,
+        'headers': conf.cveapiheaders,
+    };
+    //console.log("createCve: ",cveid,container);
+    try {
+        request(opt, (error, response, body) => {
+            //console.log("createCve: ",response, body);
+            if (error) {
+                console.warn(error);
+                cb(error);
+            } else if (body.error) {
+                console.warn(error);
+                cb(body.message);
+            } else {
+                cb();
+            }
+        });
+    } catch (error) {
+        console.warn(error);
+        cb(error);
+    }
+}
+
 protected.post('/', csrfProtection, async function(req,res) {
     var q = {};
     var opts = {"idpath":"body.cveMetadata.cveId"};
@@ -108,8 +135,12 @@ protected.post('/', csrfProtection, async function(req,res) {
     
     if (lateststate == "RESERVED") {
         if (j.cveMetadata.state == "PUBLISHED") {
-            // push cve j.cveMetadata.cveId, cnaContainer: j.containers.cna
-            res.json({"body":"Push is authorised for you, but 'publish new cve' not yet implemented."});
+            var result = await new Promise( res => { createCve(j.cveMetadata.cveId, j.containers.cna, res)})
+            if (!result) {
+                res.json({"body":"Push to cve.org success."});
+            } else {
+                res.json({"body":"Push to cve.org failed. "+result});
+            }
             res.end();    
             return true;            
         } else if (j.cveMetadata.state == "REJECTED") {
