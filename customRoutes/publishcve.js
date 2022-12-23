@@ -65,17 +65,18 @@ function getCveIdState(cveid, cb) {
     }
 }
 
-function createCve(cveid, container, cb) {
+function publishCve(cveid, isupdate, container, cb) {
     var opt = {
         'method' : 'POST',
         'url': conf.cveapiurl+'/cve/'+ cveid +"/cna",
         'json': {"cnaContainer": container},
         'headers': conf.cveapiheaders,
     };
-    console.log("createCve: ",cveid,container);
+    if (isupdate) {
+        opt['method'] = "PUT";
+    }
     try {
         request(opt, (error, response, body) => {
-            console.log("createCve: ",response, body);
             if (error) {
                 console.warn(error);
                 cb(error);
@@ -83,6 +84,7 @@ function createCve(cveid, container, cb) {
                 console.warn(body.error);
                 cb(body.message);
             } else {
+                console.log(body.message);
                 cb();
             }
         });
@@ -132,41 +134,27 @@ protected.post('/', csrfProtection, async function(req,res) {
 
     var lateststate = await new Promise( res => { getCveIdState(req.body.cve, res)})
     //console.log("According to cve.org "+req.body.cve+" is state "+lateststate);
-    
-    if (lateststate == "RESERVED") {
-        if (j.cveMetadata.state == "PUBLISHED") {
-            var result = await new Promise( res => { createCve(j.cveMetadata.cveId, j.containers.cna, res)})
-            if (!result) {
-                res.json({"body":"Push to cve.org success."});
 
-                var s2 = email.sendemail({"to":"security@apache.org",
-                                          "subject":j.cveMetadata.cveId+" was pushed to cve.org",
-                                          "text":"push success",
-                                         }).then( (x) => {  console.log("sent CVE push mail "+x);});
-                
-            } else {
-                res.json({"body":"Push to cve.org failed. "+result});
-            }
-            res.end();    
-            return true;            
-        } else if (j.cveMetadata.state == "REJECTED") {
-            res.json({"body":"Push is authorised for you, but 'reject new cve' not yet implemented."});
-            res.end();    
-            return true;                        
+    if (j.cveMetadata.state == "PUBLISHED") {
+        var isupdate = (lateststate != "RESERVED")
+        var result = await new Promise( res => { publishCve(j.cveMetadata.cveId, isupdate, j.containers.cna, res)})
+        if (!result) {
+            res.json({"body":"Push to cve.org success."});
+            
+            var s2 = email.sendemail({"to":"security@apache.org",
+                                      "subject":j.cveMetadata.cveId+" was pushed to cve.org",
+                                      "text":"push success",
+                                     }).then( (x) => {  console.log("sent CVE push mail "+x);});
+        } else {
+            res.json({"body":"Push to cve.org failed. "+result});
         }
-    } else {
-        if (j.cveMetadata.state == "PUBLISHED") {
-            res.json({"body":"Push is authorised for you, but 'update public cve' not yet implemented."});
-            res.end();    
-            return true;                        
-        } else if (j.cveMetadata.state == "REJECTED") {
-            res.json({"body":"Push is authorised for you, but 'update rejected cve' not yet implemented."});
-            res.end();    
-            return true;                                    
-        }
+        res.end();    
+        return true;                    
+    } else { // Rejected
+        res.json({"body":"Push is authorised for you, but 'reject cve' not yet implemented."});
+        res.end();    
+        return true;                        
     }
-    res.end();    
-    return true;
 });
 
 module.exports = {
