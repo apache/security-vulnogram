@@ -280,7 +280,7 @@ var self = module.exports = {
     
     asfhookaddcomment: function(doc,req) {
         var pathcve = "cve";
-        if (doc.body.cveMetadata.cveId)
+        if (doc.body.cveMetadata && doc.body.cveMetadata.cveId)
             pathcve = "cve5";
 	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
