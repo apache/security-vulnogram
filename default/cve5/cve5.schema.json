@@ -676,8 +676,7 @@
             },
             "required": [
                 "version",
-                "versionType",
-              "status"
+                "status"
             ]            
           }
         },

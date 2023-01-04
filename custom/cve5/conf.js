@@ -402,6 +402,7 @@ module.exports = {
         }
     },
     validators: [
+	conf.validators,
         function (schema, value, path) {
             var errors = [];
             if (path == 'root') {
