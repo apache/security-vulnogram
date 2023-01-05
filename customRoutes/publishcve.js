@@ -143,10 +143,16 @@ protected.post('/', csrfProtection, async function(req,res) {
             
             var s2 = email.sendemail({"to":"security@apache.org",
                                       "subject":j.cveMetadata.cveId+" was pushed to cve.org",
-                                      "text":"push success",
+                                      "text":"push by "+req.user.username+" success",
                                      }).then( (x) => {  console.log("sent CVE push mail "+x);});
         } else {
             res.json({"body":"Push to cve.org failed. "+result});
+
+            var s2 = email.sendemail({"to":"security@apache.org",
+                                      "subject":j.cveMetadata.cveId+" failed push to cve.org",
+                                      "text":"push by "+req.user.username+" failed "+result,
+                                     }).then( (x) => {  console.log("sent CVE push failed mail "+x);});
+            
         }
         res.end();    
         return true;                    
