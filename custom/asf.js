@@ -1,3 +1,14 @@
+// ASF Feature changelog from v4 to v5 (asf010 branch)
+//
+// - Fixed logic error in email sending button
+// - Email can only be sent if document validates with no errors
+// - Ability to edit the announcement email entry, it populates when CVE is allocated now (or if blank)
+// - Checks for bad URLs, correct use of apache.org vendor URLs in references
+// - If wrong URL /cve or /cve5 is used it will redirect
+// - Has a non-auth /publicjson/CVE-id endpoint to grab the (full) JSON of only public issues (not for public use, for ASF etc)
+// - Requirement for severity level
+//
+
 const { v4: uuidv4 } = require('uuid');
 const request = require('request');
 const express = require('express');
