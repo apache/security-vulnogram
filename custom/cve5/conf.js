@@ -426,6 +426,10 @@ module.exports = {
                         errors.push({path: "root.containers.cna.references", property: 'format', message: 'vendor-advisory tag must point to a URL at apache.org'});
                     }
                 }
+            } else if (path.startsWith('root.containers.cna.metrics') && path.endsWith(".other")) {
+                if (!value.content) {
+                    errors.push({path: "root.containers.cna.metrics", property: 'format', message: 'Severity level is required'});
+                }
             }
             return errors;
         }
