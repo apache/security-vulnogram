@@ -14,6 +14,7 @@ var querymen = require('querymen');
 var qs = require('querystring');
 const _ = require('lodash');
 const path = require('path');
+const mongoose = require('mongoose');
 
 var queryMW;
 
@@ -551,6 +552,7 @@ module.exports = function (name, opts) {
     });
 
     var onedoc = require('./onedoc')(Document, opts);
+    var History = mongoose.models[opts.schemaName + '_history'] || docModel(opts.schemaName + '_history');
     //UPDATE many
     router.post('/update',
         csrfProtection,
@@ -577,6 +579,7 @@ module.exports = function (name, opts) {
                         var fq = {};
                         fq[idpath] = f;
                         var docs = await Document.find(fq);
+                        console.log(['Bulkd', Document])
                         var results = [];
                         for (var d of docs) {
                             var result = await Document.findByIdAndUpdate(
@@ -589,7 +592,7 @@ module.exports = function (name, opts) {
                                 "upsert": false,
                                 "new": true
                             });
-                            var r = onedoc.addHistory(d, result);
+                            var r = onedoc.addModelHistory(History, d, result);
                             if (r) {
                                 r.__v = r.__v + ' (' + _.get(result, idpath) + ')';
                                 results.push(r);
