@@ -80,11 +80,10 @@ module.exports = {
     homepage: '/cve5',
 
     // Configure addional custom ExpressJS routes.
-/*
     customRoutes: [
         {
-            path:"/info",
-            route: "./customRoutes/info"
+            path: '/version',
+            route: './customRoutes/version'
         }
-    ]*/
+    ]
 };
