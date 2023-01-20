@@ -20,13 +20,15 @@ module.exports = {
                      "REVIEW",
                      "READY",                            
                      "PUBLIC",
+                     "REJECTED",
                  ],
                  icons: {
                      RESERVED: 'inbox',
                      DRAFT: 'edit',
                      REVIEW: 'eye',
                      READY: 'wait',
-                     PUBLIC: 'closed'
+                     PUBLIC: 'closed',
+                     REJECTED: 'no'
                  }
                },
         type: {hideColumn: true, bulk: false, tabs: false},
@@ -50,6 +52,7 @@ module.exports = {
                             "REVIEW",
                             "READY",                            
                             "PUBLIC",
+                            "REJECTED",
                         ],
                     }
                 }
@@ -109,13 +112,15 @@ module.exports = {
                             "REVIEW",
                             "READY",                            
                             "PUBLIC",
+                            "REJECTED",
                         ],
                         icons: {
                             RESERVED: 'inbox',
                             DRAFT: 'edit',
                             REVIEW: 'eye',
                             READY: 'cal',
-                            PUBLIC: 'closed'
+                            PUBLIC: 'closed',
+                            REJECTED: 'no'
                         }        ,                
                         "default": "RESERVED",
                     },
