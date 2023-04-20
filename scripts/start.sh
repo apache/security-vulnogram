@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 
-sh -c "${START_COMMAND:-forever start --id 'vulnogram' --spinSleepTime 5000 --minUptime 2000 app.js; forever list}"
+sed -i -e "s/copyright.*/copyright : '$(git describe --tags)',/" config/conf.js
+node app.js
