@@ -87,7 +87,18 @@ block prepend loadEditor
         |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other && j.containers.cna.metrics[0].other.content && j.containers.cna.metrics[0].other.content.text) {
         |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.text+"\n\n"
         |         }
-        |         mt = mt + "Description:\n\n"
+        |         mt = mt + "Affected versions:\n\n"
+        |         for (a of j.containers.cna.affected) {
+        |             for (v of a.versions) {
+        |                mt = mt + "- " + a.product
+        |                if (v.version != "0") mt = mt + " " + v.version
+        |                if (v.lessThan) mt = mt + " before " + v.lessThan
+        |                if (v.lessThanOrEqual) mt = mt + " through " + v.lessThanOrEqual
+        |                if (v.status != "affected") mt = mt + " " + v.status
+        |                mt = mt + "\n"
+        |             }
+        |         }
+        |         mt = mt + "\nDescription:\n\n"
         |         for (d of j.containers.cna.descriptions) {
         |             mt = mt + d.value.trim() + "\n\n"
         |         }
