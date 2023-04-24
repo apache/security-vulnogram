@@ -1,0 +1,3 @@
+notifications:
+  commits: private@security.apache.org
+  pullrequests: private@security.apache.org
