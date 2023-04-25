@@ -323,6 +323,12 @@ module.exports = {
                                     "properties": {
                                         "other": {
                                             "title": "Text version of Severity level",
+                                            "links": [ {
+                                                "class": "lbl vgi-ext",
+                                                "place": "container",
+                                                "href": "'https://security.apache.org/blog/severityrating/'",
+                                                "rel": "'Unless otherwise specified, you can use the default ASF low/moderate/important/critical rating system'"
+                                            } ],
                                             "properties": {
                                                 "type" : {
                                                     "options": {
