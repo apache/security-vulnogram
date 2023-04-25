@@ -299,7 +299,7 @@ var self = module.exports = {
                               "cc": "security@apache.org", 
                               "bcc": req.user.email,
 			      "subject":"Comment added on "+req.body.id,
-			      "text":req.body.text+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});        
+			      "text":req.body.plainText+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
     },
 
     asfhookaddhistory: function(oldDoc, newDoc) {
