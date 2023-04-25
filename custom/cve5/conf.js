@@ -367,14 +367,15 @@ module.exports = {
                                 ],
                             },
                             "configurations": {
-                                "title":"Configurations required for exploiting this vulnerability (optional)",
+                                "options": {
+                                    "hidden": true
+                                }
                             },
-	                    "workarounds": {
-                                "title":"Workarounds and mitigations for this vulnerability (optional)",
-		                "items": {
-                                    "title": "Mitigation/Work Around",
-                                },                
-	                    },
+	                        "workarounds": {
+                                "options": {
+                                    "hidden": true
+                                }
+	                        },
                             "solutions": {
                                 "title":"Information about solutions or remediations available (optional, such as 'upgrade to version 5')",
                                 "options": {
