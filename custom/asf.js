@@ -14,10 +14,34 @@ const request = require('request');
 const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
+const docModel = require('../models/doc');
+const docRoutes = require('../routes/doc');
 
 async function asfemaillists (req, res) {
     var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
     res.send(emaillist)
+}
+
+async function asfpublicjsonlist(req, res) {
+    const query = [
+        { $match: { 'body.CNA_private.state': 'PUBLIC' }},
+        { $project: {
+            ID: '$body.cveMetadata.cveId',
+            title: '$body.containers.cna.title',
+            state: '$body.CNA_private.state',
+            updated: '$updatedAt',
+            product: '$body.containers.cna.affected.product',
+            owner: '$body.CNA_private.owner'
+        }}
+    ];
+
+    let Document4 = res.locals.docs.cve.Document;
+    var r4 = await Document4.aggregate(query);
+
+    let Document5 = res.locals.docs.cve5.Document;
+    var r5 = await Document5.aggregate(query);
+
+    res.json(r4.concat(r5));
 }
 
 async function asfpublicjson(req, res) {
@@ -195,6 +219,7 @@ var self = module.exports = {
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing
         app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
         app.get('/asfemaillists', ensureAuthenticated, asfemaillists); // work around CORS
+        app.get('/publicjson', asfpublicjsonlist);
         app.get('/publicjson/:id', asfpublicjson);
     },
 
