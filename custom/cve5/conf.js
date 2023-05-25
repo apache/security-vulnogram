@@ -440,7 +440,7 @@ module.exports = {
                 }
             } else if (path.startsWith('root.containers.cna.metrics') && path.endsWith(".other")) {
                 if (!value.content) {
-                    errors.push({path: "root.containers.cna.metrics", property: 'format', message: 'Severity level is required'});
+                    errors.push({path: path.replaceAll(".other", "") + ".oneOf[1].other.content.text", property: 'format', message: 'Severity level is required'});
                 }
             }
             return errors;
