@@ -14,8 +14,6 @@ const request = require('request');
 const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
-const docModel = require('../models/doc');
-const docRoutes = require('../routes/doc');
 
 async function asfemaillists (req, res) {
     var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
