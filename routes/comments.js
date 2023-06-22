@@ -10,6 +10,14 @@ var random_slug = function () {
     return crypto.randomBytes(13).toString('base64').replace(/[\+\/\=]/g, '-');
 }
 
+function validId(id) {
+    if (id.match("^[\\w\\d-]+$")) {
+        return id;
+    } else {
+        throw new Error("Invalid characters found in id");
+    }
+}
+
 /*
 * if integrated with email, it shows emails with the same ID in the subject line
 
@@ -114,17 +122,18 @@ module.exports = function (Document, opts) {
     }
     router = express.Router();
     router.post('/comment', csrfProtection, async function (req, res) {
+        const doc_id = validId(req.body.id);
         // ASF we need to load the document so we can get the PMC
         var q = {};
-        q[opts.idpath] = req.body.id;
+        q[opts.idpath] = doc_id;
         var ret = await Document.findOne(q).exec();
         asf.asfhookaddcomment(ret,req);
         // END ASF
         if (req.body.slug) {
-            var r = await updateComment(req.body.id, req.user.username, req.body.text, req.body.slug, new Date());
+            var r = await updateComment(doc_id, req.user.username, req.body.text, req.body.slug, new Date());
             res.json(r);
         } else {
-            addComment(req.body.id, req.user.username, req.body.text).then(r => {
+            addComment(doc_id, req.user.username, req.body.text).then(r => {
                 res.json(r);
             })
         }
