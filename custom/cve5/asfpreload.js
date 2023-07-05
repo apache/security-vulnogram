@@ -92,6 +92,28 @@ async function loadProjectUrl(pmc) {
     } catch (error) {
         return url
     }
+    /* If that failed, see if it retired */
+    try {
+	var response = await fetch('https://whimsy.apache.org/public/committee-retired.json', {
+	    method: 'GET',
+	    credentials: 'omit',
+	    headers: {
+		'Accept': 'application/json, text/plain, */*'
+	    },
+	    redirect: 'error'
+	});
+	if (!response.ok) {
+            return url
+	} else {
+	    var res = await response.json();
+	    if (res.retired && res.retired[pmc]) {
+                url = 'https://attic.apache.org/projects/' + pmc + '.html'
+                return url
+	    }
+	}
+    } catch (error) {
+        return url
+    }
     /* If that failed, try the podlings */
     try {
 	var response = await fetch('https://whimsy.apache.org/public/public_podlings.json', {
