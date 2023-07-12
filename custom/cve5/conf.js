@@ -431,12 +431,12 @@ module.exports = {
                 if (value.url != undefined) {
                     const url = new URL(value.url);
                     if (url.hostname == "dist.apache.org") {
-                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'do not use dist.apache.org should be downloads.apache.org'});
-                    }
-                    if (url.hostname == "cveprocess.apache.org") {
+                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use dist.apache.org, this should be dlcdn.apache.org'});
+                    } else if (url.hostname == "cveprocess.apache.org") {
                         errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not link to cveprocess.apache.org, this is an internal tool'});
-                    }
-                    if (value.tags && value.tags.includes("vendor-advisory") && (!url.hostname.endsWith("apache.org") || url.pathname == "/")) {
+                    } else if (url.hostname == "downloads.apache.org") {
+                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use downloads.apache.org, this should be dlcdn.apache.org'});
+                    } else if (value.tags && value.tags.includes("vendor-advisory") && (!url.hostname.endsWith("apache.org") || url.pathname == "/")) {
                         errors.push({path: "root.containers.cna.references", property: 'format', message: 'vendor-advisory tag must point to a URL at apache.org'});
                     }
                 }
