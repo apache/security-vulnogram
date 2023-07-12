@@ -392,9 +392,7 @@ module.exports = {
                                 "title": "Credits (optional, please use if externally reported issue)",
                             },
                             "tags": {
-                                "options": {
-			            "hidden": "true"
-                                }
+                                "title": "Tags (optional, only 'unsupported-when-assigned' is relevant for Apache)"
                             },
                             "taxonomyMappings": {
                                 "options": {
