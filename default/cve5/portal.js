@@ -264,7 +264,7 @@ async function cveUpdateUser(f) {
                     portalLogout();
                     return;
                 }
-                if (document.getElementById('cveUser'))                
+                if (document.getElementById('cveUser'))
                 document.getElementById("cveUser").innerHTML =
                     cveRender({
                         ctemplate: 'userstats',
