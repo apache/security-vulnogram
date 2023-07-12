@@ -414,7 +414,7 @@ module.exports = {
         }
     },
     validators: [
-	conf.validators,
+        conf.validators,
         function (schema, value, path) {
             var errors = [];
             if (path == 'root') {
@@ -442,6 +442,16 @@ module.exports = {
                 if (!value.content) {
                     errors.push({path: path.replaceAll(".other", "") + ".oneOf[1].other.content.text", property: 'format', message: 'Severity level is required'});
                 }
+            } else if (path.startsWith('root.CNA_private.userslist')) {
+                value.split(/[ ,]+/).forEach(address => {
+                    if (address == "announce@apache.org") {
+                        errors.push({path: 'root', property: 'format', message: 'Do not add announce@apache.org to the mailinglists, it will be included automatically.'})
+                    } else if (address == "oss-security@lists.openwall.com") {
+                        errors.push({path: 'root', property: 'format', message: 'Do not add oss-security to the mailinglists, it will be notified separately.'})
+                    } else if (!address.endsWith('.apache.org')) {
+                        errors.push({path: 'root', property: 'format', message: 'Notification list is not an ASFlist.'})
+                    }
+                })
             }
             return errors;
         }
