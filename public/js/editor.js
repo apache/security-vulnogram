@@ -424,44 +424,21 @@ JSONEditor.defaults.editors.radio = class radio extends JSONEditor.AbstractEdito
     }
 };
 
-function tzOffset(x) {
-    var offset = new Date(x).getTimezoneOffset(),
-        o = Math.abs(offset);
-    return (offset < 0 ? "+" : "-") + ("00" + Math.floor(o / 60)).slice(-2) + ":" + ("00" + (o % 60)).slice(-2);
-}
-
-// The time is displayed/set in local times in the input,
-//  but setValue, getValue use UTC. JSON output will be in UTC.
-const localTZ = "UTC";
-// ASF: (new Date).toLocaleString("en", {timeZoneName: "short"}).split(" ").pop();
+// ASF
 JSONEditor.defaults.editors.dateTime = class dateTime extends JSONEditor.defaults.editors.string{
     getValue() {
-        if (this.value && this.value.length > 0) {
-            if (this.value.match(/^\d{4}-\d{2}-\d{2}T[\d\:\.]+$/)) {
-// ASF               this.value = this.value + tzOffset(this.value);
-                this.value = this.value + "+00:00";
-            }
-            var d = new Date(this.value);
-            if (d instanceof Date && !isNaN(d.getTime())) {
-                return d.toISOString();
-            } else {
-                return this.value;
-            }
+        if (this.value) {
+            return this.value + ":00.000Z";
         } else {
             return "";
         }
     }
     setValue(val) {
-        if (val && this.value.match(/^\d{4}-\d{2}-\d{2}T[\d\:\.]+$/)) {
-            val = val + tzOffset();
-        }
-        var d = new Date(val);
-        if (d instanceof Date && !isNaN(d.getTime()) && d.getTime() > 0) {
-            var x = new Date((d.getTime() - (d.getTimezoneOffset() * 60000)));
-            this.value =
-                this.input.value = x.toJSON().slice(0, 16);
+        if (val) {
+            // Drop the :00.000Z, if any
+            this.value = this.input.value = val.substring(0, 16);
         } else {
-            this.value = this.input.value = "";
+            this.value = this.input.value = val;
         }
         this.jsoneditor.notifyWatchers(this.path);
     }
@@ -469,10 +446,10 @@ JSONEditor.defaults.editors.dateTime = class dateTime extends JSONEditor.default
         this.schema.format = "datetime-local";
         super.build();
         this.input.className = "txt";
-        /* ASF */
         this.input.setAttribute("tz", "UTC");
     }
 };
+// END ASF
 
 
 JSONEditor.defaults.editors.taglist = class taglist extends JSONEditor.defaults.editors.string {
