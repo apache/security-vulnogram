@@ -247,7 +247,7 @@ module.exports = {
                                         },
                                         "product": {
                                             "options": {
-                                                "grid_columns": 8,
+                                                "grid_columns": 4,
                                                 "inputAttributes": {
                                                     "placeholder": "eg., Apache Tomcat"
                                                 }
@@ -259,13 +259,27 @@ module.exports = {
                                             }
                                         },
                                         "collectionURL": {
+                                            "title": "Package collection URL (if applicable)",
                                             "options": {
-                                                "hidden": "true",
-                                            }
+                                                "grid_columns": 4,
+                                                "inputAttributes": {
+                                                    "placeholder": "ecosystem, e.g. Maven, PyPI, etc"
+                                                }
+                                            },
+                                            "examples": [
+                                                "https://repo.maven.apache.org/maven2",
+                                                "https://pypi.python.org",
+                                                "https://rubygems.org",
+                                                "https://crates.io",
+                                                "https://cpan.org/modules"
+                                            ]
                                         },
                                         "packageName": {
                                             "options": {
-                                                "hidden": "true",
+                                                "grid_columns": 4,
+                                                "inputAttributes": {
+                                                    "placeholder": "e.g. org.apache.commons:commons-config"
+                                                }
                                             }
                                         },
                                         "versions": {
