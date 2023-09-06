@@ -381,10 +381,20 @@ var self = module.exports = {
 	        else if (cbres.statusCode != 200) {console.log(cbres); }
                 else {
                     if (body.lists && body.lists[pmcfull]) {
-                        if (body.lists[pmcfull]["users"]) {
+                        if (body.lists[pmcfull]["announce"]) {
+                            listname = "announce@"+pmcfull;
+                        } else if (body.lists[pmcfull]["announcements"]) {
+                            listname = "announcements@"+pmcfull;
+                        } else if (body.lists[pmcfull]["general"]) {
+                            listname = "general@"+pmcfull;
+                        } else if (body.lists[pmcfull]["users"]) {
                             listname = "users@"+pmcfull;
                         } else if (body.lists[pmcfull]["user"]) {
-                            listname = "user@"+pmcfull;                            
+                            listname = "user@"+pmcfull;
+                        } else if (body.lists[pmcfull]["discuss"]) {
+                            listname = "discuss@"+pmcfull;
+                        } else if (body.lists[pmcfull]["dev"]) {
+                            listname = "dev@"+pmcfull;
                         }
                     }
                 }
