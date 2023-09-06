@@ -67,6 +67,18 @@ module.exports = {
             "orgId" : {
                 "template": conf.cveorgid
             },
+            "cnaPublishedContainer": {
+                "properties": {
+                    "descriptions": {
+                        "default": {
+                            "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR].\nUsers are recommended to upgrade to version [FIXED_VERSION], which fixes this issue.",
+                            "supportingMedia": [ {
+                                "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR].<br>Users are recommended to upgrade to version [FIXED_VERSION], which fixes this issue."
+                            } ]
+                        },
+                    }
+                }
+            }
         },
         
         "title":" ",
