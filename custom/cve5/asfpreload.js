@@ -10,6 +10,8 @@ async function loadProductNames() {
     var projects = []
     var pmcs = userPMCS.split(',');
     var res;
+    const abortController = new AbortController()
+    setTimeout(() => abortController.abort(), 5000)
     try {
 	var response = await fetch('https://whimsy.apache.org/public/committee-info.json', {
 	    method: 'GET',
@@ -17,7 +19,8 @@ async function loadProductNames() {
 	    headers: {
 		'Accept': 'application/json, text/plain, */*'
 	    },
-	    redirect: 'error'
+	    redirect: 'error',
+	    signal: abortController.signal
 	});
 	if (!response.ok) {
 	    errMsg.textContent = "Failed Apache project list";
@@ -37,13 +40,16 @@ async function loadProductNames() {
 	errMsg.textContent = error;
     }
     try {
+	    const abortController = new AbortController()
+	    setTimeout(() => abortController.abort(), 5000)
 	var response = await fetch('https://whimsy.apache.org/public/public_podlings.json', {
 	    method: 'GET',
 	    credentials: 'omit',
 	    headers: {
 		'Accept': 'application/json, text/plain, */*'
 	    },
-	    redirect: 'error'
+	    redirect: 'error',
+	    signal: abortController.signal
 	});
 	if (!response.ok) {
 	    errMsg.textContent = "Failed Apache podling list";
@@ -72,13 +78,16 @@ async function loadProductNames() {
 async function loadProjectUrl(pmc) {
     var url = ""
     try {
+	    const abortController = new AbortController()
+	    setTimeout(() => abortController.abort(), 5000)
 	var response = await fetch('https://whimsy.apache.org/public/committee-info.json', {
 	    method: 'GET',
 	    credentials: 'omit',
 	    headers: {
 		'Accept': 'application/json, text/plain, */*'
 	    },
-	    redirect: 'error'
+	    redirect: 'error',
+	    signal: abortController.signal
 	});
 	if (!response.ok) {
             return url
@@ -94,13 +103,16 @@ async function loadProjectUrl(pmc) {
     }
     /* If that failed, see if it retired */
     try {
+	    const abortController = new AbortController()
+	    setTimeout(() => abortController.abort(), 5000)
 	var response = await fetch('https://whimsy.apache.org/public/committee-retired.json', {
 	    method: 'GET',
 	    credentials: 'omit',
 	    headers: {
 		'Accept': 'application/json, text/plain, */*'
 	    },
-	    redirect: 'error'
+	    redirect: 'error',
+	    signal: abortController.signal
 	});
 	if (!response.ok) {
             return url
@@ -116,13 +128,16 @@ async function loadProjectUrl(pmc) {
     }
     /* If that failed, try the podlings */
     try {
+	    const abortController = new AbortController()
+	    setTimeout(() => abortController.abort(), 5000)
 	var response = await fetch('https://whimsy.apache.org/public/public_podlings.json', {
 	    method: 'GET',
 	    credentials: 'omit',
 	    headers: {
 		'Accept': 'application/json, text/plain, */*'
 	    },
-	    redirect: 'error'
+	    redirect: 'error',
+	    signal: abortController.signal
 	});
 	if (!response.ok) {
             return url
