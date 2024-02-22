@@ -300,6 +300,11 @@ module.exports = {
                                                 },
                                             },
                                         },
+                                        "defaultStatus": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
+                                        },
                                         "repo": {
                                             "options": {
                                                 "hidden": "true",
