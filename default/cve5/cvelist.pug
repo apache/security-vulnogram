@@ -260,6 +260,9 @@ mixin listIds
 
 mixin autoText
   if con
+    - var unsupported = con.tags && con.tags.includes("unsupported-when-assigned");
+    if unsupported
+        | ** UNSUPPORTED WHEN ASSIGNED ** 
     if con.problemTypes
         - var pts = [];
         for t in con.problemTypes
@@ -348,7 +351,10 @@ mixin autoText
             p This issue affects 
                 = relevantList.join('; ')
                 |.
-        if fixedVersion
+        if unsupported
+            | As this project is retired, we do not plan to release a version that fixes this issue. Users are recommended to find an alternative or restrict access to the instance to trusted users.
+            p NOTE: This vulnerability only affects products that are no longer supported by the maintainer.
+        else if fixedVersion
             p Users are recommended to upgrade to version 
                 = fixedVersion
                 |, which fixes the issue.
