@@ -156,6 +156,9 @@ app.use(function (req, res, next) {
     //res.setHeader("Access-Control-Request-Headers", "cve-api-cna,cve-api-secret,cve-api-submitter");
     // END ASF
 
+    // Based on INFRA-25518
+    res.setHeader('Content-Security-Policy', "default-src 'self' data: 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://whimsy.apache.org; frame-ancestors 'self';");
+
     if (req.path != '/users/login' && req.session.returnTo) {
         delete req.session.returnTo
     }
