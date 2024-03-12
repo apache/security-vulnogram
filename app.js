@@ -149,8 +149,11 @@ app.use(ensureConnected);
 app.use(function (req, res, next) {
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader("Access-Control-Allow-Origin", "*");// XXX investigate
-    res.setHeader("Access-Control-Request-Headers", "cve-api-cna,cve-api-secret,cve-api-submitter");
+    // ASF
+    // we don't use web integrations that need CORS, so safer to disable:
+    //res.setHeader("Access-Control-Allow-Origin", "*");// XXX investigate
+    //res.setHeader("Access-Control-Request-Headers", "cve-api-cna,cve-api-secret,cve-api-submitter");
+    // END ASF
 
     if (req.path != '/users/login' && req.session.returnTo) {
         delete req.session.returnTo
