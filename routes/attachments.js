@@ -4,7 +4,7 @@ var csrfProtection = csurf();
 const path = require('path');
 const os = require('os');
 const Busboy = require('busboy');
-
+const fs = require('fs');
 // input doc, opts
 
 module.exports = function (Document, opts) {
@@ -133,7 +133,7 @@ module.exports = function (Document, opts) {
     // delete file
     router.delete('/:id(' + opts.idpattern + ')/file/:filename', csrfProtection, async function (req, res) {
         var fq = {};
-        fq[idpath] = req.params.id;
+        fq[opts.idpath] = req.params.id;
         // ASF
         if (!req.user.pmcs.includes(conf.admingroupname)) {
             res.send('not authorized');

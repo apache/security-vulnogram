@@ -9,3 +9,4 @@ package-lock.json
 ignore
 tmp
 standalone
+config/conf.js

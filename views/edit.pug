@@ -58,7 +58,6 @@ block content
     div#mainTabGroup
         span.lbl &nbsp;
         block editorTab
-        block firsttab
             input.tab(name='tabs', type='radio', id='editorTab', value="1",checked)
             label.lbl#editorLabel(for='editorTab')
                 span.flx Editor
@@ -161,4 +160,3 @@ mixin alertDialog
             center.gap
                 input#alertOk.btn.sfe(type="reset" onclick="document.getElementById('alertDialog').close();" value="OK")
                 input#alertCancel.btn.red(type="reset" onclick="document.getElementById('alertDialog').close();" value="Cancel" dstyle="display:none")
-
