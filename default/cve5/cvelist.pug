@@ -288,13 +288,15 @@ mixin autoText
                   - var vlist = [];
                   for v in p.versions
                       if v.status == 'affected'
-                          if v.lessThan
+                          if v.version == '0' && ( v.lessThan == '*' || v.lessThanOrEqual == '*')
+                              - vlist.push ( 'all versions' )
+                          else if v.lessThan
                               - vlist.push ( (v.version != '0' ? ' from ' + v.version: '') + (v.lessThan != '*' ? ' before ' + v.lessThan:''));
                               - fixedVersion = v.lessThan
                           else if v.lessThanOrEqual
                               - vlist.push ( (v.version != '0' ? ' from ' + v.version: '') + (v.lessThanOrEqual != '*' ? ' through ' + v.lessThanOrEqual:''));
                           else if v.version != '0'
-                                  - vlist.push (' ' + v.version)
+                              - vlist.push (' ' + v.version)
                   if (vlist && vlist.length > 0)
                       - relevantList.push(pn + ':' + vlist.join(','));
                   else if p.defaultStatus == 'affected'
