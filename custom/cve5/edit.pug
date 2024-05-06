@@ -91,12 +91,17 @@ block prepend loadEditor
         |         for (a of j.containers.cna.affected) {
         |             for (v of a.versions) {
         |                mt = mt + "- " + a.product
-        |                if (v.version != "0") mt = mt + " " + v.version
-        |                if (v.lessThan == "*" || v.lessThanOrEqual == "*") {
-        |                    mt = mt + " or later"
+        |                const openended = v.lessThan == "*" || v.lessThanOrEqual == "*"
+        |                if (v.version == "0" && openended) {
+        |                    mt = mt + "all versions"
         |                } else {
-        |                    if (v.lessThan) mt = mt + " before " + v.lessThan
-        |                    if (v.lessThanOrEqual) mt = mt + " through " + v.lessThanOrEqual
+        |                    if (v.version != "0") mt = mt + " " + v.version
+        |                    if (openended) {
+        |                        mt = mt + " or later"
+        |                    } else {
+        |                        if (v.lessThan) mt = mt + " before " + v.lessThan
+        |                        if (v.lessThanOrEqual) mt = mt + " through " + v.lessThanOrEqual
+        |                    }
         |                }
         |                if (v.status != "affected") mt = mt + " " + v.status
         |                mt = mt + "\n"
