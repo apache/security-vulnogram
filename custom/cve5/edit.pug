@@ -93,7 +93,7 @@ block prepend loadEditor
         |                mt = mt + "- " + a.product
         |                const openended = v.lessThan == "*" || v.lessThanOrEqual == "*"
         |                if (v.version == "0" && openended) {
-        |                    mt = mt + "all versions"
+        |                    mt = mt + ": all versions"
         |                } else {
         |                    if (v.version != "0") mt = mt + " " + v.version
         |                    if (openended) {

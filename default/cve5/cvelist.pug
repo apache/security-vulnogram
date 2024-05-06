@@ -275,7 +275,7 @@ mixin autoText
               = pts.join(', ')
           else
               | A
-      | vulnerability
+      |  vulnerability
       - var codelist = [];
       - var relevantList = [];
       - var fixedVersion = '[FIXED_VERSION]';
@@ -298,7 +298,7 @@ mixin autoText
                           else if v.version != '0'
                               - vlist.push (' ' + v.version)
                   if (vlist && vlist.length > 0)
-                      - relevantList.push(pn + ':' + vlist.join(','));
+                      - relevantList.push(pn + ': ' + vlist.join(','));
                   else if p.defaultStatus == 'affected'
                       - relevantList.push(pn);
           - var ptext = plist.join(', ');
