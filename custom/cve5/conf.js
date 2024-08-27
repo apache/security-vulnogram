@@ -495,7 +495,9 @@ module.exports = {
                         errors.push({path: 'root', property: 'format', message: 'Do not add oss-security to the mailinglists, it will be notified separately.'})
                     } else if (!address.endsWith('.apache.org')) {
                         errors.push({path: 'root', property: 'format', message: 'Notification list is not an ASF list.'})
-                    }
+                    } else if (address.startsWith('security@') || address.startsWith('private@')) {
+                        errors.push({path: 'root', property: 'format', message: 'Do not notify private lists: notifications should go to public lists. Mixing public and private lists is discouraged.'})
+		    }
                 })
             }
             return errors;
