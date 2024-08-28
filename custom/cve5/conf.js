@@ -466,6 +466,13 @@ module.exports = {
                         errors.push({path: path, property: 'format', message: 'In state PUBLIC you must include a vendor-advisory reference pointing to your advisory or mailing list post at an apache.org URL'});
                     }
                 }
+                if (value && value.containers && value.containers.cna && value.containers.cna.title && value.containers.cna.affected && value.containers.cna.affected.length > 0 && value.containers.cna.affected[0].product) {
+                    const product = value.containers.cna.affected[0].product.toLowerCase()
+                    const title = value.containers.cna.title.toLowerCase()
+                    if (title.includes(product)) {
+                        errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
+                    }
+                }
             } else if (path.startsWith('root.containers.cna.references')) {
                 if (value.url != undefined) {
                     try {
