@@ -549,6 +549,6 @@ function cveFixForVulnogram(j) {
     return j;
 }
 
-if (exports) {
+if (typeof exports !== 'undefined') {
     exports.htmltoText = htmltoText
 }
