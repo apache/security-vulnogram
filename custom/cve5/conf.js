@@ -181,6 +181,12 @@ module.exports = {
                                 }                                
                             },
                             "problemTypes": {
+                                "links": [ {
+                                    "class": "lbl vgi-ext",
+                                    "place": "header",
+                                    "rel": "'to be selected from the CWE-1003 view (autocompleted)'",
+                                    "href": "'https://cwe.mitre.org/data/definitions/1003.html'"
+                                } ],
                                 "items": {
                                     "properties": {
                                         "descriptions": {
