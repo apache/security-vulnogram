@@ -479,6 +479,16 @@ module.exports = {
                         errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
                     }
                 }
+                if (value && value.containers && value.containers.cna && value.containers.cna.affected) {
+                    for (let i = 0; i < value.containers.cna.affected.length; i++) {
+                        const affected = value.containers.cna.affected[i]
+                        if (affected.collectionURL && affected.collectionURL.includes("maven")) {
+                            if (!affected.packageName || !affected.packageName.includes(":")) {
+                                errors.push({path: "root.containers.cna.affected." + i + ".packageName", property: 'format', message: "Specify the package name in the format 'groupId:artifactId'"})
+                            }
+                        }
+                    }
+                }
             } else if (path.startsWith('root.containers.cna.references')) {
                 if (value.url != undefined) {
                     try {
