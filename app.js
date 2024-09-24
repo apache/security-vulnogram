@@ -53,8 +53,8 @@ db.on('error', function (err) {
 
 const app = express();
 
-var RateLimit = require('express-rate-limit');
-var limiter = new RateLimit({
+var rateLimit = require('express-rate-limit');
+var limiter = rateLimit({
   windowMs: 1*60*1000, // 1 minute
   max: 200
 });
@@ -90,9 +90,8 @@ app.use(express.static('public'));
 app.use(session({
     secret: crypto.randomBytes(64).toString('hex'),
     resave: true,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV == "production",
       httpOnly: true
     }
 }));

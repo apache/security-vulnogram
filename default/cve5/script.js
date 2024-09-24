@@ -49,7 +49,7 @@ function loadCVE(value) {
                 return response.json();
             })
             .then(function (res) {
-                if (res.dataVersion && res.dataVersion == '5.0') {
+                if (res.dataVersion && (res.dataVersion == '5.0' || res.dataVersion == '5.1')) {
                     if (res.containers.cna.x_legacyV4Record) {
                         delete res.containers.cna.x_legacyV4Record;
                     }
@@ -75,7 +75,7 @@ function loadCVE(value) {
 
 async function rejectRecord() {
     var id = getDocID();
-    if (window.confirm('Do you want to reject ' + id + '? All vulnerability deatils will be removed.')) {
+    if (window.confirm('Do you want to reject ' + id + '? All vulnerability details will be removed.')) {
         loadJSON({
             cveMetadata: {
                 cveId: id,
@@ -348,11 +348,12 @@ function getProductAffected(cve) {
     return lines.join();
 };
 
+/* safely convert HTML in supportingMedia to text */
 function domhtml(html) {
     text = htmltoText(html) || "";
     let doc = new DOMParser().parseFromString('<pre>' + text + '</pre>', 'text/html');
     var ret = doc.body.innerText || "";
-    return ret;
+    return ret.trim();
 }
 
 function htmltoText(html) {
@@ -373,7 +374,9 @@ function htmltoText(html) {
         //text = text.replace(/^\s*/gim, "");
         //text = text.replace(/ ,/gi, ",");
         //text = text.replace(/ +/gi, " ");
-        text = text.replace(/\n\n+/gi, "\n\n");
+        //text = text.replace(/\n\n/gi, "\n");
+        text = text.replace(/^\s+/,"");
+        text = text.replace(/\s+$/,"");
         return text;
     }
 };
@@ -416,12 +419,29 @@ document.addEventListener("click", function (e) {
     }
 });
 
+var autoTextRequired = [
+    'root.containers.cna.affected',
+    'root.containers.cna.problemTypes',
+    'root.containers.cna.impacts',
+]
+function enoughAutoTextFields(res) {
+    for(s of res) {
+        for(p of autoTextRequired) {
+            if (s.path.startsWith(p)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 async function autoText(event) {
     if (event) {
         event.preventDefault();
     }
-    if (docEditor.validation_results && docEditor.validation_results.length == 0) {
-
+    if (docEditor.validation_results 
+        && (docEditor.validation_results.length == 0 || enoughAutoTextFields(docEditor.validation_results)))
+         {
         var doc = docEditor.getValue();
         var text = cveRender({
             ctemplate: 'autoText',
@@ -511,7 +531,7 @@ async function loadCVEFile(event, elem) {
             reader.onload = function (evt) {
                 try {
                     res = JSON.parse(evt.target.result);
-                    if (res && res.dataVersion == "5.0") {
+                    if (res && res.dataVersion == "5.0" || res.dataVersion == "5.1") {
                         res = cveFixForVulnogram(res);
                         //docEditor.setValue(res);
                         var edOpts = (res.cveMetadata.state == 'REJECTED') ? rejectEditorOption : publicEditorOption;

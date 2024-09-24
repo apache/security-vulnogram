@@ -29,3 +29,10 @@ docSchema.oneOf[0].title="Editor"
 //}
 
 // END ASF
+
+// make sure all starting and ending spaces in strings are trimmed 
+JSONEditor.defaults.editors.string.prototype.sanitize = function(value) {
+    if(value)
+        return value.trim();
+    return value;
+  }; 
