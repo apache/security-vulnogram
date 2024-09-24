@@ -21,48 +21,73 @@ async function asfemaillists (req, res) {
 }
 
 async function asfpublicjsonlist(req, res) {
-    const query = [
+    let Document4 = res.locals.docs.cve.Document;
+    var r4 = await Document4.aggregate([
+        { $match: { 'body.CVE_data_meta.STATE': 'PUBLIC' }},
+        { $project: {
+            ID: '$body.CVE_data_meta.ID',
+            title: '$body.CVE_data_meta.TITLE',
+            state: '$body.CVE_data_meta.STATE',
+            updated: '$updatedAt',
+            owner: '$body.CNA_private.owner'
+        }}
+    ]);
+
+    let Document5 = res.locals.docs.cve5.Document;
+    var r5 = await Document5.aggregate([
         { $match: { 'body.CNA_private.state': 'PUBLIC' }},
         { $project: {
             ID: '$body.cveMetadata.cveId',
             title: '$body.containers.cna.title',
             state: '$body.CNA_private.state',
             updated: '$updatedAt',
-            product: '$body.containers.cna.affected.product',
             owner: '$body.CNA_private.owner'
         }}
-    ];
-
-    let Document4 = res.locals.docs.cve.Document;
-    var r4 = await Document4.aggregate(query);
-
-    let Document5 = res.locals.docs.cve5.Document;
-    var r5 = await Document5.aggregate(query);
+    ]);
 
     res.json(r4.concat(r5));
 }
 
-async function asfpublicjson(req, res) {
-    var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
-    allerr = {"error":"nodoc"};
-    if (!ids || !ids[0]) {
-        res.json(allerr)
-        return;
-    }
-    let Document = res.locals.docs.cve5.Document;
+const nodoc = {"error":"nodoc"};
+async function findCVE(Document, idField, id, cb) {
     var q = {};
-    q["body.cveMetadata.cveId"] = ids[0];
+    q[idField] = id;
     Document.findOne(q, async function (err, docs) {
         if (err) {
-            res.json(allerr)
+            res.json(nodoc);
         } else {
+            cb(docs);
+        }
+    });
+}
+
+async function asfpublicjson(req, res) {
+    var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
+    if (!ids || !ids[0]) {
+        res.json(nodoc)
+        return;
+    }
+    findCVE(
+        res.locals.docs.cve5.Document,
+        "body.cveMetadata.cveId",
+        ids[0],
+        async function (docs) {
             if (docs && docs.body && docs.body.CNA_private && docs.body.CNA_private.state == "PUBLIC") {
                 res.json(docs.body)
             } else {
-                res.json(allerr)
+                findCVE(
+                    res.locals.docs.cve.Document,
+                    "body.CVE_data_meta.ID",
+                    ids[0],
+                    async function (docs) {
+                        if (docs && docs.body && docs.body.CVE_data_meta && docs.body.CVE_data_meta.STATE && docs.body.CVE_data_meta.STATE == "PUBLIC") {
+                            res.json(docs.body)
+                        } else {
+                            res.json(nodoc)
+                        }
+                    })
             }
-        }
-    });
+        })
 }
 
 function asflogout (req, res) {
@@ -381,10 +406,20 @@ var self = module.exports = {
 	        else if (cbres.statusCode != 200) {console.log(cbres); }
                 else {
                     if (body.lists && body.lists[pmcfull]) {
-                        if (body.lists[pmcfull]["users"]) {
+                        if (body.lists[pmcfull]["announce"]) {
+                            listname = "announce@"+pmcfull;
+                        } else if (body.lists[pmcfull]["announcements"]) {
+                            listname = "announcements@"+pmcfull;
+                        } else if (body.lists[pmcfull]["general"]) {
+                            listname = "general@"+pmcfull;
+                        } else if (body.lists[pmcfull]["users"]) {
                             listname = "users@"+pmcfull;
                         } else if (body.lists[pmcfull]["user"]) {
-                            listname = "user@"+pmcfull;                            
+                            listname = "user@"+pmcfull;
+                        } else if (body.lists[pmcfull]["discuss"]) {
+                            listname = "discuss@"+pmcfull;
+                        } else if (body.lists[pmcfull]["dev"]) {
+                            listname = "dev@"+pmcfull;
                         }
                     }
                 }

@@ -4,6 +4,7 @@
   "description": "Making the world safer one CVE at a time, since 2017. Tool for creating Security Advisories and CVE ID information. With customizable plugins it can be used for tracking anything that can be expressed with a JSON-Schema. plugins are available for tracking security incidents, tickets, contacts, NVD entries and CVE assignments.",
   "main": "app.js",
   "scripts": {
+    "unittest": "node ./unittest/test.js; node ./unittest/validation.js",
     "test": "nodemon app",
     "start": "./scripts/start.sh",
     "stop": "forever stop app.js",

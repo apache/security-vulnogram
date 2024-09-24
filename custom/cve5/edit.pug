@@ -91,9 +91,18 @@ block prepend loadEditor
         |         for (a of j.containers.cna.affected) {
         |             for (v of a.versions) {
         |                mt = mt + "- " + a.product
-        |                if (v.version != "0") mt = mt + " " + v.version
-        |                if (v.lessThan) mt = mt + " before " + v.lessThan
-        |                if (v.lessThanOrEqual) mt = mt + " through " + v.lessThanOrEqual
+        |                const openended = v.lessThan == "*" || v.lessThanOrEqual == "*"
+        |                if (v.version == "0" && openended) {
+        |                    mt = mt + ": all versions"
+        |                } else {
+        |                    if (v.version != "0") mt = mt + " " + v.version
+        |                    if (openended) {
+        |                        mt = mt + " or later"
+        |                    } else {
+        |                        if (v.lessThan) mt = mt + " before " + v.lessThan
+        |                        if (v.lessThanOrEqual) mt = mt + " through " + v.lessThanOrEqual
+        |                    }
+        |                }
         |                if (v.status != "affected") mt = mt + " " + v.status
         |                mt = mt + "\n"
         |             }
@@ -214,20 +223,21 @@ block customtabs
                 div#outemail
             h1!= "ASF Email"               
             p!= "Use the button below to send these mails, or copy, paste, and send the email yourself."
+            p!= "Note that ASF announcement mailing lists are moderated. It may take some hours/days before your email will be published."
             div(style='float:right')
                 a.icn.right.copy.btn(onmouseover='this.textContent="Copy"',onclick='copyText(asfemail);this.textContent="Copied";infoMsg.textContent="Copied to Clipboard"')  Copy
             .indent.bor.pad
                 div#asfemail
 
             p
-            form.rnd(method='POST', action='/sendemails', onclick="var j=mainTabGroup.getValue(); j.CNA_private.emailed='yes';save()")
+            form.rnd(method='POST', action='/sendemails')
                input(type='hidden', name='_csrf', value=csrfToken)
                input(type='hidden',name='emailtext',id='emailtext')
                input(type='hidden',name='emailsubject',id='emailsubject')
                input(type='hidden',name='emailreplyto',id='emailreplyto')
                input(type='hidden',name='emailto1',id='emailto1')
                input(type='hidden',name='emailto2',id='emailto2')               
-               button.btn.sfe(disabled='true', type='submit', value='Email', id='emailbutton') Send these Emails
+               button.btn.sfe(disabled='true', type='button', value='Email', id='emailbutton', onclick='var j=mainTabGroup.getValue(); j.CNA_private.emailed="yes";save(undefined, function(){form.submit();});') Send these Emails
                div#emailbuttonnote               
 
 block append customtabs

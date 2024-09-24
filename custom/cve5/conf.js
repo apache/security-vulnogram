@@ -67,6 +67,18 @@ module.exports = {
             "orgId" : {
                 "template": conf.cveorgid
             },
+            "cnaPublishedContainer": {
+                "properties": {
+                    "descriptions": {
+                        "default": {
+                            "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR].\nUsers are recommended to upgrade to version [FIXED_VERSION], which fixes this issue.",
+                            "supportingMedia": [ {
+                                "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR].<br>Users are recommended to upgrade to version [FIXED_VERSION], which fixes this issue."
+                            } ]
+                        },
+                    }
+                }
+            }
         },
         
         "title":" ",
@@ -97,13 +109,21 @@ module.exports = {
                         "format": "",
                     },
                     "userslist": {
-                        "title": "This is your PMC list such as users@ or dev@ where you also want security announcement emails go to.  More than one list is okay, separate with commas",
+                        "title": "This is your project list such as users@ where you also want security announcement emails go to.  More than one list is okay, separate with commas",
                         "type": "string",
                         "options": {
                             "xhidden": "true"
                         }
                     },
-                    
+                    "internal_references": {
+                        "title": "Internal references: optional references for this issue that are not secret but also not useful outside of the ASF.",
+                        "type": "array",
+                        "format": "table",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    },
                     "state": {
                         "title": "State. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
                         "enum": [
@@ -161,6 +181,12 @@ module.exports = {
                                 }                                
                             },
                             "problemTypes": {
+                                "links": [ {
+                                    "class": "lbl vgi-ext",
+                                    "place": "header",
+                                    "rel": "'to be selected from the CWE-1003 view (autocompleted)'",
+                                    "href": "'https://cwe.mitre.org/data/definitions/1003.html'"
+                                } ],
                                 "items": {
                                     "properties": {
                                         "descriptions": {
@@ -227,7 +253,7 @@ module.exports = {
                                         },
                                         "product": {
                                             "options": {
-                                                "grid_columns": 8,
+                                                "grid_columns": 4,
                                                 "inputAttributes": {
                                                     "placeholder": "eg., Apache Tomcat"
                                                 }
@@ -239,13 +265,27 @@ module.exports = {
                                             }
                                         },
                                         "collectionURL": {
+                                            "title": "Package collection URL (if applicable)",
                                             "options": {
-                                                "hidden": "true",
-                                            }
+                                                "grid_columns": 4,
+                                                "inputAttributes": {
+                                                    "placeholder": "ecosystem, e.g. Maven, PyPI, etc"
+                                                }
+                                            },
+                                            "examples": [
+                                                "https://repo.maven.apache.org/maven2",
+                                                "https://pypi.python.org",
+                                                "https://rubygems.org",
+                                                "https://crates.io",
+                                                "https://cpan.org/modules"
+                                            ]
                                         },
                                         "packageName": {
                                             "options": {
-                                                "hidden": "true",
+                                                "grid_columns": 4,
+                                                "inputAttributes": {
+                                                    "placeholder": "e.g. org.apache.commons:commons-config"
+                                                }
                                             }
                                         },
                                         "versions": {
@@ -265,6 +305,11 @@ module.exports = {
                                                     },
                                                 },
                                             },
+                                        },
+                                        "defaultStatus": {
+                                            "options": {
+                                                "hidden": "true",
+                                            }
                                         },
                                         "repo": {
                                             "options": {
@@ -427,17 +472,38 @@ module.exports = {
                         errors.push({path: path, property: 'format', message: 'In state PUBLIC you must include a vendor-advisory reference pointing to your advisory or mailing list post at an apache.org URL'});
                     }
                 }
+                if (value && value.containers && value.containers.cna && value.containers.cna.title && value.containers.cna.affected && value.containers.cna.affected.length > 0 && value.containers.cna.affected[0].product) {
+                    const product = value.containers.cna.affected[0].product.toLowerCase()
+                    const title = value.containers.cna.title.toLowerCase()
+                    if (title.includes(product)) {
+                        errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
+                    }
+                }
+                if (value && value.containers && value.containers.cna && value.containers.cna.affected) {
+                    for (let i = 0; i < value.containers.cna.affected.length; i++) {
+                        const affected = value.containers.cna.affected[i]
+                        if (affected.collectionURL && affected.collectionURL.includes("maven")) {
+                            if (!affected.packageName || !affected.packageName.includes(":")) {
+                                errors.push({path: "root.containers.cna.affected." + i + ".packageName", property: 'format', message: "Specify the package name in the format 'groupId:artifactId'"})
+                            }
+                        }
+                    }
+                }
             } else if (path.startsWith('root.containers.cna.references')) {
                 if (value.url != undefined) {
-                    const url = new URL(value.url);
-                    if (url.hostname == "dist.apache.org") {
-                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use dist.apache.org, this should be dlcdn.apache.org'});
-                    } else if (url.hostname == "cveprocess.apache.org") {
-                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not link to cveprocess.apache.org, this is an internal tool'});
-                    } else if (url.hostname == "downloads.apache.org") {
-                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use downloads.apache.org, this should be dlcdn.apache.org'});
-                    } else if (value.tags && value.tags.includes("vendor-advisory") && (!url.hostname.endsWith("apache.org") || url.pathname == "/")) {
-                        errors.push({path: "root.containers.cna.references", property: 'format', message: 'vendor-advisory tag must point to a URL at apache.org'});
+                    try {
+                        const url = new URL(value.url);
+                        if (url.hostname == "dist.apache.org") {
+                            errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use dist.apache.org, this should be dlcdn.apache.org'});
+                        } else if (url.hostname == "cveprocess.apache.org") {
+                            errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not link to cveprocess.apache.org, this is an internal tool'});
+                        } else if (url.hostname == "downloads.apache.org") {
+                            errors.push({path: "root.containers.cna.references", property: 'format', message: 'Do not use downloads.apache.org, this should be dlcdn.apache.org'});
+                        } else if (value.tags && value.tags.includes("vendor-advisory") && (!url.hostname.endsWith("apache.org") || url.pathname == "/")) {
+                            errors.push({path: "root.containers.cna.references", property: 'format', message: 'vendor-advisory tag must point to a URL at apache.org'});
+                        }
+                    } catch (error) {
+                        // Fine, don't validate until the URL is valid
                     }
                 }
             } else if (path.startsWith('root.containers.cna.metrics') && path.endsWith(".other")) {
@@ -445,14 +511,16 @@ module.exports = {
                     errors.push({path: path.replaceAll(".other", "") + ".oneOf[1].other.content.text", property: 'format', message: 'Severity level is required'});
                 }
             } else if (path.startsWith('root.CNA_private.userslist')) {
-                value.split(/[ ,]+/).forEach(address => {
+                value.trim().split(/[ ,]+/).forEach(address => {
                     if (address == "announce@apache.org") {
                         errors.push({path: 'root', property: 'format', message: 'Do not add announce@apache.org to the mailinglists, it will be included automatically.'})
                     } else if (address == "oss-security@lists.openwall.com") {
                         errors.push({path: 'root', property: 'format', message: 'Do not add oss-security to the mailinglists, it will be notified separately.'})
                     } else if (!address.endsWith('.apache.org')) {
-                        errors.push({path: 'root', property: 'format', message: 'Notification list is not an ASFlist.'})
-                    }
+                        errors.push({path: 'root', property: 'format', message: 'Notification list is not an ASF list.'})
+                    } else if (address.startsWith('security@') || address.startsWith('private@')) {
+                        errors.push({path: 'root', property: 'format', message: 'Do not notify private lists: notifications should go to public lists. Mixing public and private lists is discouraged.'})
+		    }
                 })
             }
             return errors;
