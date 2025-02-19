@@ -358,8 +358,13 @@ module.exports = {
                                 "minItems": 0,
                             },
                             "metrics": {
-                                "title":"Metrics. A text severity level is required (additional CVSS rating is optional)",
+                                "title":"Metrics. A text severity rating is required (additional CVSS rating is optional)",
                                 "items": {
+                                    "oneOf": [
+                                        { "required": ["other"], "title": "ASF severity rating" },
+                                        { "required": ["format", "scenarios", "cvssV4_0"], "title": "CVSS 4.0" },
+                                        { "required": ["format", "scenarios", "cvssV3_1"], "title": "CVSS 3.1 (Obsolete)" }
+                                    ],
                                     "properties": {
                                         "other": {
                                             "title": "Text version of Severity level",
