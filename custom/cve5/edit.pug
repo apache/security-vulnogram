@@ -84,8 +84,14 @@ block prepend loadEditor
         |            }
         |         }
         |         mt = ""
-        |         if (j.containers.cna.metrics && j.containers.cna.metrics[0] && j.containers.cna.metrics[0].other && j.containers.cna.metrics[0].other.content && j.containers.cna.metrics[0].other.content.text) {
-        |             mt = mt + "Severity: "+j.containers.cna.metrics[0].other.content.text+"\n\n"
+        |         if (j.containers.cna.metrics) {
+        |             mt = mt + "Severity: "
+        |             for (m of j.containers.cna.metrics) {
+        |                 if (m.other && m.other.content && m.other.content.text) {
+        |                     mt = mt + m.other.content.text+" "
+        |                 }
+        |             }
+        |             mt = mt + "\n\n"
         |         }
         |         mt = mt + "Affected versions:\n\n"
         |         for (a of j.containers.cna.affected) {
