@@ -1,7 +1,9 @@
 function getProductListNoVendor(cve) {
     var lines = [];
     for (var affected of cve.containers.cna.affected) {
-        lines.push(affected.product);
+        if (!lines.includes(affected.product)) {
+            lines.push(affected.product);
+        }
     }
     return lines.join(", ");
 }
