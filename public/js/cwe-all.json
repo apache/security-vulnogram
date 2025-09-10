@@ -733,7 +733,7 @@
 "CWE-1025 Comparison Using Wrong Factors",
 "CWE-1037 Processor Optimization Removal or Modification of Security-critical Code",
 "CWE-1038 Insecure Automated Optimizations",
-"CWE-1039 Automated Recognition Mechanism with Inadequate Detection or Handling of Adversarial Input Perturbations",
+"CWE-1039 Inadequate Detection or Handling of Adversarial Input Perturbations in Automated Recognition Mechanism",
 "CWE-1041 Use of Redundant Code",
 "CWE-1042 Static Member Data Element outside of a Singleton Class Element",
 "CWE-1043 Data Element Aggregating an Excessively Large Number of Non-Primitive Elements",
@@ -961,4 +961,8 @@
 "CWE-1421 Exposure of Sensitive Information in Shared Microarchitectural Structures during Transient Execution",
 "CWE-1422 Exposure of Sensitive Information caused by Incorrect Data Forwarding during Transient Execution",
 "CWE-1423 Exposure of Sensitive Information caused by Shared Microarchitectural Predictor State that Influences Transient Execution",
-"CWE-1426 Improper Validation of Generative AI Output"]}
+"CWE-1426 Improper Validation of Generative AI Output",
+"CWE-1427 Improper Neutralization of Input Used for LLM Prompting",
+"CWE-1428 Reliance on HTTP instead of HTTPS",
+"CWE-1429 Missing Security-Relevant Feedback for Unexecuted Operations in Hardware Interface",
+"CWE-1431 Driving Intermediate Cryptographic State/Results to Hardware Module Outputs"]}
