@@ -82,6 +82,8 @@ function publishCve(cveid, isupdate, container, cb) {
                 cb(error);
             } else if (body.error) {
                 console.warn(body.error);
+                console.warn(body.message);
+                console.warn(body.details);
                 cb(body.message);
             } else {
                 console.log(body.message);
