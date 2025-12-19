@@ -310,7 +310,9 @@ function addError(el) {
 
 function validateForm(f) {
     let isvalid = true;
-    f.elements.forEach(x => {
+    const controls = f.elements;
+    for (let i = 0; i < controls.length; i++) {
+        const x = controls[i];
         if (!isvalid)
             return;
         /* Needed is an alias for required to avoid showing
@@ -324,7 +326,7 @@ function validateForm(f) {
                     addError(x);
             }
         }
-    });
+    };
     return isvalid;
 }
 
@@ -596,8 +598,21 @@ async function cveLoad(cveId) {
             mainTabGroup.change(0);
             return res;
         } else {
-            errMsg.textContent = "Failed to load valid CVE Record";
-            infoMsg.textContent = "";
+            try {
+                const response = await fetch('https://cveawg.mitre.org/api/cve/' + cveId);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.cveMetadata) {
+                        loadJSON(cveFixForVulnogram(data), cveId, "Loaded " + cveId + " from public API");
+                        mainTabGroup.change(0);
+                        return data;
+                    }
+                }
+            } catch (e2) {
+                errMsg.textContent = "Failed to load valid CVE Record";
+                infoMsg.textContent = "";
+                console.error('Failed to fetch from public API:', e2);
+            }
         }
     } catch (e) {
         if (e == '404' || e.error == 'CVE_RECORD_DNE') {
@@ -628,8 +643,21 @@ async function cveLoad(cveId) {
                 }
             }
         } else {
-            //console.log(e);
-            portalErrorHandler(e);
+            try {
+                const response = await fetch('https://cveawg.mitre.org/api/cve/' + cveId);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.cveMetadata) {
+                        loadJSON(cveFixForVulnogram(data), cveId, "Loaded " + cveId + " from public API");
+                        mainTabGroup.change(0);
+                        return data;
+                    }
+                }
+            } catch (e2) {
+                errMsg.textContent = "Failed to load valid CVE Record";
+                infoMsg.textContent = "";
+                console.error('Failed to fetch from public API:', e2);
+            }
         }
     }
 }
@@ -656,6 +684,16 @@ function transatePath(p) {
     }
     return p;
 }
+
+function filterADP(vr) {
+    if (vr && vr.length > 0) {
+        var filtered = vr.filter(a => a.path && a.path.startsWith('root.containers.adp') == 0);
+        return filtered;
+    }
+    else { 
+        return vr
+    }
+}
 async function cvePost() {
     // ASF
     var j = await mainTabGroup.getValue();
@@ -675,7 +713,8 @@ async function cvePost() {
     return;
     // END ASF
 
-    if (docEditor.validation_results && docEditor.validation_results.length == 0) {
+    var vr = filterADP(docEditor.validation_results);
+    if (vr && vr.length == 0) {
         /*if (save != undefined) {
             await save();
         }*/
@@ -751,7 +790,7 @@ async function cvePost() {
             portalErrorHandler(e);
         }
     } else {
-        showAlert('Please fix errors before posting');
+        showAlert('Please fix errors before posting - Please ignore the ADP errors');
     }
 }
 
