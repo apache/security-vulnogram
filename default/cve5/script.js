@@ -665,7 +665,10 @@ function generateCpeApplicabilityNode(affectedProduct) {
                     if (v.lessThan) {
                         cpeMatch.push({
                             "vulnerable": vulnerable,
-                            "criteria": `cpe:2.3:a:${normalizeCPEtoken(affectedProduct.vendor)}:${normalizeCPEtoken(affectedProduct.product)}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
+                            //"criteria": `cpe:2.3:a:${normalizeCPEtoken(affectedProduct.vendor)}:${normalizeCPEtoken(affectedProduct.product)}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
+                            //ASF
+                            "criteria": `cpe:2.3:a:apache:${normalizeCPEtoken(affectedProduct.product.replace("Apache", "").trim())}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
+                            //END ASF
                             "versionStartIncluding": normalizeCPEtoken(v.version),
                             "versionEndExcluding": normalizeCPEtoken(v.lessThan)
                         });
