@@ -315,22 +315,25 @@ var self = module.exports = {
             }
             return false;
         }
-	if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
-	    if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
-		req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
+        if (doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner) {
+            if (!self.asfgroupacls(doc.body.CNA_private.owner, req.user.pmcs)) {
+                req.flash('error','owned by pmc '+doc.body.CNA_private.owner);
                 console.log("wrong acl");
                 doc = {};
                 res.render('blank', {
                     title: 'Error',
                 });
                 return false;
-	    }
-	} else {
-	    req.flash('error','ACLs are bad tell security team "missing CNA_private.owner"');
-            res.render('blank', {
-                title: 'Error',
-            });
-            return false;
+            }
+        } else {
+            req.flash('error','ACLs are bad tell security team "missing CNA_private.owner"');
+            if (!self.asfgroupacls("security", req.user.pmcs)) {
+                res.render('blank', {
+                    title: 'Error',
+                });
+
+                return false;
+            }
         }
         return true;
     },
