@@ -540,6 +540,7 @@
           "description": "A list of the affected source code functions, methods, subroutines, or procedures (optional).",
           "uniqueItems": true,
           "options": {
+            "hide_header": true,
             "infoText": "A list of the affected source code functions, methods, subroutines, or procedures (optional).",
             "grid_columns": 4,
             "class": "vgi-edit"
@@ -718,9 +719,8 @@
     "dataVersion": {
       "description": "The version of the schema being used. Used to support multiple versions of this format.",
       "type": "string",
-      "enum": [
-        "5.1"
-      ],
+      "default": "5.1",
+      "pattern": "^5\\.[0-9]+(\\.[0-9]+)?$",
       "options": {
         "hidden": "true"
       }
@@ -944,6 +944,7 @@
       ]
     },
     "cnaPublishedContainer": {
+      "id": "cntr",
       "description": "An object containing the vulnerability information provided by a CVE Numbering Authority (CNA) for a published CVE ID. There can only be one CNA container per CVE record since there can only be one assigning CNA. The CNA container must include the required information defined in the CVE Rules, which includes a product, version, problem type, prose description, and a reference.",
       "type": "object",
       "format": "grid",
@@ -993,7 +994,20 @@
           "$ref": "#/definitions/impacts"
         },
         "affected": {
+          
           "$ref": "#/definitions/affected"
+        },
+        "cpeApplicability": {
+          "title": "CPE Applicability",
+          "template": "generateCpeApplicability(context.x)",
+          "items": {
+            "$ref": "#/definitions/cpeApplicabilityElement"
+          },
+          "watch": {
+            "x": "cntr.affected"
+          },
+          "type": "array",
+          "format": "CPEA"
         },
         "descriptions": {
           "id": "description",
@@ -1063,7 +1077,7 @@
           "properties": {
             "engine": {
               "type": "string",
-              "default": "Vulnogram 0.2.0"
+              "default": "Vulnogram 0.5.0"
             }
           },
           "options": {
@@ -1190,7 +1204,8 @@
           "$ref": "#/definitions/references"
         },
         "metrics": {
-          "$ref": "#/definitions/metrics"
+          "$ref": "#/definitions/metrics",
+          "default": []
         },
         "configurations": {
           "$ref": "#/definitions/configurations"
@@ -1227,7 +1242,10 @@
       "patternProperties": {
         "^x_": {}
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "options": {
+        "display_required_only": true
+      }
     },
     "affected": {
       "type": "array",
@@ -1240,6 +1258,137 @@
       "minItems": 1,
       "items": {
         "$ref": "#/definitions/product"
+      }
+    },
+    "cpeApplicabilityElement": {
+      "description": "Affected products defined using an implementation of the CPE Applicability Language, mostly copied/forked from the NIST NVD CVE API v2.0 schema (optional). An operator property allows AND or OR logic between CPEs or combinations of CPEs. The negate and vulnerable Boolean properties allow CPEs to be inverted and/or defined as vulnerable or not. Multiple version fields are provided for capturing ranges of products when defining a CPE Match String Range. NOTE: When defining a cpeApplicability block, it is recommended that it align with (as much as possible) the product data provided within the affected block.",
+      "properties": {
+        "operator": {
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "type": "string",
+          "format": "radio",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "negate": {
+          "type": "boolean",
+          "format" : "checkbox",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/definitions/cpe_node"
+          },
+          "type": "array",
+          "options": {
+            "grid_columns": 10
+          }      
+        }
+      },
+      "format": "grid",
+      "required": [
+        "nodes"
+      ]
+    },
+    "cpe_node": {
+      "description": "Defines a CPE configuration node in an applicability statement.",
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "format": "radio",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "negate": {
+          "type": "boolean",
+          "format": "checkbox",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "cpeMatch": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cpe_match"
+          },
+          "options": {
+            "grid_columns": 9
+          }
+        }
+      },
+      "format": "grid",
+      "required": [
+        "operator",
+        "cpeMatch"
+      ]
+    },
+    "cpe_match": {
+      "description": "CPE match string or range",
+      "type": "object",
+      "format": "grid",
+      "properties": {
+        "vulnerable": {
+          "type": "boolean",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "criteria": {
+          "$ref": "#/definitions/cpe23",
+          "options": {
+              "grid_columns": 9
+          }
+        },
+        "versionStartExcluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionStartIncluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionEndExcluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionEndIncluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        }
+      },
+      "required": [
+        "vulnerable",
+        "criteria"
+      ],
+      "additionalProperties": false
+    },
+    "cpe23": {
+      "type": "string",
+      "description": "Common Platform Enumeration (CPE) Name in 2.3 format",
+      "pattern": "(cpe:2\\.3:[aho*\\-](:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){5}(:(([a-zA-Z]{2,3}(-([a-zA-Z]{2}|[0-9]{3}))?)|[*\\-]))(:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){4})",
+      "minLength": 1,
+      "maxLength": 2048,
+      "options": {
+        "patternmessage": "Enter a valid CPE"
       }
     },
     "description": {
@@ -1383,6 +1532,7 @@
         }
       ],
       "options": {
+        "hide_header": true,
         "class": "vgi-bug",
         "grid_columns": 6,
         "formClass": "lni"
@@ -1508,6 +1658,7 @@
       ],
       "uniqueItems": true,
       "options": {
+        "hide_header": true,
         "class": "vgi-impact",
         "grid_columns": 6,
         "formClass": "lni"
@@ -1599,7 +1750,31 @@
         "oneOf": [
           { "required": ["format", "scenarios", "cvssV4_0"], "title": "CVSS 4.0" },
           { "required": ["format", "scenarios", "cvssV3_1"], "title": "CVSS 3.1 (Obsolete)" },
-          { "required": ["other"], "title": "Other" }
+          {
+            "required": [
+              "other"
+            ],
+            "title": "Other",
+            "default": {
+              "other": {
+                "type": "text",
+                "content": {
+                  "text": ""
+                }
+              }
+            },
+            "properties": {
+              "other": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "pattern": "^(?!ssvc$).*"
+                  }
+                }
+              }
+            }
+          }
         ],
         "description": "This is impact type information (e.g. a text description, CVSSv2, CVSSv3, etc.). Must contain: At least one entry, can be text, CVSSv2, CVSSv3, others may be added.",
         "minimumProperties": 1,
@@ -1988,6 +2163,40 @@
                   }
                 }
               },
+              "exploitMaturity": {
+                "title": "Exploit Maturity",
+                "type": "string",
+                "format": "radio",
+                "default": "NOT_DEFINED",
+                "enum": [
+                  "UNREPORTED",
+                  "PROOF_OF_CONCEPT",
+                  "ATTACKED",
+                  "NOT_DEFINED"
+                ],
+                "options": {
+                  "infoText": "This metric measures the likelihood of the vulnerability being attacked, and is based on the current state of exploit techniques, exploit code availability, or active, “in-the-wild” exploitation.",
+                  "tooltips": {
+                    "NOT_DEFINED": "Reliable threat intelligence is not available to determine Exploit Maturity characteristics.",
+                    "UNREPORTED": "Based on available threat intelligence each of the following must apply:\nNo knowledge of publicly available proof-of-concept exploit code No knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability (i.e., neither the “POC” nor “Attacked” values apply)",
+                    "PROOF_OF_CONCEPT": "Based on available threat intelligence each of the following must apply:\nProof-of-concept exploit code is publicly available\nNo knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability",
+                    "ATTACKED": "Based on available threat intelligence each of the following must apply:\nNo knowledge of publicly available proof-of-concept exploit code No knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability (i.e., neither the “POC” nor “Attacked” values apply)"
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Unreported",
+                    "Published Proof-of-Concept",
+                    "Attacked",
+                    "Not Defined"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "UNREPORTED": "what",
+                    "PROOF_OF_CONCEPT": "text",
+                    "ATTACKED": "bomb"
+                  }
+                }
+              },
               "Safety": {
                 "title": "Safety Impact",
                 "type": "string",
@@ -2144,8 +2353,8 @@
           "Not defined",
           "Informational",
           "Reduced",
-          "Moderate",
-          "Hightest"
+          "Normal",
+          "Highest"
         ],
         "icons": {
           "NOT_DEFINED": "what",
@@ -2160,27 +2369,28 @@
                 "title": "Base Severity",
                 "type": "string",
                 "format": "string",
-                "template": "cvssjs.severity(context.sc).name",
+                "template": "context.sc && (cvssjs.severity(context.sc).name)",
                 "watch": {
                   "sc": "cvss4.baseScore"
                 },
                 "options": {
-                  "grid_columns": 2,
-                  "class": "vgi-dial"
+                  "grid_columns": 4,
+                  "class": "vgi-dial",
+                  "input_width": "5em"
                 }
               },
               "baseScore": {
-                "title": "Score (TBD)",
+                "title": "CVSS-B",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 10,
                 "default":0,
-                "template": "context.vs && (new window.CVSS40(context.vs)).Score()",
+                "template": "context.vs && window.CVSS40 && (new window.CVSS40(context.vs).Score())",
                 "watch": {
                   "vs": "cvss4.vectorString"
                  },                
                 "options": {
-                  "grid_columns": 1,
+                  "grid_columns": 2,
                   "input_width": "3em"
                 }
               },
@@ -2205,6 +2415,7 @@
                   "subIntegrityImpact": "cvss4.subIntegrityImpact",
                   "vulnAvailabilityImpact": "cvss4.vulnAvailabilityImpact",
                   "subAvailabilityImpact": "cvss4.subAvailabilityImpact",
+                  "exploitMaturity": "cvss4.exploitMaturity",
                   "Safety": "cvss4.Safety",
                   "Automatable": "cvss4.Automatable",
                   "Recovery": "cvss4.Recovery",
@@ -2216,9 +2427,17 @@
                   {
                     "place": "header",
                     "class": "vgi-ext indent",
-                    "href": "'https://www.first.org/cvss/calculator/4.0#' + context.self",
+                    "href": "'https://www.first.org/cvss/calculator/4.0#' + cvssjs.vector4(context)",
                     "title": "CVSS Calculator",
-                    "rel": "' Open in CVSS Calculator'"
+                    "rel": "' First.org Calc'"
+                  },
+                  {
+                    "place": "header",
+                    "target": "_self",
+                    "class": "vgi-out",
+                    "href": "'javascript:copyToClipboard(\"' + cvssjs.vector4(context) + '\");void(0);'",
+                    "title": "Copy Vector",
+                    "rel": "' Copy'"
                   }
                 ]
               }
@@ -2769,7 +2988,8 @@
       "uniqueItems": true,
       "options": {
         "class": "vgi-safe tgap",
-        "disable_array_add": false
+        "disable_array_add": false,
+        "hide_header": true
       },
       "items": {
         "title": "Solution",
@@ -2787,9 +3007,8 @@
       "description": "Workarounds and mitigations for this vulnerability.",
       "uniqueItems": true,
       "options": {
-        "class": "vgi-avoid tgap",
-        "disable_array_delete": false,
-        "disable_array_delete_last_row": false
+        "hide_header": true,
+        "class": "vgi-avoid tgap"
       },
       "items": {
         "title": "Workaround",
@@ -2804,6 +3023,7 @@
       "type": "array",
       "format": "table",
       "options": {
+        "hide_header": true,
         "class": "vgi-cog tgap"
       },
       "title": "Required Configuration for Exposure (optional)",
@@ -2821,6 +3041,7 @@
     "exploits": {
       "title": "Exploit Status (optional)",
       "options": {
+        "hide_header": true,
         "class": "vgi-bomb tgap"
       },
       "type": "array",
