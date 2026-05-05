@@ -14,6 +14,8 @@ on:
   schedule:
     - cron: '0 9 * * 5'
 
+permissions: {}
+
 jobs:
   analyze:
     name: Analyze
