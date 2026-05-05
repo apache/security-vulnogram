@@ -3,15 +3,52 @@
 //- Extends default document editor for CVE
 
 extends ../../views/edit
-block append bannerItemsLeft
-    //-form.indent.out.nobr(onsubmit="event.preventDefault();loadCVE(this.git.value);return false;")
-        input.txt(type="text",name="git",placeholder="CVE-YYYY-NNNN",pattern=".*CVE-[0-9]{4}-[0-9]{4,12}.*",size=17,title="CVE ID CVE-yyyy-nnnn+",required)
-        button.btn.vgi-in(type="submit") GIT
-    button.fbn.sfe.vgi-put(id="post1") Post to CVE.org
-    //-a.vgi-tweet.fbn(type="button",oncontextmenu='tweetJSON(event, this);',onclick='tweetJSON(event, this);',value="Download",target="_blank",title="Share a tweet about this CVE") Tweet
-    //-a.vgi-download.fbn(type="button",oncontextmenu='saveCSAF(event, this);',onclick='saveCSAF(event, this);',target="_blank",title="Download CSAF") CSAF
+
+include portal-dialogs.pug
+
+block append head
+    style.
+        #recentList { flex-direction: column; gap: 1px;}
+        #recentList a.lbl {
+            max-width: 17em;
+            gap: 0px;
+        }
+        #recentList a span:first-child  {
+            flex-grow: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: "-";
+        }
+        #recentList a span:last-child {
+            margin-left: auto;
+            flex-shrink: 0;
+            padding-left: 0.5em;
+        }
+
+block append sidebarNav
+    details#recentGroup.sidebar-expandable
+        summary.lbl.vgi-time Recent 
+            span#recentOrg
+        #recentEmpty.lbl ...
+        #recentList.flx
+
+block draftsSummaryActions
+    if min
+        a#draftPublishOpenBtn.right.sfe.fbn.vgi-export(href="#" title="Manage and publish cached drafts" onclick="event.stopPropagation();return cveOpenDraftPublishDialog(event);") Manage
+
+block append sidebarSections
+    a#cvePortalNav.lbl.vgi-org(href="#", onclick="return showCvePortal(event);") CVE Portal
+
+block append outputButtons
+    //- a.vgi-download.fbn(type="button",oncontextmenu='saveCSAF(event, this);',onclick='saveCSAF(event, this);',target="_blank",title="Download CSAF") CSAF
+    button.sfe.fbn.vgi-export(id="post1") Publish CVE
+    button.rbtn.vgi-cog(type="button", title="Customize default CNA/ADP fields", onclick="return openDefaultPropertiesSettings(event);") 
+    a.rbtn.vgi-what(href="https://www.vulnogram.org/docs/",target="_blank")
 
 block append scripts
+    if min || !conf.realtime || !conf.realtime.enabled
+        script(src=conf.basedir + "js/json-patch-extended.min.js")
     script(type="module")
         | import {CVSS40} from './static/cvss40.js';
         | window.CVSS40 = CVSS40;
@@ -32,90 +69,154 @@ block append loadEditor
 
 block prepend topHeaderRight
 
-block openButton
-    input#importJSON.hid(type="file",accept="application/json",onchange="loadCVEFile(event,this);")
-    a.fbn.vgi-folder(type="file",onclick='importFile(event, this);') Open
-
-block prepend bannerItemsRight
-  block bannerItemsRightLoad
-    form.indent.out.nobr(onsubmit="cveSelectLoad(event);return false;")
-        input.txt.lbl#cveEditable(type="search",name="id",list="editablelist",placeholder="CVE-yyyy-nnnn..",title="Load CVE for editing",required)
+block append topHeaderLeft
+  block topHeaderLeftLoad
+    form.bor.out.nobr.vgi-cve(onsubmit="cveSelectLoad(event);return false;")
+        input.txt#cveEditable(type="search",name="id",list="editablelist",placeholder="CVE-yyyy-nnnn",pattern=".*CVE-[0-9]{4}-[0-9]{4,12}.*",size=16,title="Load CVE from CVE.org",required)
         datalist#editablelist
-        button.btn.vgi-in(type="submit") Load
+        button#load1.fbn.vgi-import(type="submit",title="Import from cve.org") Load
 
 block customtabs
         input.tab(name='tabs', type='radio', id='advisoryTab', value="4")
         label.lbl(for='advisoryTab') Preview
-        .wht.fil.bor.pad
+        .fil.bort.pad
             div(style='float:right')
-                a.vgi-download.btn.right(type="button",oncontextmenu='downloadHtml(document.getElementById("cvetitle").innerText, render, this);',onclick='downloadHtml(document.getElementById("cvetitle").innerText, render, this);',value="Download") Download
-                a.vgi-mail.btn.right(type="button",oncontextmenu='draftEmail(event, this, "render");',onclick='draftEmail(event, this,"render");',value="Email") Email
+                a.vgi-download.fbn.right(type="button",oncontextmenu='downloadHtml(document.getElementById("cvetitle").innerText, render, this);',onclick='downloadHtml(document.getElementById("cvetitle").innerText, render, this);',value="Download") Download
+                a.vgi-mail.fbn.right(type="button",oncontextmenu='draftEmail(event, this, "render");',onclick='draftEmail(event, this,"render");',value="Email") Email
             div.render(id="render")
-        input.tab(name='tabs', type='radio', id='cvePortalTab', value="6")
-        label.lbl(for='cvePortalTab') CVE Portal
-        .wht.fil.rnd.bor#port
-            
+        if min
+            input.tab(name='tabs', type='radio', id='changesTab', value="6")
+            label.lbl(for='changesTab') Changes
+            .bort
+                div#unSavedChanges.gap.bor.rnd.wht
+                div#changelog
 
 block prepend content
-    dialog.dlg.bor.rnd.shd#cveErrorsModal
+    dialog.dlg.bor.rndx.shd#cveErrorsModal
         #cveErrors
         center.pad2
             input.btn.sfe(type="reset" onclick="document.getElementById('cveErrorsModal').close()" value="OK")
+    dialog.dlg.bor.rndx.shd#defaultPropertiesSettingsDialog
+        +dlgHeader('vgi-cog','Configure Defaults for new entries ')
+        form.gap.pad(onsubmit="event.preventDefault();return false;")
+            div.flx
+                div.vflx
+                    b.lbl CNA container
+                    .lbl Your skill level:
+                    .rdg
+                        .form-control
+                            input.hid#cnaPresetNoob(type="radio", name="cnaPreset", value="noob", onclick="setDefaultPropertiesPreset('cnaContainer', this.value)")
+                            label.lbl.vgi-cap(for="cnaPresetNoob") Noob
+                        .form-control
+                            input.hid#cnaPresetBasic(type="radio", name="cnaPreset", value="basic", onclick="setDefaultPropertiesPreset('cnaContainer', this.value)")
+                            label.lbl.vgi-hardhat(for="cnaPresetBasic") Basic
+                        .form-control
+                            input.hid#cnaPresetPro(type="radio", name="cnaPreset", value="pro", onclick="setDefaultPropertiesPreset('cnaContainer', this.value)")
+                            label.lbl.vgi-hat(for="cnaPresetPro") 1337
+                    #defaultPropertiesCnaFields.pad.vflx
+                div.vflx
+                    b.lbl ADP container
+                    .lbl Preset:
+                    .rdg
+                        .form-control
+                            input.hid#adpPresetEnricher(type="radio", name="adpPreset", value="enricher", onclick="setDefaultPropertiesPreset('adpContainer', this.value)")
+                            label.lbl.vgi-search(for="adpPresetEnricher") Enricher
+                        .form-control
+                            input.hid#adpPresetSupplier(type="radio", name="adpPreset", value="supplier", onclick="setDefaultPropertiesPreset('adpContainer', this.value)")
+                            label.lbl.vgi-factory(for="adpPresetSupplier") Supplier
+                    #defaultPropertiesAdpFields.pad.vflx
+                div.vflx
+                    b.lbl Product fields
+                    .lbl Default values:
+                    .vflx
+                        label.lbl(for="defaultPropertiesVendorName") Default vendor name
+                        span.txt-icon-wrap
+                            span.txt-input-icon.vgi-factory
+                            input.txt.txt-has-icon#defaultPropertiesVendorName(type="text", size="28", placeholder="eg., Linux")
+                        label.lbl(for="defaultPropertiesProductName") Default product
+                        span.txt-icon-wrap
+                            span.txt-input-icon.vgi-package
+                            input.txt.txt-has-icon#defaultPropertiesProductName(type="text", size="28", placeholder="eg., Linux Kernel")
+                        label.lbl(for="defaultPropertiesVersionType") Default version type
+                        span.txt-icon-wrap
+                            span.txt-input-icon.vgi-versions
+                            input.txt.txt-has-icon#defaultPropertiesVersionType(type="text", size="16", list="defaultPropertiesVersionTypeSuggestions", placeholder="eg., semver")
+                        datalist#defaultPropertiesVersionTypeSuggestions
+                    .lbl Preset:
+                    .rdg
+                        .form-control
+                            input.hid#productPresetOpenSource(type="radio", name="productPreset", value="openSource", onclick="setDefaultPropertiesPreset('productFields', this.value)")
+                            label.lbl.vgi-text(for="productPresetOpenSource") Open Source
+                        .form-control
+                            input.hid#productPresetClosedSource(type="radio", name="productPreset", value="closedSource", onclick="setDefaultPropertiesPreset('productFields', this.value)")
+                            label.lbl.vgi-package(for="productPresetClosedSource") Closed Source
+                    #defaultPropertiesProductFields.pad.vflx
+            center.gap
+                button.btn.sfe(type="button", onclick="saveDefaultPropertiesSettings()") Apply
+                | 
+                button.btn.vgi-reuse(type="button", onclick="resetDefaultPropertiesSettings()") Reset defaults
+                | 
+                button.btn.vgi-x(type="button", onclick="this.closest('dialog').close()") Close
+    dialog.dlg.bor.rndx.shd#draftPublishDialog
+        header.ban.sec.pad
+            b.lbl.vgi-edit Drafts Manager
+            a.right.rbtn.vgi-x(title="Close drafts manager" onclick="this.closest('dialog').close()")
+        .pad2
+            p
+                button.btn.sfe.vgi-export(type="button" onclick="return cvePublishSelectedDrafts(event);") Publish Selected
+                span.lbl#draftPublishStatus Select drafts with 0 errors to publish, or click an ID to open.
+            table#draftPublishTable.vtbl.sortable
+                thead
+                    tr
+                        th(data-sort-method='none')
+                            input(type="checkbox" onclick="cveDraftPublishToggleAll(this.checked)")
+                        th(data-sort-method='number') Draft ID
+                        th Title
+                        th(data-sort-method='number') CVSS
+                        th Public at
+                        th Updated
+                        th(data-sort-method='none') Action
+                tbody#draftPublishRows
+        center.pad2
+            | 
+            button.btn.vgi-x(type="button" onclick="this.closest('dialog').close()") Close
+    dialog.dlg.bor.rndx.shd#publishPreviewDialog
+        header.ban.sec.pad
+            b.lbl.vgi-eye#publishPreviewTitle Publish Preview
+            a.right.rbtn.vgi-x(title="Close preview" onclick="document.getElementById('publishPreviewDialog').close()")
+        .pad2
+            p.lbl#publishPreviewSummary Review the current CVE Services container next to the pending publish.
+            #publishPreviewBody.render.wht.pad.bor
+        center.pad2.gap
+            button.btn.vgi-x(type="button" id="publishPreviewCancel") Cancel
+            button.btn.sfe.vgi-export(type="button" id="publishPreviewConfirm") Publish
     +showSecret
     +userAddDialog
     +userEditDialog
+    +cpeNameOverrideDialog
+    dialog.dlg.bor.rndx.shd#cvePortalDialog
+        header.ban.sec.pad
+            b.lbl.vgi-org CVE CNA Portal
+            a.right.rbtn.vgi-x(title="Close CVE Portal" onclick="return closeCvePortal(event);")
+        #port
 
-mixin userAddDialog
-    dialog.dlg.bor.rnd.shd#userAddDialog
-        +dlgHeader('vgi-user','Add a new user')
-        form.gap(onsubmit="event.preventDefault();cveAddUser(this)")
-            +userEdit('Add user')
+mixin cpeNameOverrideDialog
+    dialog.dlg.bor.rndx.shd#cpeNameOverrideDialog
+        +dlgHeader('vgi-cog','CPE name and type alias mappings')
+        form.gap(onsubmit="event.preventDefault();return false;")
+            table#cpeNameOverrideTable
+                thead
+                    tr
+                        th Normal Name
+                        th CPE Name
+                        th CPE Type
+                        th
+                tbody#cpeNameOverrideRows
 
-mixin userEditDialog
-    dialog.dlg.bor.rnd.shd#userEditDialog
-        +dlgHeader('vgi-user','Update user details')
-        form#userEditForm.gap(onsubmit="event.preventDefault();cveUpdateUser(this)")
-            +userEdit('Update')
-
-mixin userEdit(label)
-    input.txt(type="hidden" name="u")
-    input.txt.gap(name="new_username" "pattern"="^[a-zA-Z0-9\\-_@\\.]{3,50}$" required=true placeholder="username/email" size="43" title="username - only alpha-numeric and . _ - @ are allowed (min 3 characters)")
-    br
-    input.txt.gap(name="first" "pattern"=".{1,64}" required=true placeholder="First name" title="First Name")
-    input.txt.gap(name="last" "pattern"=".{1,64}" required=true placeholder="Last name" title="Last Name")
-    div.gap
-        br
-        - var idName = "cveUserAdmin"+label[0];
-        input(id=idName type="checkbox" name="admin")
-        label.vgi-king.lbl(for=idName title="Is this an admin?") Admin
-        if label
-            input.lbl(id = idName + 'Active', type="checkbox" name="active" checked)
-            label.lbl(for=idName + 'Active', title="Is the account active?") Active
-    br
-    input.gap.sfe.btn.vgi-magic(type="submit" value=label)
-    if label
-        | 
-        button.gap.btn.vgi-reuse(onclick="cveUserKeyReset(this)") Reset API Key
-
-mixin showSecret
-    dialog.dlg.bor.rnd.shd#secretDialog
-      +dlgHeader('vgi-lock','IMPORTANT! New API Secret Key generated!')
-      center.gap
-        form#secretDialogForm(onsubmit="event.preventDefault();this.reset();this.closest('dialog').close();return false")
-            h3.vgi-alert#userMessage
-            p Please securely store this API key.
-                br
-                |  This key will not be shown again!
-            b.lbl API Secret Key
-            br
-            input.txt.bor(type="password" size=39 name="pass" readonly)
-            input#showpass(name="showpass" type="checkbox" onclick="this.form.pass.type = (this.form.pass.type === 'password'? 'text' : 'password')")
-            label.vgi-eye.lbl.sbn(for="showpass")
+                tfoot
+                    tr(colspan=4)
+                        td
+                            button.btn.vgi-add.sfe(type="button",onclick="cpeOverrideAddRow()") Add mapping
             center.gap
-                input.btn.sfe(type="reset" onclick="this.closest('dialog').close()" value="OK")
-
-mixin dlgHeader(icon, msg)
-    header.ban.sec.pad
-        b.lbl(class=icon)=msg
-        | 
-        a.sbn.right.vgi-fail(onclick="this.closest('dialog').close()")
+                | 
+                button.btn.vgi-fail(type="button",onclick="this.closest('dialog').close();autoCPE()") Close

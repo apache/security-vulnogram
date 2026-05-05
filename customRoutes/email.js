@@ -15,7 +15,12 @@ module.exports = {
 	if (!mailinfo.to) {
 	    mailinfo.to = "ASF Security <security@apache.org>";
 	}	
-	let info = await transporter.sendMail(mailinfo);
-	return info.messageId;
+	if (conf.cveapiliveservice) {
+		let info = await transporter.sendMail(mailinfo);
+		return info.messageId;
+	} else {
+		console.log(mailinfo.text)
+		return "(not live, no message id)"
+	}
     }
 }

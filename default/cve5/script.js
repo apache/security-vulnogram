@@ -1,76 +1,37 @@
 var currentYear = new Date().getFullYear();
 const defaultTimeout = 1000 * 60 * 60; // one hour timeout
+var vgExamples = window.vgExamples || {};
+window.vgExamples = vgExamples;
+
+async function loadExamples(field, orgName) {
+    if (!field || !orgName) {
+        return;
+    }
+    if (!vgExamples[field]) {
+        vgExamples[field] = {};
+    } else if (vgExamples[field][orgName]) {
+        return vgExamples[field][orgName];
+    }
+
+    var url = 'https://raw.githubusercontent.com/Vulnogram/cve-index/refs/heads/main/data/' + field + '/' + orgName + '.json';
+    var response = await fetch(url, {
+        method: 'GET',
+        credentials: 'omit',
+        headers: {
+            'Accept': 'application/json, text/plain, */*'
+        }
+    });
+    if (!response.ok) {
+        //throw new Error('Failed to load examples for ' + field + '/' + orgName + ': ' + response.statusText);
+    }
+    var data = await response.json();
+    vgExamples[field][orgName] = data;
+    return data;
+}
 
 function hidepopups() {
     document.getElementById("userListPopup").open = false;
     document.getElementById("userStatsPopup").open = false;
-}
-
-function tweetJSON(event, link) {
-    var j = mainTabGroup.getValue();
-    if (!j) {
-        event.preventDefault();
-        return;
-    }
-    var id = j.cveMetadata.cveId;
-    /* var cvelist = textUtil.deep_value(j, 'CNA_private.CVE_list');
-     if (cvelist && cvelist.length > 0) {
-         id = '';
-     }*/
-    var text = id + ' ' + getBestTitle(j.containers.cna);
-    text = text.replace(/ +(?= )/g, '');
-    link.href = 'https://twitter.com/intent/tweet?&text='
-        + encodeURI(text)
-        + '&url=' + encodeURI(textUtil.deep_value(j, 'containers.cna.references.0.url'));
-    //    + '&hashtags=' + encodeURI(id)
-    //via=vulnogram&hashtags=CVE
-}
-
-function loadCVE(value) {
-    var realId = value.match(/(CVE-(\d{4})-(\d{1,12})(\d{3}))/);
-    if (realId) {
-        var id = realId[1];
-        var year = realId[2];
-        var bucket = realId[3];
-        fetch('https://raw.githubusercontent.com/CVEProject/cvelistv5/master/review_set/' + year + '/' + bucket + 'xxx/' + id + '.json', {
-            method: 'GET',
-            credentials: 'omit',
-            headers: {
-                'Accept': 'application/json, text/plain, */*'
-            },
-            redirect: 'error'
-        })
-            .then(function (response) {
-                if (!response.ok) {
-                    errMsg.textContent = "Failed to load valid CVE JSON";
-                    infoMsg.textContent = "";
-                    throw Error(id + ' ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(function (res) {
-                if (res.dataVersion && (res.dataVersion.match(/^5\.(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?$/))) {
-                    if (res.containers.cna.x_legacyV4Record) {
-                        delete res.containers.cna.x_legacyV4Record;
-                    }
-                    if (res.containers) {
-                        res = cveFixForVulnogram(res);
-                    }
-                    var edOpts = (res.cveMetadata.state == 'REJECTED') ? rejectEditorOption : publicEditorOption;
-                    mainTabGroup.change(0);
-                    loadJSON(res, id, "Loaded " + id + " from GIT!", edOpts);
-                } else {
-                    errMsg.textContent = "Failed to load valid CVE JSON v 5 record";
-                    infoMsg.textContent = "";
-                }
-            })
-            .catch(function (error) {
-                errMsg.textContent = error;
-            })
-    } else {
-        errMsg.textContent = "CVE ID required";
-    }
-    return false;
 }
 
 async function rejectRecord() {
@@ -191,10 +152,12 @@ var additionalTabs = {
             });
         }
     },
-    cvePortalTab: {
-        title: 'CVE Org',
-        setValue: function () {
-
+    changesTab: {
+        title: 'Changes',
+        setValue: async function (j) {
+            if (typeof cveRenderPublishChanges === 'function') {
+                await cveRenderPublishChanges(j);
+            }
         }
     },
     // ASF
@@ -368,6 +331,7 @@ function htmltoText(html) {
         text = text.replace(/<\/li[^>]*?>/gi, "\n");
         text = text.replace(/<li.*?>/gi, "  *  ");
         text = text.replace(/<\/ul[^>]*?>/gi, "\n\n");
+        text = text.replace(/<p[^>]*?>/gi, "\n\n");
         text = text.replace(/<\/p[^>]*?>/gi, "\n\n");
         text = text.replace(/<br\s*[\/]?>/gi, "\n");
         text = text.replace(/<[^>]+>/gi, "");
@@ -387,7 +351,7 @@ function getProblemTypeString(o) {
             if (o.problemTypes[j].descriptions[k].lang == "en") {
                 var pt = o.problemTypes[j].descriptions[k].description;
                 if (pt) {
-                    pts.push(pt.replace(/^CWE-[0-9 ]+/, ''));
+                    pts.push(pt.replace(/^CWE-[0-9 ]+/, '').replace(/Improper/, 'Insufficient'));
                 }
             }
         }
@@ -457,7 +421,7 @@ async function autoText(event) {
         });
         hE.setValue(text, '', false);
     } else {
-        showAlert('Please enter all the required fields first!');
+        showAlert('First, fill in the problem, impact, and affected fields!');
     }
 }
 
@@ -544,54 +508,395 @@ function cvssImport(j) {
     return j
 }
 
-async function loadCVEFile(event, elem) {
-    var file = elem.files[0];
-    if (file) {
-        try {
-            var reader = new FileReader();
-            reader.readAsText(file, "UTF-8");
-            reader.onload = function (evt) {
-                try {
-                    res = JSON.parse(evt.target.result);
-                    if (res && res.dataVersion && res.dataVersion.match(/^5\.(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))?$/)) {
-                        res = cveFixForVulnogram(res);
-                        //docEditor.setValue(res);
-                        var edOpts = (res.cveMetadata.state == 'REJECTED') ? rejectEditorOption : publicEditorOption;
-                        mainTabGroup.change(0);
-                        loadJSON(res, null, "Imported file", edOpts);
-                    } else {
-                        showAlert("Not a CVE JSON 5.0 file!");
-                    }
-                } catch (e) {
-                    showAlert(e);
-                }
-            };
-            reader.onerror = function (evt) {
-                errMsg.textContent = "Error reading file";
-                showAlert('Error reading file!');
-            };
-        } catch (e) {
-            showAlert(e);
-        }
-    }
-}
-
 function cveFixForVulnogram(j) {
+    if (!j) {
+        return j;
+    }
     j = addRichTextCVE(j);
     j = cvssImport(j);
-    if (j.containers && j.containers.cna && j.containers.cna.problemTypes == undefined) {
-        j.containers.cna.problemTypes = [];
+    var cna = j.containers && j.containers.cna;
+    if (!cna) {
+        return j;
     }
-    if (j.containers && j.containers.cna && j.containers.cna.impacts == undefined) {
-        j.containers.cna.impacts = [];
+    if (Array.isArray(cna.problemTypes)) {
+        cna.problemTypes.forEach(function (problemType) {
+            if (!problemType || !Array.isArray(problemType.descriptions)) {
+                return;
+            }
+            problemType.descriptions.forEach(function (entry) {
+                if (!entry || entry.type != "CWE" || typeof entry.cweId != "string" || typeof entry.description != "string") {
+                    return;
+                }
+                var description = entry.description.trim();
+                if (description && description.indexOf(entry.cweId) == -1) {
+                    entry.description = entry.cweId + " " + description;
+                }
+            });
+        });
     }
-    if (j.containers && j.containers.cna && j.containers.cna.metrics == undefined) {
-        j.containers.cna.metrics = [];
+    if (cna.problemTypes == undefined) {
+        cna.problemTypes = [];
+    }
+    if (cna.impacts == undefined) {
+        cna.impacts = [];
+    }
+    if (cna.metrics == undefined) {
+        cna.metrics = [];
     }
     return j;
 }
 
 let previousVersions = null;
+
+const cpeOverrideDbName = 'vulnogram-settings';
+const cpeOverrideStoreName = 'cpeNameOverrides';
+const cpeOverrideStoreKey = 'list';
+var cpeNameOverrideCache = null;
+var cpeOverrideSaveTimer = null;
+var cpeOverrideDialogReady = false;
+
+function openCpeOverrideDb() {
+    return new Promise(function (resolve, reject) {
+        if (!('indexedDB' in window)) {
+            resolve(null);
+            return;
+        }
+        var request = indexedDB.open(cpeOverrideDbName, 1);
+        request.onupgradeneeded = function () {
+            var db = request.result;
+            if (!db.objectStoreNames.contains(cpeOverrideStoreName)) {
+                db.createObjectStore(cpeOverrideStoreName, { keyPath: "id" });
+            }
+        };
+        request.onsuccess = function () {
+            resolve(request.result);
+        };
+        request.onerror = function () {
+            reject(request.error);
+        };
+    });
+}
+
+function normalizeCpeOverrideType(value) {
+    if (value === 'app' || value === 'os' || value === 'hardware') {
+        return value;
+    }
+    return '';
+}
+
+function normalizeCpeOverrideKey(value) {
+    if (!value) {
+        return '';
+    }
+    return String(value).trim().toLowerCase();
+}
+
+function normalizeCpeOverrideList(list) {
+    if (list instanceof Map) {
+        list = Array.from(list.values());
+    }
+    if (!Array.isArray(list)) {
+        return [];
+    }
+    var unique = [];
+    var seen = Object.create(null);
+    for (var i = list.length - 1; i >= 0; i--) {
+        var entry = list[i];
+        var normalName = entry && entry.normalName ? String(entry.normalName).trim() : '';
+        var cpeName = entry && entry.cpeName ? String(entry.cpeName).trim() : '';
+        var cpeType = normalizeCpeOverrideType(entry && entry.cpeType ? String(entry.cpeType).trim() : '');
+        if (!normalName) {
+            continue;
+        }
+        var key = normalizeCpeOverrideKey(normalName);
+        if (key && seen[key]) {
+            continue;
+        }
+        if (key) {
+            seen[key] = true;
+        }
+        unique.push({ normalName: normalName, cpeName: cpeName, cpeType: cpeType });
+    }
+    unique.reverse();
+    return unique;
+}
+
+function cpeOverrideListToMap(list) {
+    if (!Array.isArray(list)) {
+        return new Map();
+    }
+    var map = new Map();
+    for (var i = 0; i < list.length; i++) {
+        var entry = list[i];
+        if (!entry || !entry.normalName) {
+            continue;
+        }
+        var key = normalizeCpeOverrideKey(entry.normalName);
+        if (!key) {
+            continue;
+        }
+        map.set(key, entry);
+    }
+    return map;
+}
+
+function normalizeCpeOverrideMap(list) {
+    return cpeOverrideListToMap(normalizeCpeOverrideList(list));
+}
+
+async function loadCpeNameOverrides() {
+    if (cpeNameOverrideCache instanceof Map) {
+        return cpeNameOverrideCache;
+    }
+    try {
+        var db = await openCpeOverrideDb();
+        if (!db) {
+            cpeNameOverrideCache = new Map();
+            return cpeNameOverrideCache;
+        }
+        return await new Promise(function (resolve, reject) {
+            var tx = db.transaction(cpeOverrideStoreName, "readonly");
+            var store = tx.objectStore(cpeOverrideStoreName);
+            var getReq = store.getAll();
+            getReq.onsuccess = function () {
+                var result = Array.isArray(getReq.result) ? getReq.result : [];
+                var entries = [];
+                for (var i = 0; i < result.length; i++) {
+                    var item = result[i];
+                    if (!item) {
+                        continue;
+                    }
+                    entries.push(item);
+                }
+                var rawList = entries.length ? entries : [];
+                var map = normalizeCpeOverrideMap(rawList);
+                cpeNameOverrideCache = map;
+                resolve(map);
+            };
+            getReq.onerror = function () {
+                reject(getReq.error);
+            };
+            tx.oncomplete = function () {
+                db.close();
+            };
+            tx.onerror = function () {
+                db.close();
+            };
+        });
+    } catch (e) {
+        console.error('Failed to load CPE name overrides', e);
+        cpeNameOverrideCache = new Map();
+        return cpeNameOverrideCache;
+    }
+}
+
+async function saveCpeNameOverrides(list) {
+    var cleaned = normalizeCpeOverrideList(list);
+    var cpeNamePattern = /^[a-zA-Z0-9._-]+$/;
+    for (var i = 0; i < cleaned.length; i++) {
+        var entry = cleaned[i];
+        if (entry.cpeName && !cpeNamePattern.test(entry.cpeName)) {
+            entry.cpeName = '';
+        }
+    }
+    var map = cpeOverrideListToMap(cleaned);
+    cpeNameOverrideCache = map;
+    try {
+        var db = await openCpeOverrideDb();
+        if (!db) {
+            return map;
+        }
+        await new Promise(function (resolve, reject) {
+            var tx = db.transaction(cpeOverrideStoreName, "readwrite");
+            var store = tx.objectStore(cpeOverrideStoreName);
+            store.clear();
+            cleaned.forEach(function (entry) {
+                store.put({
+                    id: entry.normalName,
+                    normalName: entry.normalName,
+                    cpeName: entry.cpeName,
+                    cpeType: entry.cpeType
+                });
+            });
+            tx.oncomplete = function () {
+                db.close();
+                resolve();
+            };
+            tx.onerror = function () {
+                db.close();
+                reject(tx.error);
+            };
+        });
+    } catch (e) {
+        console.error('Failed to save CPE name overrides', e);
+    }
+    return map;
+}
+
+function findCpeNameOverride(name, overrides) {
+    if (!name) {
+        return null;
+    }
+    var needle = normalizeCpeOverrideKey(name);
+    if (!needle) {
+        return null;
+    }
+    if (overrides instanceof Map) {
+        return overrides.get(needle) || null;
+    }
+    if (!Array.isArray(overrides)) {
+        return null;
+    }
+    for (var i = 0; i < overrides.length; i++) {
+        var entry = overrides[i];
+        if (!entry || !entry.normalName) {
+            continue;
+        }
+        if (normalizeCpeOverrideKey(entry.normalName) === needle) {
+            return entry;
+        }
+    }
+    return null;
+}
+
+function applyCpeNameOverride(name, overrides) {
+    var entry = findCpeNameOverride(name, overrides);
+    if (!entry) {
+        return { name: name, type: 'a' };
+    }
+    var overrideName = entry.cpeName && entry.cpeName.trim() ? entry.cpeName : name;
+    return { name: overrideName, type: entry.cpeType || '*' };
+}
+
+function resolveCpeTypeLetter(value) {
+    if (value === 'app') {
+        return 'a';
+    }
+    if (value === 'os') {
+        return 'o';
+    }
+    if (value === 'hardware') {
+        return 'h';
+    }
+    return '';
+}
+
+function cpeOverrideCreateRow(entry) {
+    var normalName = entry && entry.normalName ? entry.normalName : '';
+    var cpeName = entry && entry.cpeName ? entry.cpeName : '';
+    var cpeType = normalizeCpeOverrideType(entry && entry.cpeType ? entry.cpeType : '');
+    var row = document.createElement('tr');
+    row.setAttribute('data-cpe-override-row', true);
+    row.innerHTML = pugRender({
+        renderTemplate: 'cpeNameOverrideRow',
+        doc: {
+            normalName: normalName,
+            cpeName: cpeName,
+            cpeType: cpeType
+        }
+    });
+    return row;
+}
+
+function cpeOverrideRenderRows(list) {
+    var tbody = document.getElementById('cpeNameOverrideRows');
+    if (!tbody) {
+        return;
+    }
+    tbody.innerHTML = '';
+    var entries = normalizeCpeOverrideList(list);
+    entries.sort(function (a, b) {
+        return normalizeCpeOverrideKey(a && (a.id || a.normalName)).localeCompare(
+            normalizeCpeOverrideKey(b && (b.id || b.normalName))
+        );
+    });
+    if (!entries.length) {
+        tbody.appendChild(cpeOverrideCreateRow({}));
+        return;
+    }
+    entries.forEach(function (entry) {
+        tbody.appendChild(cpeOverrideCreateRow(entry));
+    });
+}
+
+function cpeOverrideReadRows() {
+    var tbody = document.getElementById('cpeNameOverrideRows');
+    if (!tbody) {
+        return [];
+    }
+    var rows = tbody.querySelectorAll('tr[data-cpe-override-row]');
+    var list = [];
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var normalInput = row.querySelector('input[name="normalName"]');
+        var cpeInput = row.querySelector('input[name="cpeName"]');
+        var typeSelect = row.querySelector('select[name="cpeType"]');
+        list.push({
+            normalName: normalInput ? normalInput.value : '',
+            cpeName: cpeInput ? cpeInput.value : '',
+            cpeType: typeSelect ? typeSelect.value : ''
+        });
+    }
+    return list;
+}
+
+function cpeOverrideScheduleSave() {
+    if (cpeOverrideSaveTimer) {
+        clearTimeout(cpeOverrideSaveTimer);
+    }
+    cpeOverrideSaveTimer = setTimeout(function () {
+        cpeOverrideSaveTimer = null;
+        var list = cpeOverrideReadRows();
+        saveCpeNameOverrides(list);
+    }, 200);
+}
+
+function cpeOverrideAddRow() {
+    var tbody = document.getElementById('cpeNameOverrideRows');
+    if (!tbody) {
+        return;
+    }
+    var row = cpeOverrideCreateRow({});
+    tbody.appendChild(row);
+    var input = row.querySelector('input[name="normalName"]');
+    if (input) {
+        input.focus();
+    }
+    cpeOverrideScheduleSave();
+}
+
+function cpeOverrideDeleteRow(btn) {
+    if (!btn) {
+        return;
+    }
+    var row = btn.closest('tr');
+    if (row) {
+        row.remove();
+        cpeOverrideScheduleSave();
+    }
+}
+
+function initCpeOverrideDialog(dialog) {
+    if (cpeOverrideDialogReady || !dialog) {
+        return;
+    }
+    dialog.addEventListener('input', cpeOverrideScheduleSave);
+    dialog.addEventListener('change', cpeOverrideScheduleSave);
+    cpeOverrideDialogReady = true;
+}
+
+async function showCpeNameOverridesDialog() {
+    var dialog = document.getElementById('cpeNameOverrideDialog');
+    if (!dialog) {
+        return;
+    }
+    initCpeOverrideDialog(dialog);
+    var overrides = await loadCpeNameOverrides();
+    cpeOverrideRenderRows(overrides);
+    if (!dialog.open) {
+        dialog.showModal();
+    }
+}
 
 async function clearCPE() {
         localStorage.setItem('autoCPEChk', false);
@@ -610,10 +915,9 @@ async function autoCPE() {
         //docEditor.getEditor('root.containers.cna.cpeApplicability').watch('cntr.affected');
         var affectedEditor = await docEditor.getEditor('root.containers.cna.affected');
         var affected = await affectedEditor.getValue();
-
+        var overrides = await loadCpeNameOverrides();
         var cpeEditor = await docEditor.getEditor('root.containers.cna.cpeApplicability');
-        var cpe = generateCpeApplicability(affected);
-        //console.log(cpe);
+        var cpe = generateCpeApplicability(affected, overrides);
         cpeEditor.setValue(cpe,'',true);
     } else {
         //docEditor.getEditor('root.containers.cna.cpeApplicability').disable();
@@ -621,13 +925,17 @@ async function autoCPE() {
     }
 }
 
-function generateCpeApplicability(affected) {
+function generateCpeApplicability(affected, overrides) {
     let cpeApplicabilityNodes = [];
     if (!affected || affected.length === 0 || !(localStorage.getItem('autoCPEChk') === 'true')) {
         return [];
     }
+    var overrideMap = overrides instanceof Map ? overrides : cpeNameOverrideCache;
+    if (!(overrideMap instanceof Map)) {
+        overrideMap = new Map();
+    }
     for (const affectedProduct of affected) {
-        const cpeApplicabilityNode = generateCpeApplicabilityNode(affectedProduct);
+        const cpeApplicabilityNode = generateCpeApplicabilityNode(affectedProduct, overrideMap);
         if (cpeApplicabilityNode) {
             cpeApplicabilityNodes.push(cpeApplicabilityNode);
         }
@@ -638,14 +946,28 @@ function generateCpeApplicability(affected) {
     }];
 }
 function normalizeCPEtoken(x) {
-    if (x === undefined || x === null) {
-        return '-';
+    if (x === undefined || x === null || x == '') {
+        return '*';
     }
-    return x.trim().toLowerCase().replaceAll(/[\s:]+/g, '_').replaceAll(/([*?])/g, '\$1');
+    return x.trim().toLowerCase().replaceAll(/[^0-9a-z_\-\.\*]+/g, '_');
 }
 
-function generateCpeApplicabilityNode(affectedProduct) {
+function generateCpeApplicabilityNode(affectedProduct, overrides) {
     let cpeMatch = [];
+    var overrideMap = overrides instanceof Map ? overrides : cpeNameOverrideCache;
+    if (!(overrideMap instanceof Map)) {
+        overrideMap = new Map();
+    }
+    var vendorOverride = applyCpeNameOverride(affectedProduct.vendor, overrideMap);
+    var productOverride = applyCpeNameOverride(affectedProduct.product, overrideMap);
+    // ASF
+    var cpeType = 'a';
+    var vendorToken = "apache";
+    var productToken = normalizeCPEtoken(productOverride.name);
+    if (productToken) {
+        productToken = productToken.replace("Apache", "").trim();
+    }
+    // END ASF
 
     /*if (!affectedProduct.vendor || !affectedProduct.product) {
         return null;
@@ -662,13 +984,12 @@ function generateCpeApplicabilityNode(affectedProduct) {
                     platforms = affectedProduct.platforms;
                 }
                 for (const p of platforms) {
+                    var platformOverride = applyCpeNameOverride(p, overrideMap);
+                    var platformToken = normalizeCPEtoken(platformOverride.name);
                     if (v.lessThan) {
                         cpeMatch.push({
                             "vulnerable": vulnerable,
-                            //"criteria": `cpe:2.3:a:${normalizeCPEtoken(affectedProduct.vendor)}:${normalizeCPEtoken(affectedProduct.product)}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
-                            //ASF
-                            "criteria": `cpe:2.3:a:apache:${normalizeCPEtoken(affectedProduct.product.replace("Apache", "").trim())}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
-                            //END ASF
+                            "criteria": `cpe:2.3:${cpeType}:${vendorToken}:${productToken}:*:*:${platformToken}:*:*:*:*:*`,
                             "versionStartIncluding": normalizeCPEtoken(v.version),
                             "versionEndExcluding": normalizeCPEtoken(v.lessThan)
                         });
@@ -676,14 +997,14 @@ function generateCpeApplicabilityNode(affectedProduct) {
                     else if (v.lessThanOrEqual) {
                         cpeMatch.push({
                             "vulnerable": vulnerable,
-                            "criteria": `cpe:2.3:a:${normalizeCPEtoken(affectedProduct.vendor)}:${normalizeCPEtoken(affectedProduct.product)}:*:*:${normalizeCPEtoken(p)}:*:*:*:*:*`,
+                            "criteria": `cpe:2.3:${cpeType}:${vendorToken}:${productToken}:*:*:${platformToken}:*:*:*:*:*`,
                             "versionStartIncluding": normalizeCPEtoken(v.version),
                             "versionEndIncluding": normalizeCPEtoken(v.lessThanOrEqual)
                         });
                     } else {
                         cpeMatch.push({
                             "vulnerable": vulnerable,
-                            "criteria": `cpe:2.3:a:${normalizeCPEtoken(affectedProduct.vendor)}:${normalizeCPEtoken(affectedProduct.product)}:${normalizeCPEtoken(v.version)}:*:${normalizeCPEtoken(p)}:*:*:*:*:*`
+                            "criteria": `cpe:2.3:${cpeType}:${vendorToken}:${productToken}:${normalizeCPEtoken(v.version)}:*:${platformToken}:*:*:*:*:*`
                         });
                     }
                 }
@@ -704,6 +1025,123 @@ function generateCpeApplicabilityNode(affectedProduct) {
 }
 
 /**
+ * Extract a CVSS vector from raw clipboard text.
+ * Accepts direct vectors and common calculator URLs containing vectors.
+ */
+function extractCvssVectorString(text) {
+  if (text === undefined || text === null) {
+    return null;
+  }
+  var input = String(text).trim();
+  if (!input) {
+    return null;
+  }
+
+  // Support URL payloads like "...?vector=CVSS:4.0/..."
+  var vectorParam = input.match(/[?#&]vector=([^&#\s]+)/i);
+  if (vectorParam && vectorParam[1]) {
+    try {
+      input = decodeURIComponent(vectorParam[1]);
+    } catch (e) {
+      input = vectorParam[1];
+    }
+  }
+
+  var prefixed = input.match(/CVSS:\d(?:\.\d)?\/[A-Za-z0-9:\/._-]+/i);
+  if (prefixed && prefixed[0]) {
+    return prefixed[0];
+  }
+
+  // Retry once if the whole clipboard payload is URL encoded.
+  try {
+    var decoded = decodeURIComponent(input);
+    if (decoded && decoded !== input) {
+      prefixed = decoded.match(/CVSS:\d(?:\.\d)?\/[A-Za-z0-9:\/._-]+/i);
+      if (prefixed && prefixed[0]) {
+        return prefixed[0];
+      }
+      input = decoded;
+    }
+  } catch (e) {
+    // Ignore decode failures and continue with original text.
+  }
+
+  // CVSS v2 vectors have no CVSS: prefix.
+  var v2 = input.match(/AV:[NAL]\/AC:[LMH]\/Au:[MSN](?:\/[A-Za-z]{1,3}:[A-Za-z0-9._-]+)+/i);
+  if (v2 && v2[0]) {
+    return v2[0];
+  }
+
+  return null;
+}
+
+function resolveCvssEditorPathFromNode(node) {
+  if (!node || !node.closest) {
+    return null;
+  }
+  var current = node.closest('[data-schemapath]');
+  while (current) {
+    var schemaPath = current.getAttribute('data-schemapath');
+    if (schemaPath) {
+      var m = schemaPath.match(/^(.*\.(cvssV4_0|cvssV3_1|cvssV3_0|cvssV2_0))(?:\.|$)/);
+      if (m && m[1]) {
+        return m[1];
+      }
+    }
+    current = current.parentElement ? current.parentElement.closest('[data-schemapath]') : null;
+  }
+  return null;
+}
+
+function pasteCvssVector(vectorText, cvssEditorPath) {
+  var vectorString = extractCvssVectorString(vectorText);
+  if (!vectorString) {
+    console.warn('No CVSS vector found in clipboard text.');
+    return false;
+  }
+
+  var targetPath = cvssEditorPath || resolveCvssEditorPathFromNode(document.activeElement);
+  if (!targetPath || !docEditor || !docEditor.getEditor) {
+    console.warn('Unable to locate a CVSS editor for vector paste.');
+    return false;
+  }
+
+  var cvssEditor = docEditor.getEditor(targetPath);
+  if (!cvssEditor) {
+    console.warn('Unable to find CVSS editor:', targetPath);
+    return false;
+  }
+
+  var nextValue = {};
+  Object.assign(nextValue, cvssEditor.getValue() || {});
+  nextValue.vectorString = vectorString;
+  // Force vector values to overwrite existing defaults/current selections.
+  fillCvssMetrics(nextValue, { force: true });
+  cvssEditor.setValue(nextValue, '', true);
+  return false;
+}
+
+function pasteCvssVectorFromClipboard(sourceNode) {
+  var targetPath = resolveCvssEditorPathFromNode(sourceNode || document.activeElement);
+  if (!targetPath && sourceNode !== document.activeElement) {
+    targetPath = resolveCvssEditorPathFromNode(document.activeElement);
+  }
+  if (!(navigator.clipboard && navigator.clipboard.readText)) {
+    console.warn('Clipboard API unavailable for CVSS vector paste.');
+    return false;
+  }
+  navigator.clipboard.readText()
+    .then(function (text) {
+      pasteCvssVector(text, targetPath);
+      return null;
+    })
+    .catch(function (e) {
+      console.warn('Unable to read clipboard text for CVSS paste.', e);
+    });
+  return false;
+}
+
+/**
  * Fill missing CVSS metric fields from vectorString; otherwise:
  * - Base metrics -> "worst-case" value
  * - Threat/Supplemental (v4) -> "NOT_DEFINED"
@@ -711,7 +1149,9 @@ function generateCpeApplicabilityNode(affectedProduct) {
  * Supports CVSS v2.0, v3.0/v3.1, and v4.0(.1) JSON schema shapes as published by FIRST.
  * Mutates and returns the same object.
  */
-function fillCvssMetrics(cvss) {
+function fillCvssMetrics(cvss, options) {
+  options = options || {};
+  var force = options.force === true;
   const isMissing = v => v === undefined || v === null || v === "";
 
   // --- version detection -----------------------------------------------------
@@ -811,13 +1251,13 @@ function fillCvssMetrics(cvss) {
       SA: { prop: "subAvailabilityImpact",      map: { H: "HIGH", L: "LOW", N: "NONE" } },
     },
     threat: {
-      // E values in vector are single letters; JSON value we'll use: "ATTACKED" | "POC" | "UNREPORTED" | "NOT_DEFINED"
-      E:  { prop: "exploitMaturity", map: { X: "NOT_DEFINED", A: "ATTACKED", P: "POC", U: "UNREPORTED" } },
+      // E values in vector are single letters; map them to schema enum values.
+      E:  { prop: "exploitMaturity", map: { X: "NOT_DEFINED", A: "ATTACKED", P: "PROOF_OF_CONCEPT", U: "UNREPORTED" } },
     },
     supplemental: {
-      S:  { prop: "safety",                    map: { X: "NOT_DEFINED", N: "NEGLIGIBLE", P: "PRESENT" } },
-      AU: { prop: "automatable",               map: { X: "NOT_DEFINED", N: "NO", Y: "YES" } },
-      R:  { prop: "recovery",                  map: { X: "NOT_DEFINED", A: "AUTOMATIC", U: "USER", I: "IRRECOVERABLE" } },
+      S:  { prop: "Safety",                    map: { X: "NOT_DEFINED", N: "NEGLIGIBLE", P: "PRESENT" } },
+      AU: { prop: "Automatable",               map: { X: "NOT_DEFINED", N: "NO", Y: "YES" } },
+      R:  { prop: "Recovery",                  map: { X: "NOT_DEFINED", A: "AUTOMATIC", U: "USER", I: "IRRECOVERABLE" } },
       V:  { prop: "valueDensity",              map: { X: "NOT_DEFINED", D: "DIFFUSE", C: "CONCENTRATED" } },
       RE: { prop: "vulnerabilityResponseEffort", map: { X: "NOT_DEFINED", L: "LOW", M: "MODERATE", H: "HIGH" } },
       // U uses words in the vector (Clear/Green/Amber/Red). Normalize to upper-case JSON forms.
@@ -850,7 +1290,7 @@ function fillCvssMetrics(cvss) {
   const fillGroup = (obj, table, worst) => {
     for (const [abbr, entry] of Object.entries(table)) {
       const prop = entry.prop;
-      if (isMissing(obj[prop])) {
+      if (force || isMissing(obj[prop])) {
         const v = fromVectorOr(abbr, entry);
         obj[prop] = v != null ? v : (worst ? worst[prop] : obj[prop]);
       }
@@ -863,14 +1303,14 @@ function fillCvssMetrics(cvss) {
     // Threat metrics -> vector or NOT_DEFINED
     for (const [abbr, entry] of Object.entries(v40.threat)) {
       const prop = entry.prop;
-      if (isMissing(cvss[prop])) {
+      if (force || isMissing(cvss[prop])) {
         cvss[prop] = fromVectorOr(abbr, entry) ?? "NOT_DEFINED";
       }
     }
     // Supplemental metrics -> vector or NOT_DEFINED
     for (const [abbr, entry] of Object.entries(v40.supplemental)) {
       const prop = entry.prop;
-      if (isMissing(cvss[prop])) {
+      if (force || isMissing(cvss[prop])) {
         cvss[prop] = fromVectorOr(abbr, entry) ?? "NOT_DEFINED";
       }
     }
