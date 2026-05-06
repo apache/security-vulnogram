@@ -17,8 +17,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      cooldown:
-        default-days: 7
+    cooldown:
+      default-days: 7
     ignore:
       # Actions from `actions/*` and `github/*` are referenced by their major version tag
       # (e.g. `actions/checkout@v4`), which already tracks the latest minor/patch release.
