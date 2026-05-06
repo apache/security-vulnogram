@@ -6,6 +6,7 @@ notifications:
   pullrequests: private@security.apache.org
 
 github:
+
   # Explicitly enables Dependabot Alerts and Updates
   dependabot_alerts: true
   dependabot_updates: true
