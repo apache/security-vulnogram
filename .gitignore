@@ -10,3 +10,5 @@ ignore
 tmp
 standalone
 config/conf.js
+# IntelliJ
+/.idea/
