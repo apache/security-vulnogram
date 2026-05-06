@@ -5,10 +5,13 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
+#   The NPM run is disabled until #184 is solved, since Dependabot can not upgrade dependencies without a lock file.
+#   https://github.com/apache/security-vulnogram/issues/184
+#
+#  - package-ecosystem: "npm" # See documentation for possible values
+#    directory: "/" # Location of package manifests
+#    schedule:
+#      interval: "weekly"
 
   - package-ecosystem: "github-actions"
     directory: "/"
