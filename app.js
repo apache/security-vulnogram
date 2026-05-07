@@ -1,5 +1,16 @@
 // Copyright (c) 2017 Chandan B N. All rights reserved.
 
+// Must run before any require that reads process.env at module load.
+const dotenv = require('dotenv').config()
+if (dotenv.error) {
+    console.log(".env was not loaded.");
+}
+if(!process.env.NODE_ENV) {
+    process.env.NODE_ENV = "production";
+}
+
+const conf = require('./config/conf');
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -19,17 +30,7 @@ const passport = require('passport');
 const crypto = require('crypto');
 const compress = require('compression');
 
-const dotenv = require('dotenv').config()
-if (dotenv.error) {
-    console.log(".env was not loaded.");
-}
-
-const conf = require('./config/conf');
 const optSet = require('./models/set');
-
-if(!process.env.NODE_ENV) {
-    process.env.NODE_ENV = "production";
-}
 
 mongoose.Promise = global.Promise;
 mongoose.set('strictQuery', false);
