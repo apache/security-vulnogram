@@ -5,7 +5,30 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+#   The NPM run is disabled until #184 is solved, since Dependabot can not upgrade dependencies without a lock file.
+#   https://github.com/apache/security-vulnogram/issues/184
+#
+#  - package-ecosystem: "npm" # See documentation for possible values
+#    directory: "/" # Location of package manifests
+#    schedule:
+#      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    ignore:
+      # Actions from `actions/*` and `github/*` are referenced by their major version tag
+      # (e.g. `actions/checkout@v4`), which already tracks the latest minor/patch release.
+      # Suppress patch and minor PRs to avoid churn; only let Dependabot open PRs when a new
+      # major version is available.
+      - dependency-name: "actions/*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+      - dependency-name: "github/*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"

@@ -1,3 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Documentation: https://github.com/apache/infrastructure-asfyaml
 notifications:
   commits: private@security.apache.org
   pullrequests: private@security.apache.org
+
+github:
+
+  # Explicitly enables Dependabot Alerts and Updates
+  dependabot_alerts: true
+  dependabot_updates: true

@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const conf = require('../config/conf');
 
 // set from: (default security@) to: subject: text 
 

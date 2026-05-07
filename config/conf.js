@@ -1,14 +1,44 @@
 const fs = require("fs");
+const process = require("process");
 var package = require('../package.json');
 var secrets = require('./customsecrets.js');
+
+prod = !process.env["NODE_ENV"] || process.env["NODE_ENV"] == "production"
+if (prod) {
+    console.log("");
+    console.log("PRODUCTION MODE");
+    console.log("");
+    console.log("Running in 'production' mode, this will send email");
+    console.log("and allocate real CVEs. For testing, use NODE_ENV=development");
+    console.log("");
+}
+
+if (prod) {
+    cveapiurl = "https://cveawg.mitre.org/api",
+
+    //Add this block to enable HTTPs. Configure paths for valid SSL certificates.
+    // Either get them from your favorite Certificate Authority or generate self signed:
+    // Keep these safe and secured and readable only by account running vulnogram process!
+    // $ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
+
+    httpsOptions = {
+        key: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem', 'utf8'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem', 'utf8'),
+        ca: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem', 'utf8'),
+        minVersion: 'TLSv1.2'
+    }
+} else {
+    cveapiurl = "http://localhost:3555"
+    httpsOptions = undefined
+}
 
 module.exports = {
     // CVE automation configuration and CNA name
     cveorgid: "'f0158376-9dc2-43b6-827c-5f631a4d8d09'",
     cveapiheaders: secrets.cveapiheaders,
-    cveapiurl: "https://cveawg.mitre.org/api",
+    cveapiurl: cveapiurl,
     cveapishortname: "apache",
-    cveapiliveservice: true,
+    cveapiliveservice: prod,
     // which PMC is admin group?
     admingroupname: "security",
     // which PMC have a security@ address?
@@ -53,17 +83,7 @@ module.exports = {
         }
     },
 
-    //Uncomment this block to enable HTTPs. Configure paths for valid SSL certificates.
-    // Either get them from your favorite Certificate Authority or generate self signed:
-    // Keep these safe and secured and readable only by account running vulnogram process!
-    // $ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
-
-    httpsOptions: {
-        key: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem', 'utf8'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem', 'utf8'),
-        ca: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem', 'utf8'),
-        minVersion: 'TLSv1.2'
-    },
+    httpsOptions: httpsOptions,
 
     mitreURL: 'https://www.cve.org/CVERecord?id=',
     defectURL: '',
