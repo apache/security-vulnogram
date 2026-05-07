@@ -11,5 +11,13 @@ such as:
 
 ## Development
 
+Create a `config/customsecrets.js` with:
+
+```js
+module.exports = {
+    database: `mongodb://admin:admin@127.0.0.1:27017`,
+}
+```
+
 * start mongodb with `docker compose up -d vulnogram-mongo`
 * start the app with `node app.js`

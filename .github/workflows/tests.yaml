@@ -1,0 +1,36 @@
+name: "Unit tests"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [main]
+ 
+permissions: {}
+
+jobs:
+  unittests:
+    name: "Run unit tests"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Set up nodejs
+      uses: actions/setup-node@v6
+
+    - name: Install dependencies
+      # we don't pin dependencies yet,
+      # https://github.com/apache/security-vulnogram/issues/184
+      run: npm install
+
+    - name: Set dummy secrets
+      run: |-
+        echo 'module.exports = { database: "dummy" }' > config/customsecrets.js
+      
+    - name: Run test
+      run: npm run unittest
+      env:
+        NODE_ENV: development
