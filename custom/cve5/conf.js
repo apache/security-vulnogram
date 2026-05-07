@@ -513,7 +513,7 @@ module.exports = {
                 }
             } else if (path.startsWith('root.containers.cna.metrics') && path.endsWith(".other")) {
                 if (!value.content) {
-                    errors.push({path: path.replaceAll(".other", "") + ".oneOf[1].other.content.text", property: 'format', message: 'Severity level is required'});
+                    errors.push({path: path.replaceAll(".other", "") + ".oneOf[2].other.content.text", property: 'format', message: 'Severity level is required'});
                 }
             } else if (path.startsWith('root.CNA_private.userslist')) {
                 value.trim().split(/[ ,]+/).forEach(address => {
