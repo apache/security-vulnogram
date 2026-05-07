@@ -1,6 +1,4 @@
 const express = require('express');
-const fs = require('fs');
-const ObjectID = require('mongodb').ObjectID;
 const docModel = require('../models/doc');
 const conf = require('../config/conf');
 const querymw = require('../lib/querymw');
@@ -14,12 +12,16 @@ var querymen = require('querymen');
 var qs = require('querystring');
 const _ = require('lodash');
 const path = require('path');
-const mongoose = require('mongoose');
+const toErrorMessage = require('../lib/error-message');
+const textUtil = require('../src/js/edit/util.js');
 
 var queryMW;
+var queryMWBody;
 
 module.exports = function (name, opts) {
     opts.schemaName = name;
+    opts.collectionName = opts.conf && opts.conf.collectionName ? opts.conf.collectionName : name;
+    opts.historyCollectionName = opts.conf && opts.conf.historyCollectionName ? opts.conf.historyCollectionName : opts.schemaName + '_histories';
     //todo make it configurable
     var idpath = opts.idpath = opts.facet.ID.path;
     if (undefined == opts.facet.ID.link) {
@@ -33,8 +35,9 @@ module.exports = function (name, opts) {
     var tabFacet = {};
     var bulkInput = {};
     var toIndex = {};
-    var defaultSort = {};
     var lookups = [];
+    var allowedFieldPaths = new Set();
+    var xExtensionPrefixes = new Set();
     var chartFacet = {
         count: [{
             $count: "total"
@@ -42,8 +45,82 @@ module.exports = function (name, opts) {
     };
     var chartCount = 0;
 
+    function addAllowedFieldPath(path) {
+        if (typeof path !== 'string' || !path) {
+            return;
+        }
+        var parts = path.split('.').filter(Boolean);
+        if (!parts.length) {
+            return;
+        }
+        for (var i = 1; i <= parts.length; i++) {
+            allowedFieldPaths.add(parts.slice(0, i).join('.'));
+        }
+    }
+
+    function collectSchemaPropertyPrefixes(schema, prefix, depth) {
+        if (!schema || typeof schema !== 'object' || depth > 6) {
+            return;
+        }
+        if (schema.patternProperties && Object.prototype.hasOwnProperty.call(schema.patternProperties, '^x_')) {
+            xExtensionPrefixes.add(prefix);
+        }
+        if (schema.properties && typeof schema.properties === 'object') {
+            for (var key in schema.properties) {
+                if (!Object.prototype.hasOwnProperty.call(schema.properties, key)) {
+                    continue;
+                }
+                var nextPrefix = prefix ? prefix + '.' + key : key;
+                addAllowedFieldPath(nextPrefix);
+                collectSchemaPropertyPrefixes(schema.properties[key], nextPrefix, depth + 1);
+            }
+        }
+        if (schema.items && typeof schema.items === 'object') {
+            collectSchemaPropertyPrefixes(schema.items, prefix, depth + 1);
+        }
+        for (var k of ['allOf', 'anyOf', 'oneOf']) {
+            if (Array.isArray(schema[k])) {
+                for (var i = 0; i < schema[k].length; i++) {
+                    collectSchemaPropertyPrefixes(schema[k][i], prefix, depth + 1);
+                }
+            }
+        }
+    }
+
+    function isSafeFieldPath(path) {
+        if (typeof path !== 'string' || !/^[A-Za-z0-9_.]+$/.test(path)) {
+            return false;
+        }
+        if (allowedFieldPaths.has(path)) {
+            return true;
+        }
+        var parts = path.split('.').filter(Boolean);
+        if (parts[0] === 'body') {
+            for (var segment of parts.slice(1)) {
+                if (segment.indexOf('x_') === 0) {
+                    return true;
+                }
+            }
+        }
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            var parentPath = parts.slice(0, i).join('.');
+            if (part.indexOf('x_') === 0 && xExtensionPrefixes.has(parentPath)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     for (key in opts.facet) {
         var options = opts.facet[key];
+        if (typeof options.path === 'string') {
+            addAllowedFieldPath(options.path);
+        } else if (Array.isArray(options.path)) {
+            for (var ap of options.path) {
+                addAllowedFieldPath(ap);
+            }
+        }
         //toIndex[options.path] = options.sort ? options.sort : 1;
 
         if (!options.hideColumn) {
@@ -113,20 +190,26 @@ module.exports = function (name, opts) {
         }
     }
 
+    addAllowedFieldPath(idpath);
+    if (opts.schema && typeof opts.schema === 'object') {
+        collectSchemaPropertyPrefixes(opts.schema, 'body', 0);
+    }
+
     queryMW = querymw(opts.facet);
+    queryMWBody = querymw(opts.facet, 'body');
 
     var module = {};
-    var Document = module.Document = docModel(name);
+    var Document = module.Document = docModel(opts.collectionName);
 
     //console.log(toIndex);
     for (var x in toIndex) {
         var o = {};
         o[x] = toIndex[x];
         delete o.createIndex;
-        Document.collection.createIndex(o, { background: true }).catch(function(e){
+        Document.createIndex(o, { background: true }).catch(function (e) {
             console.log('Error ensuring text index: ' + e.message)
         });
-            
+
     }
 
 
@@ -137,7 +220,7 @@ module.exports = function (name, opts) {
         router = express.Router();
     }
 
-    router.get('*', function (req, res, next) {
+    router.use(function (req, res, next) {
         res.locals.schemaName = name;
         res.locals.page = req.baseUrl + req.path;
         next();
@@ -148,33 +231,32 @@ module.exports = function (name, opts) {
 
 
 
-    router.get('/json/:id', function (req, res) {
+    router.get('/json/:id', async function (req, res) {
         var ids = req.params.id.match(RegExp(idpattern, 'img'));
         if (ids) {
-            var searchSchema = Document;
             var q = {};
             q[idpath] = {
                 "$in": ids
             };
-            searchSchema.find(q, {
-                //body: 1,
-                _id: 0
-            }, {}, function (err, docs) {
-                if (err) {
-                    res.json({
-                        title: 'Error',
-                        message: 'Query failed',
-                        docs: []
-                    });
-                } else {
-                    res.json(docs);
-                }
-            });
+            try {
+                var docs = await Document.find(q, {
+                    projection: {
+                        _id: 0
+                    }
+                }).toArray();
+                res.json(docs);
+            } catch (err) {
+                res.json({
+                    title: 'Error',
+                    message: 'Query failed',
+                    docs: []
+                });
+            }
         } else {
             res.json([]);
         }
     });
-    router.post('/json/', async function (req, res) {
+    router.post('/json/', csrfProtection, async function (req, res) {
         if (req.body.ids && req.body.ids.length > 0) {
             //console.log('REQ: ' + JSON.stringify(req.body.ids));
             var q = {};
@@ -186,10 +268,20 @@ module.exports = function (name, opts) {
             };
             if (req.body.fields && req.body.fields.length > 0) {
                 for (var f of req.body.fields) {
+                    if (!isSafeFieldPath(f)) {
+                        res.status(400);
+                        res.json({
+                            title: 'Error',
+                            message: 'Invalid field selection'
+                        });
+                        return;
+                    }
                     fields[f] = 1;
                 }
             }
-            var results = await Document.find(q, fields);
+            var results = await Document.find(q, {
+                projection: fields
+            }).toArray();
             res.json(results);
         } else {
             res.json([]);
@@ -233,18 +325,34 @@ module.exports = function (name, opts) {
             var r = await Document.aggregate([
                 { $match: req.querymen.query },
                 { $project: project }
-            ]);
+            ]).toArray();
             res.json(r);
         });
 
-    router.get('/:t(examples|enum)/',
+    async function enumExamples(req, res, t) {
+        if (!isSafeFieldPath(req.query.field)) {
+            res.status(400);
+            res.json({
+                title: 'Error',
+                message: 'Invalid field selection'
+            });
+            return;
+        }
+        var r = await Document.distinct(req.query.field, req.querymen.query);
+        var ret = {};
+        ret[t] = r;
+        res.json(ret);
+    }
+
+    router.get(['/examples', '/examples/'],
         queryMW,
         async function (req, res) {
-            //console.log(JSON.stringify(req.querymen.query));
-            var r = await Document.find(req.querymen.query).distinct(req.query.field);
-            var ret = {};
-            ret[req.params.t] = r;
-            res.json(ret);
+            return enumExamples(req, res, 'examples');
+        });
+    router.get(['/enum', '/enum/'],
+        queryMW,
+        async function (req, res) {
+            return enumExamples(req, res, 'enum');
         });
 
     router.get('/agg/',
@@ -327,7 +435,7 @@ module.exports = function (name, opts) {
                         })
                     }
                     //console.log('pipeLine:' + JSON.stringify(pipeLine,2,2,2));
-                    var ret = await Document.aggregate(pipeLine);
+                    var ret = await Document.aggregate(pipeLine).toArray();
 
                     res.json(ret);
                 } else {
@@ -423,13 +531,13 @@ module.exports = function (name, opts) {
                 // ASF because we have to filter them all
                 tabs = await Document.aggregate([{
                     $facet: mytabFacet
-                }]).exec();
+                }]).toArray();
             } else {
                 if (Object.keys(tabFacet).length != 0) {
                 //console.log('QUERY:' + JSON.stringify(req.querymen.query,2,3,4));
                     tabs = await Document.aggregate([{
                         $facet: tabFacet
-                    }]).exec();
+                    }]).toArray();
                 }
             // END ASF
             }
@@ -477,8 +585,7 @@ module.exports = function (name, opts) {
                 pipeLine.push({
                     $facet: chartFacet
                 });
-                var agg = Document.aggregate(pipeLine).collation(numCollation);
-                charts = await agg.exec();
+                charts = await Document.aggregate(pipeLine, { collation: numCollation }).toArray();
                 //console.log('Aggregation QUERY: ' + JSON.stringify(pipeLine, null, 3));
                 docs = charts[0].all;
                 delete charts[0].all;
@@ -489,14 +596,13 @@ module.exports = function (name, opts) {
                 delete charts[0].count;
             } else {
                 //console.log('PROJE' + JSON.stringify(project));
-                total = await Document.countDocuments(req.querymen.query).exec();
+                total = await Document.countDocuments(req.querymen.query);
                 var aggQuery = [
                     {
                         $match: req.querymen.query
                     }].concat(allQuery);
                 //console.log('AGG QUERY' + JSON.stringify(aggQuery,1,1,1));
-                docs = await Document.
-                    aggregate(aggQuery).collation(numCollation).exec();
+                docs = await Document.aggregate(aggQuery, { collation: numCollation }).toArray();
                 //total = docs.length;
             }
             //console.log('Results'+ JSON.stringify(docs,1,1,1));
@@ -525,7 +631,7 @@ module.exports = function (name, opts) {
                 title: (opts.conf ? opts.conf.title + ' - ' : '') + package.name,
                 docs: docs,
                 opts: opts,
-           //     textUtil: textUtil,
+                textUtil: textUtil,
                 qs: qs,
                 focustab: 0,
                 facet: charts,
@@ -552,16 +658,22 @@ module.exports = function (name, opts) {
     });
 
     var onedoc = require('./onedoc')(Document, opts);
-    var History = mongoose.models[opts.schemaName + '_history'] || docModel(opts.schemaName + '_history');
+    var History = docModel(opts.historyCollectionName);
     //UPDATE many
     router.post('/update',
         csrfProtection,
-        function (req, res, next) { req.query = req.body; next(); },
-        queryMW,
+        queryMWBody,
         async function (req, res) {
             try {
+                if (opts.conf && opts.conf.readonly) {
+                    res.status(403);
+                    res.render('blank', {
+                        title: 'Error',
+                        message: 'Error: bulk updates are not allowed for readonly sections.'
+                    });
+                    return;
+                }
                 var q = req.querymen.query;
-
                 var f = q[idpath];
                 if (f) {
                     delete q[idpath];
@@ -575,24 +687,23 @@ module.exports = function (name, opts) {
                         var d = new Date();
                         q.author = req.user.username;
                         q.updatedAt = d;
-                        //console.log(q);
                         var fq = {};
                         fq[idpath] = f;
-                        var docs = await Document.find(fq);
-                        console.log(['Bulkd', Document])
+                        var docs = await Document.find(fq).toArray();
                         var results = [];
                         for (var d of docs) {
-                            var result = await Document.findByIdAndUpdate(
-                                d._id, {
+                            var updated = await Document.findOneAndUpdate(
+                                { _id: d._id }, {
                                 "$set": q,
                                 "$inc": {
                                     __v: 1
                                 }
                             }, {
-                                "upsert": false,
-                                "new": true
+                                upsert: false,
+                                returnDocument: 'after'
                             });
-                            var r = onedoc.addModelHistory(History, d, result);
+                            var result = updated;
+                            var r = result ? onedoc.addModelHistory(History, d, result) : null;
                             if (r) {
                                 r.__v = r.__v + ' (' + _.get(result, idpath) + ')';
                                 results.push(r);
@@ -616,7 +727,7 @@ module.exports = function (name, opts) {
                     });
                 }
             } catch (err) {
-                req.flash('error', err);
+                req.flash('error', toErrorMessage(err));
                 res.render('blank', {
                     title: 'Error',
                     message: 'failed bulk updates: ' + err.message
@@ -651,4 +762,4 @@ module.exports = function (name, opts) {
 
     module.router = router;
     return module;
-}
+};

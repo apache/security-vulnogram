@@ -1,0 +1,592 @@
+{
+  "title": "Using <span class=\"vgi-logo\">Vulnogram</span> with CVE Services",
+  "outputMarkdown": "index.md",
+  "screenshotsDir": "screenshots",
+  "hero": {
+    "src": "https://vulnogram.org/css/Vulnogram-og.jpg",
+    "alt": "Vulnogram - Reserve, Manage, Publish CVEs.",
+    "href": "https://www.vulnogram.org/",
+    "caption": "Vulnogram - Reserve, Manage, Publish CVEs."
+  },
+  "sections": [
+    {
+      "id": "access",
+      "title": "1. Access <span class=\"vgi-logo\">Vulnogram</span>",
+      "text": "Open [Vulnogram.org](https://www.vulnogram.org) for a quick start. The instance on [Vulnogram.org](https://www.vulnogram.org) enables CNAs to use the browser to draft, manage, and publish CVE records. To enable multiple CNA team members to collaborate on drafts in a cental place, download and set up Vulnogram in [Team server mode](https://github.com/Vulnogram/Vulnogram?tab=readme-ov-file#vulnogram-team-deployment)."
+    },
+    {
+      "id": "login",
+      "title": "2. Login to CVE Services",
+      "text": "Open the **CVE Portal** panel, select the target portal (`production`, `test`, `adp-test`, or local), and authenticate with your CNA short name, CVE user, and API key."
+    },
+    {
+      "id": "reserve",
+      "title": "3. Reserve CVE IDs",
+      "text": "After login, use **Reserve One CVE** or the dropdown batch actions to reserve IDs for the current year, next year, or previous year. Use state/year filters to find reserved IDs."
+    },
+    {
+      "id": "details",
+      "title": "4. Enter CVE Record Details",
+      "text": "Use the **Editor** tab to enter vulnerability details, affected products, references, and metrics. Switch between **Editor**, **Source**, and **Preview** tabs while drafting.\n\nFor repeated CNA or ADP work, open the **Configure Default Settings** dialog from the top-right settings button <span class=\"rbtn vgi-cog\"></span>. It lets you simplify the form for new entries by choosing default set of fields to show and by setting default vendor, product, and version-type values, which helps reduce repetitive edits and keeps new records more consistent."
+    },
+    {
+      "id": "publish",
+      "title": "5. Publish to CVE Services",
+      "text": "Use **Publish CVE** to submit the record to the currently selected portal. In test mode, publishing targets the CVE Services test environment."
+    },
+    {
+      "id": "admin",
+      "title": "6. Manage Users and API Keys (Admin)",
+      "text": "Organization administrators can open **Users** in the portal view to add users, update profile and role attributes, disable accounts, and reset API secrets."
+    },
+    {
+      "id": "reject",
+      "title": "7. How to Reject a CVE ID",
+      "text": "Use **Reject this CVE ID** and **Reject this ID** controls to retire unused IDs or withdraw published records. The two workflows below show where each reject action lives."
+    }
+  ],
+  "screenshots": [
+    {
+      "id": "01-access-editor",
+      "file": "01-access-editor.png",
+      "section": "access",
+      "alt": "Vulnogram CVE editor workspace shown in a browser window with the URL visible",
+      "caption": "Access Vulnogram at [https://www.vulnogram.org](https://www.vulnogram.org).",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto",
+          "path": "#editor"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#docEditor"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 400
+        }
+      ]
+    },
+    {
+      "id": "02-portal-login",
+      "file": "02-portal-login.png",
+      "section": "login",
+      "alt": "CVE Portal login dialog in Vulnogram",
+      "caption": "CVE Services login form from the **CVE Portal** sidebar action.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#mainTabGroup"
+        },
+        {
+          "action": "showPortalLogin"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog[open] #cveLoginForm"
+        },
+        {
+          "action": "setStyle",
+          "selector": "#cvePortalNav",
+          "property": "background",
+          "value": "var(--acc)"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "03-reserve-cve-ids",
+      "file": "03-reserve-cve-ids.png",
+      "section": "reserve",
+      "alt": "CVE Portal reserve controls in Vulnogram",
+      "caption": "**CVE Portal** reserve controls with state and year filters.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#mainTabGroup"
+        },
+        {
+          "action": "renderPortalMock",
+          "variant": "member"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog[open] #cvePortalFilter"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog[open] #cveList",
+          "state": "attached"
+        },
+        {
+          "action": "renderCveListMock",
+          "count": 10,
+          "year": 2025,
+          "startSequence": 8401,
+          "state": "RESERVED",
+          "requester": "example.cna"
+        },
+        {
+          "action": "setStyle",
+          "selector": "#cvePortalNav",
+          "property": "background",
+          "value": "var(--acc)"
+        },
+        {
+          "action": "addCircleOverlay",
+          "selector": "#cvePortalDialog button[onclick=\"cveReserveAndRender(0)\"]",
+          "containerSelector": "#cvePortalDialog",
+          "color": "#d90429",
+          "outlineColor": "#ffffff",
+          "width": 8,
+          "outlineWidth": 14,
+          "paddingX": 26,
+          "paddingY": 14
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "04-enter-cve-details",
+      "file": "04-enter-cve-details.png",
+      "section": "details",
+      "alt": "Vulnogram CVE editor detail form area",
+      "caption": "Primary **Editor** form where record content is entered.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto",
+          "path": "#editor"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#docEditor"
+        },
+        {
+          "action": "loadCveDocument",
+          "cveId": "CVE-2025-0001"
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 400
+        }
+      ]
+    },
+    {
+      "id": "04b-settings-dialog",
+      "file": "04b-settings-dialog.png",
+      "section": "details",
+      "alt": "Vulnogram settings dialog for configuring default CNA, ADP, and product fields for new entries",
+      "caption": "The settings dialog configures defaults for new entries.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1680,
+          "height": 1080
+        },
+        {
+          "action": "goto",
+          "path": "#editor"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#docEditor"
+        },
+        {
+          "action": "loadCveDocument",
+          "cveId": "CVE-2025-0001"
+        },
+        {
+          "action": "click",
+          "selector": "button[title=\"Customize default CNA/ADP fields\"]"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#defaultPropertiesSettingsDialog[open]"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 400
+        }
+      ]
+    },
+    {
+      "id": "05-publish-cve",
+      "file": "05-publish-cve.png",
+      "section": "publish",
+      "alt": "Vulnogram header with Publish CVE action",
+      "caption": "Top action bar with **Publish CVE** control.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#post1"
+        },
+        {
+          "action": "loadCveDocument",
+          "cveId": "CVE-2025-0001"
+        },
+        {
+          "action": "addArrowOverlay",
+          "selector": "#post1",
+          "color": "#d90429",
+          "outlineColor": "#ffffff",
+          "width": 6,
+          "outlineWidth": 12,
+          "startOffsetX": -10,
+          "startOffsetY": 120,
+          "endOffsetX": 0,
+          "endOffsetY": 50
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "05b-publish-multiple-cve",
+      "file": "05b-publish-multiple-cve.png",
+      "section": "publish",
+      "alt": "Vulnogram drafts manager dialog showing multiple cached CVE entries",
+      "caption": "**Drafts Manager** with sample cached CVE entries ready for bulk publish.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#draftPublishDialog",
+          "state": "attached"
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#draftsGroup",
+          "state": "attached"
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#draftsGroup",
+          "attribute": "open",
+          "value": "open"
+        },
+        {
+          "action": "seedDraftsCache",
+          "clearExisting": true,
+          "entries": [
+            {
+              "id": "CVE-2025-7101",
+              "title": "Remote code execution in Example API Gateway",
+              "description": "Improper request deserialization in the management endpoint allows remote code execution.",
+              "score": 9.8,
+              "errorCount": 0
+            },
+            {
+              "id": "CVE-2025-7102",
+              "title": "SQL injection in Example Reporting Console",
+              "description": "Unsanitized query parameters in the reporting search endpoint permit SQL injection.",
+              "score": 8.1,
+              "errorCount": 0
+            },
+            {
+              "id": "CVE-2025-7103",
+              "title": "Authorization bypass in Example Tenant Manager",
+              "description": "A missing ownership check allows authenticated users to view unauthorized tenant data.",
+              "score": 6.5,
+              "errorCount": 2
+            },
+            {
+              "id": "CVE-2025-7104",
+              "title": "Stored cross-site scripting in Example Support Portal",
+              "description": "User supplied HTML is rendered without neutralization in support ticket comments.",
+              "score": 5.4,
+              "errorCount": 0,
+              "publicDate": "2026-04-15T12:00:00.000Z"
+            }
+          ]
+        },
+        {
+          "action": "openDraftPublishDialog"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#draftPublishDialog[open] #draftPublishRows tr"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "06-admin-user-management",
+      "file": "06-admin-user-management.png",
+      "section": "admin",
+      "alt": "CVE Portal user management popup in Vulnogram",
+      "caption": "Admin-oriented **Users** management view in the **CVE Portal**.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#mainTabGroup"
+        },
+        {
+          "action": "renderPortalMock",
+          "variant": "admin"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog[open] #cveList",
+          "state": "attached"
+        },
+        {
+          "action": "renderCveListMock",
+          "count": 10,
+          "year": 2025,
+          "startSequence": 8401,
+          "state": "RESERVED",
+          "requester": "example.cna"
+        },
+        {
+          "action": "openUserList"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog #userListPopup[open]"
+        },
+        {
+          "action": "setStyle",
+          "selector": "#cvePortalNav",
+          "property": "background",
+          "value": "var(--acc)"
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "07a-reject-unused-cves",
+      "file": "07a-reject-unused-cves.png",
+      "section": "reject",
+      "subsection": "a) Rejecting Unused or Unpublished CVEs",
+      "alt": "CVE list table in Vulnogram portal with reject icon highlighted for an unused CVE ID",
+      "caption": "Unused/unpublished IDs can be rejected directly from **Reject this CVE ID** in the CVE list action column.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 980
+        },
+        {
+          "action": "goto"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#mainTabGroup"
+        },
+        {
+          "action": "renderPortalMock",
+          "variant": "member"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cvePortalDialog[open] #cveList",
+          "state": "attached"
+        },
+        {
+          "action": "renderCveListMock",
+          "count": 10,
+          "year": 2025,
+          "startSequence": 8401,
+          "state": "RESERVED",
+          "requester": "example.cna"
+        },
+        {
+          "action": "setStyle",
+          "selector": "#cvePortalNav",
+          "property": "background",
+          "value": "var(--acc)"
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#cveListTable tbody tr:nth-child(10) td:last-child a.fbn.vgi-del[title=\"Reject this CVE ID\"]"
+        },
+        {
+          "action": "scrollToSelector",
+          "selector": "#cveListTable tbody tr:nth-child(10) td:last-child a.fbn.vgi-del[title=\"Reject this CVE ID\"]",
+          "block": "center",
+          "ms": 200
+        },
+        {
+          "action": "addCircleOverlay",
+          "selector": "#cveListTable tbody tr:nth-child(10) td:last-child a.fbn.vgi-del[title=\"Reject this CVE ID\"]",
+          "containerSelector": "#cvePortalDialog",
+          "color": "#d90429",
+          "outlineColor": "#ffffff",
+          "width": 8,
+          "outlineWidth": 14,
+          "paddingX": 18,
+          "paddingY": 12
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    },
+    {
+      "id": "07b-reject-published-cve",
+      "file": "07b-reject-published-cve.png",
+      "section": "reject",
+      "subsection": "b) Rejecting Published CVEs",
+      "alt": "Bottom of a loaded CVE editor form with reject this CVE ID link highlighted",
+      "caption": "Published records are rejected from the editor footer **Reject this ID** link after loading the CVE.",
+      "steps": [
+        {
+          "action": "setViewport",
+          "width": 1600,
+          "height": 980
+        },
+        {
+          "action": "goto",
+          "path": "#editor"
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "#docEditor"
+        },
+        {
+          "action": "loadCveDocument",
+          "cveId": "CVE-2025-0001"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 400
+        },
+        {
+          "action": "markLinkByText",
+          "text": "Reject this ID",
+          "exact": true
+        },
+        {
+          "action": "waitForSelector",
+          "selector": "a[data-gendoc-link-target=\"1\"]"
+        },
+        {
+          "action": "scrollToSelector",
+          "selector": "a[data-gendoc-link-target=\"1\"]",
+          "block": "end",
+          "ms": 250
+        },
+        {
+          "action": "addCircleOverlay",
+          "selector": "a[data-gendoc-link-target=\"1\"]",
+          "color": "#d90429",
+          "outlineColor": "#ffffff",
+          "width": 8,
+          "outlineWidth": 14,
+          "paddingX": 30,
+          "paddingY": 14
+        },
+        {
+          "action": "setAttribute",
+          "selector": "#cvePortalNav",
+          "attribute": "data-portal-status",
+          "value": "connected"
+        },
+        {
+          "action": "waitForTimeout",
+          "ms": 300
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "$id": "https://cve.org/cve/record/v5_00/",
   "type": "object",
   "title": "CVE JSON record format",
-  "description": "cve-schema specifies the CVE JSON record format. This is the blueprint for a rich set of JSON data that can be submitted by CVE Numbering Authorities (CNAs) and Authorized Data Publishers (ADPs) to describe a CVE Record. Some examples of CVE record data include CVE ID number, affected product(s), affected version(s), and public references. While those specific items are required when assigning a CVE, there are many other optional data in the schema that can be used to enrich CVE Records for community benefit. Learn more about the CVE program at [the official website](https://cve.mitre.org). This CVE JSON record format is defined using JSON Schema. Learn more about JSON Schema [here](https://json-schema.org/).",
+  "description": "cve-schema specifies the CVE JSON record format. This is the blueprint for a rich set of JSON data that can be submitted by CVE Numbering Authorities (CNAs) and Authorized Data Publishers (ADPs) to describe a CVE Record. Some examples of CVE record data include CVE ID number, affected product(s), affected version(s), and public references. While those specific items are required when assigning a CVE, there are many other optional data in the schema that can be used to enrich CVE Records for community benefit. Learn more about the CVE program at [the official website](https://cve.org). This CVE JSON record format is defined using JSON Schema. Learn more about JSON Schema [here](https://json-schema.org/).",
   "options": {
     "class": "hid",
     "keep_oneof_values": true
@@ -140,12 +140,13 @@
           "$ref": "#/definitions/uriType",
           "pattern": "^(ftp|http)s?://\\S+$",
           "options": {
+            "class": "vgi-ext",
+            "input_width": "80%",
             "patternmessage": "Enter a valid URL",
             "inputAttributes": {
-                "placeholder": "eg., https://example.org/CVE-yyyy-nnnn"
+              "placeholder": "eg., https://example.org/CVE-yyyy-nnnn"
             }
-          },
-          "default": "https://"
+          }
         },
         "name": {
           "description": "User created name for the reference, often the title of the page.",
@@ -157,14 +158,17 @@
           }
         },
         "tags": {
-          "id":"xtag",
+          "id": "xtag",
           "description": "An array of one or more tags that describe the resource referenced by 'url'.",
           "type": "array",
           "minItems": 1,
           "format": "taglist",
           "uniqueItems": true,
           "options": {
-            "input_width": "15em"
+            "input_width": "30%",
+            "inputAttributes": {
+                "placeholder": "type of reference"
+            }
           },
           "items": {
             "type": "string",
@@ -189,7 +193,30 @@
               "broken-link",
               "permissions-required",
               "customer-entitlement"
-            ]
+            ],
+            "options": {
+              "icons": {
+              "vendor-advisory":"alert",
+              "issue-tracking":"bug",
+              "mitigation":"bandage",
+              "patch":"safe",
+              "third-party-advisory":"multialert",
+              "vdb-entry":"data",
+              "mailing-list":"mail",
+              "release-notes":"text",
+              "exploit":"bomb",
+              "not-applicable":"no",
+              "media-coverage":"info",
+              "product":"package",
+              "related":"ext",
+              "signature":"key",
+              "technical-description":"text",
+              "government-resource":"org",
+              "broken-link":"unlink",
+              "permissions-required":"lock",
+              "customer-entitlement":"user"
+              }
+            }
           }
         }
       }
@@ -202,10 +229,10 @@
         "class": "vgi-tag",
         "formClass": "lni",
         "grid_columns": 6,
-        "patternmessage": "Enter CVE-yyyy-nnnn format",
+        "patternmessage": "CVE-year-nnnn",
         "remove_empty_properties": false,
         "inputAttributes": {
-          "placeholder": "CVE-yyyy-nnnn or pick from existing",
+          "placeholder": "CVE-year-nnnn or pick from existing",
           "type": "search"
         }
       },
@@ -215,8 +242,7 @@
     },
     "orgId": {
       "description": "A UUID for an organization participating in the CVE program. This UUID can be used to lookup the organization record in the user registry service.",
-      "$ref": "#/definitions/uuidType",
-      "template": "csCache && csCache.orgInfo ?csCache.orgInfo.UUID:'00000000-0000-4000-9000-000000000000'"
+      "$ref": "#/definitions/uuidType"
     },
     "userId": {
       "description": "A UUID for a user participating in the CVE program. This UUID can be used to lookup the user record in the user registry service.",
@@ -276,10 +302,15 @@
           "unaffected": "safe",
           "unknown": "what"
         },
+        "tooltips": {
+          "affected": "Affected - bad",
+          "unaffected": "Unffected - safe",
+          "unknown": "Unknown - not sure"
+        },
         "enum_titles": [
-          "y",
-          "n",
-          "?"
+          " ",
+          " ",
+          " "
         ]
       }
     },
@@ -293,8 +324,6 @@
         "class": "hid"
       },
       "description": "Provides information about the set of products and services affected by this vulnerability.",
-
-
       "properties": {
         "vendor": {
           "type": "string",
@@ -355,6 +384,15 @@
               "64 bit",
               "32 bit"
             ],
+            "options": {
+              "icons": {
+              "Windows": "vgi-ms",
+              "MacOS": "vgi-mac",
+              "Linux": "vgi-tux",
+              "iOS":"vgi-mac",
+              "Android":"vgi-android"
+              }
+            },
             "maxLength": 1024
           }
         },
@@ -439,7 +477,7 @@
             "patternmessage": "Enter a valid URL",
             "inputAttributes": {
               "placeholder": "eg., https://wordpress.org/plugins"
-            }            
+            }
           }
         },
         "packageName": {
@@ -470,20 +508,30 @@
             }
           }
         },
+        "packageURL": {
+          "title": "Package URL (purl)",
+          "description": "A Package URL, a unified URL specification for identifying packages hosted by known package hosts. The Package URL MUST NOT include a version.",
+          "$ref": "#/definitions/uriType",
+          "options": {
+            "show_errors": "always",
+            "grid_columns": 12,
+            "class": "vgi-package",
+            "inputAttributes": {
+              "placeholder": "eg., pkg:maven/org.apache.commons/commons-lang3"
+            }
+          }
+        },
         "cpes": {
           "title": "CPEs",
           "type": "array",
           "format": "table",
-          "options": {
-            "hidden": true
-          },
           "description": "Affected products defined by CPE. This is an array of CPE values (vulnerable and not), we use an array so that we can make multiple statements about the same version and they are separate (if we used a JSON object we'd essentially be keying on the CPE name and they would have to overlap). Also this allows things like cveDataVersion or cveDescription to be applied directly to the product entry. This also allows more complex statements such as \"Product X between versions 10.2 and 10.8\" to be put in a machine-readable format. As well since multiple statements can be used multiple branches of the same product can be defined here.",
           "uniqueItems": true,
           "items": {
             "title": "CPE Name",
             "type": "string",
             "description": "Common Platform Enumeration (CPE) Name in either 2.2 or 2.3 format",
-            "pattern": "([c][pP][eE]:/[AHOaho]?(:[A-Za-z0-9._\\-~%]*){0,6})|(cpe:2\\.3:[aho*\\-](:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){5}(:(([a-zA-Z]{2,3}(-([a-zA-Z]{2}|[0-9]{3}))?)|[*\\-]))(:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){4})",
+            "pattern": "(cpe:2\\.3:[aho*\\-](:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'\\(\\)+,/:;<=>@\\[\\]\\^`\\{\\|\\}~]))+(\\?*|\\*?))|[*\\-])){5}(:(([a-zA-Z]{2,3}(-([a-zA-Z]{2}|[0-9]{3}))?)|[*\\-]))(:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){4})",
             "minLength": 1,
             "maxLength": 2048,
             "options": {
@@ -540,6 +588,7 @@
           "description": "A list of the affected source code functions, methods, subroutines, or procedures (optional).",
           "uniqueItems": true,
           "options": {
+            "hide_header": true,
             "infoText": "A list of the affected source code functions, methods, subroutines, or procedures (optional).",
             "grid_columns": 4,
             "class": "vgi-edit"
@@ -570,16 +619,17 @@
           "type": "array",
           "title": "Versions (exact versions or ranges)",
           "options": {
-            "class": "vgi-versions"
+            "class": "vgi-versions",
+            "table_class": "vtbl"
           },
-          "description": "Set of product versions or version ranges related to the vulnerability. The versions satisfy the CNA Rules [8.1.2 requirement](https://cve.mitre.org/cve/cna/rules.html#section_8-1_cve_entry_information_requirements). Versions or defaultStatus may be omitted, but not both.",
+          "description": "Set of product versions or version ranges related to the vulnerability. The versions satisfy the CNA Rules. Versions or defaultStatus may be omitted, but not both.",
           "minItems": 1,
           "uniqueItems": true,
           "format": "table",
           "items": {
             "type": "object",
             "id": "vE",
-            "title": "Version",
+            "title": "version",
             "description": "A single version or a range of versions, with vulnerability status.\n\nAn entry with only 'version' and 'status' indicates the status of a single version.\n\nOtherwise, an entry describes a range; it must include the 'versionType' property, to define the version numbering semantics in use, and 'limit', to indicate the non-inclusive upper limit of the range. The object describes the status for versions V such that 'version' <= V and V < 'limit', using the <= and < semantics defined for the specific kind of 'versionType'. Status changes within the range can be specified by an optional 'changes' list.\n\nThe algorithm to decide the status specified for a version V is:\n\n\tfor entry in product.versions {\n\t\tif entry.lessThan is not present and entry.lessThanOrEqual is not present and v == entry.version {\n\t\t\treturn entry.status\n\t\t}\n\t\tif (entry.lessThan is present and entry.version <= v and v < entry.lessThan) or\n\t\t   (entry.lessThanOrEqual is present and entry.version <= v and v <= entry.lessThanOrEqual) { // <= and < defined by entry.versionType\n\t\t\tstatus = entry.status\n\t\t\tfor change in entry.changes {\n\t\t\t\tif change.at <= v {\n\t\t\t\t\tstatus = change.status\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn status\n\t\t}\n\t}\n\treturn product.defaultStatus\n\n",
             "properties": {
               "status": {
@@ -598,25 +648,25 @@
                 }
               },
               "lessThan": {
-                "title": "< Version (range)",
+                "title": "< version (range) or ",
                 "description": "The non-inclusive upper limit of the range. This is the least version NOT in the range. The usual version syntax is expanded to allow a pattern to end in an asterisk `(*)`, indicating an arbitrarily large number in the version ordering. For example, `{version: 1.0 lessThan: 1.*}` would describe the entire 1.X branch for most range kinds, and `{version: 2.0, lessThan: *}` describes all versions starting at 2.0, including 3.0, 5.1, and so on. Only one of lessThan and lessThanOrEqual should be specified.",
                 "$ref": "#/definitions/version",
                 "options": {
-                  "infoText":"Usually fixed version. Use * to indicate no upper bounds, or 1.2.* to indicate rest of 1.2 branch.",
+                  "class": "vgi-lt",
+                  "infoText": "Usually fixed version. Use * to indicate no upper bounds, or 1.2.* to indicate rest of 1.2 branch.",
                   "inputAttributes": {
-                    "placeholder": "eg., 1.2.8, 1.2.*",
-                    "size": 4
+                    "placeholder": "eg., 1.2.8, 1.2.*"
                   }
                 }
               },
               "lessThanOrEqual": {
-                "title": "<= Version (range)",
+                "title": "<= version (range)",
                 "description": "The inclusive upper limit of the range. This is the greatest version contained in the range. Only one of lessThan and lessThanOrEqual should be specified. For example, `{version: 1.0, lessThanOrEqual: 1.3}` covers all versions from 1.0 up to and including 1.3.",
                 "$ref": "#/definitions/version",
                 "options": {
+                  "class": "vgi-lte",
                   "inputAttributes": {
-                    "placeholder": "eg., 1.2.7, 1.2.*",
-                    "size": 4
+                    "placeholder": "eg., 1.2.7, 1.2.*"
                   }
                 }
               },
@@ -624,10 +674,13 @@
                 "type": "array",
                 "title": "status changes (patches, split ranges)",
                 "format": "table",
+                "options": {
+                  "table_class": "none"
+                },
                 "description": "A list of status changes that take place during the range. The array should be sorted in increasing order by the 'at' field, according to the versionType, but clients must re-sort the list themselves rather than assume it is sorted.",
                 "uniqueItems": true,
                 "items": {
-                  "title": "item",
+                  "title": "change",
                   "type": "object",
                   "description": "The start of a single status change during the range.",
                   "required": [
@@ -642,13 +695,13 @@
                         "inputAttributes": {
                           "placeholder": "eg., patch 10, 1.2.5a, 1.2.6"
                         }
-                      }                      
+                      }
                     },
                     "status": {
-                      "title": "Affected status changes to",
+                      "title": "status changes to",
                       "description": "The new status in the range starting at the given version.",
                       "$ref": "#/definitions/status",
-                      "default":"unaffected"
+                      "default": "unaffected"
                     }
                   }
                 }
@@ -658,10 +711,11 @@
                 "description": "The version numbering system used for specifying the range. This defines the exact semantics of the comparison (less-than) operation on versions, which is required to understand the range itself. 'Custom' indicates that the version type is unspecified and should be avoided whenever possible. It is included primarily for use in conversion of older data files.",
                 "minLength": 1,
                 "options": {
+                  "input_width": "7em",
                   "inputAttributes": {
                     "placeholder": "eg. semver, maven, custom, python",
-                    "size": "5"
-                  }                  
+                    "size": "7"
+                  }
                 },
                 "maxLength": 128,
                 "examples": [
@@ -679,9 +733,9 @@
               }
             },
             "required": [
-                "version",
-                "status"
-            ]            
+              "version",
+              "status"
+            ]
           }
         },
         "defaultStatus": {
@@ -690,7 +744,21 @@
           "$ref": "#/definitions/status",
           "default": "unaffected"
         }
-      }
+      },
+      "defaultProperties": [
+        "vendor",
+        "product",
+        "platforms",
+        "collectionURL",
+        "packageName",
+        "packageURL",
+        "repo",
+        "modules",
+        "programFiles",
+        "programRoutines",
+        "versions",
+        "defaultStatus"
+      ]
     },
     "replacedBy": {
       "type": "array",
@@ -718,9 +786,8 @@
     "dataVersion": {
       "description": "The version of the schema being used. Used to support multiple versions of this format.",
       "type": "string",
-      "enum": [
-        "5.1"
-      ],
+      "default": "5.1",
+      "pattern": "^5\\.[0-9]+(\\.[0-9]+)?$",
       "options": {
         "hidden": "true"
       }
@@ -746,10 +813,10 @@
           },
           "links": [
             {
-              "class": "lbl vgi-ext",
-              "href": "'https://www.cve.org/CVERecord?id=' + context.self",
-              "title": "'CVE.org Entry",
-              "rel": "'cve.org'"
+              "class": "rbtn vgi-ext",
+              "href": "'https://www.vulnogram.org/' + context.self",
+              "title": "'View CVE Record",
+              "rel": "' '"
             }
           ]
         },
@@ -837,7 +904,7 @@
           "links": [
             {
               "class": "lbl vgi-ext",
-              "href": "'https://www.cve.org/CVERecord?id=' + context.self",
+              "href": "'https://vulnogram.org/seaview/?' + context.self",
               "title": "'CVE.org Entry",
               "rel": "'cve.org'"
             }
@@ -921,8 +988,7 @@
           "description": "The container provider's organizational UUID.",
           "options": {
             "hidden": true
-          },
-          "template": "csCache.orgInfo?csCache.orgInfo.UUID:'00000000-0000-4000-9000-000000000000'"
+          }
         },
         "shortName": {
           "$ref": "#/definitions/shortName",
@@ -944,11 +1010,12 @@
       ]
     },
     "cnaPublishedContainer": {
+      "id": "cntr",
       "description": "An object containing the vulnerability information provided by a CVE Numbering Authority (CNA) for a published CVE ID. There can only be one CNA container per CVE record since there can only be one assigning CNA. The CNA container must include the required information defined in the CVE Rules, which includes a product, version, problem type, prose description, and a reference.",
       "type": "object",
       "format": "grid",
       "options": {
-          "class": "hid"
+        "class": "hid"
       },
       "properties": {
         "providerMetadata": {
@@ -987,13 +1054,49 @@
           }
         },
         "problemTypes": {
-          "$ref": "#/definitions/problemTypes"
+          "$ref": "#/definitions/problemTypes",
+          "default": [
+            {
+              "descriptions": [
+                {
+                  "lang": "en",
+                  "description": "",
+                  "type": "CWE"
+                }
+              ]
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/definitions/source"
         },
         "impacts": {
-          "$ref": "#/definitions/impacts"
+          "$ref": "#/definitions/impacts",
+          "default": [
+            {
+              "descriptions": [
+                {
+                  "lang": "en",
+                  "value": ""
+                }
+              ]
+            }
+          ]
         },
         "affected": {
           "$ref": "#/definitions/affected"
+        },
+        "cpeApplicability": {
+          "title": "CPE Applicability",
+          "template": "generateCpeApplicability(context.x)",
+          "items": {
+            "$ref": "#/definitions/cpeApplicabilityElement"
+          },
+          "watch": {
+            "x": "cntr.affected"
+          },
+          "type": "array",
+          "format": "CPEA"
         },
         "descriptions": {
           "id": "description",
@@ -1019,7 +1122,7 @@
               "title": "Auto Generate CVE description based on other input",
               "rel": "'Auto Generate'"
             }
-          ]        
+          ]
         },
         "tags": {
           "$ref": "#/definitions/cnaTags",
@@ -1031,7 +1134,24 @@
           "$ref": "#/definitions/references"
         },
         "metrics": {
-          "$ref": "#/definitions/metrics"
+          "$ref": "#/definitions/metrics",
+          "default": [
+            {
+              "format": "CVSS",
+              "scenarios": [
+                {
+                  "lang": "en",
+                  "value": "GENERAL"
+                }
+              ],
+              "cvssV4_0": {
+                "version": "4.0",
+                "baseScore": 10,
+                "baseSeverity": "CRITICAL",
+                "vectorString": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H"
+              }
+            }
+          ]
         },
         "configurations": {
           "$ref": "#/definitions/configurations"
@@ -1051,19 +1171,15 @@
         "credits": {
           "$ref": "#/definitions/credits"
         },
-        "source": {
-          "$ref": "#/definitions/source"
-        },
         "taxonomyMappings": {
           "$ref": "#/definitions/taxonomyMappings"
-        }
-        ,
+        },
         "x_generator": {
           "type": "object",
           "properties": {
             "engine": {
               "type": "string",
-              "default": "Vulnogram 0.2.0"
+              "default": "Vulnogram 1.0.3"
             }
           },
           "options": {
@@ -1112,7 +1228,6 @@
               }
             ]
           }
-
         },
         "replacedBy": {
           "title": "Replaced by CVE IDs",
@@ -1132,7 +1247,7 @@
           "properties": {
             "engine": {
               "type": "string",
-              "default": "Vulnogram 0.1.0-dev"
+              "default": "Vulnogram 1.0.3"
             }
           },
           "options": {
@@ -1159,38 +1274,109 @@
       "description": "An object containing the vulnerability information provided by an Authorized Data Publisher (ADP). Since multiple ADPs can provide information for a CVE ID, an ADP container must indicate which ADP is the source of the information in the object.",
       "type": "object",
       "format": "grid",
+      "headerTemplate": "'ADP Container from  ' + context.i1 + ' · ' + (context.self.providerMetadata && context.self.providerMetadata.shortName ? context.self.providerMetadata.shortName : (csCache && csCache.org ? csCache.org : ''))",
+      "default":
+      {
+        "providerMetadata": {
+          "orgId": "00000000-0000-4000-9000-000000000000"
+        }
+      },
+      "links": [
+        {
+          "place": "header",
+          "class": "indent fbn sfe vgi-export",
+          "style": "context.self.providerMetadata",
+          "target": false,
+          "if": "context.self && context.self.providerMetadata && (context.self.providerMetadata.orgId === '00000000-0000-4000-9000-000000000000' || (csCache && csCache.orgInfo && context.self.providerMetadata.orgId === csCache.orgInfo.UUID))",
+          "href": "'#'",
+          "onclick": "'postADP(' + JSON.stringify(context.self && context.self.providerMetadata ? context.self.providerMetadata.orgId : null) + ', this); return false;'",
+          "title": "Post this ADP information ",
+          "rel": "'Post this information'"
+        }
+      ],
       "properties": {
         "providerMetadata": {
           "$ref": "#/definitions/providerMetadata"
         },
         "datePublic": {
+          "title": "Date Public",
+          "options": {
+            "class":"vgi-cal"
+          },
           "$ref": "#/definitions/timestamp",
           "description": "If known, the date/time the vulnerability was disclosed publicly."
         },
+        "tags": {
+          "$ref": "#/definitions/adpTags"
+        },
         "title": {
           "type": "string",
+          "title": "ADP Information Title",
           "description": "Short english language title - if the description is long we may want a short title to refer to.",
           "minLength": 1,
-          "maxLength": 256
+          "maxLength": 256,
+          "options": {
+            "class": "vgi-title",
+            "grid_columns": 10,
+            "formClass": "lni"
+          }
         },
         "problemTypes": {
-          "$ref": "#/definitions/problemTypes"
+          "$ref": "#/definitions/problemTypes",
+          "default": [],
+          "minItems":0
         },
         "impacts": {
-          "$ref": "#/definitions/impacts"
+          "$ref": "#/definitions/impacts",
+          "default": [],
+          "minItems":0
         },
         "descriptions": {
-          "$ref": "#/definitions/descriptions"
+          "type": "array",
+          "title": "CVE Description",
+          "description": "A list of multi-lingual descriptions of the vulnerability. E.g., [PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR]. OR [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] [ROOT CAUSE], which allows [ATTACKER] to [IMPACT] via [VECTOR].",
+          "default": [],
+          "minItems":0,
+          "uniqueItems": true,
+          "options": {
+            "disable_array_add": false,
+            "disable_array_delete": false,
+            "class": "vgi-text tgap"
+          },
+          "items": {
+            "$ref": "#/definitions/description",
+            "title": "Description",
+            "options": {
+              "class": "hid"
+            },
+            "properties": {
+              "supportingMedia": {
+                "items": {
+                  "required": []
+                }
+              },
+              "lang": {
+                "title": " ",
+                "$ref": "#/definitions/language",
+                "options": {
+                  "class": "hid",
+                  "hidden": false
+                }
+              }
+            }
+          }
         },
         "affected": {
-          "$ref": "#/definitions/affected"
+          "$ref": "#/definitions/affected",
+          "minItems":0
         },
-
         "references": {
-          "$ref": "#/definitions/references"
+          "$ref": "#/definitions/references",
+          "minItems":0
         },
         "metrics": {
-          "$ref": "#/definitions/metrics"
+          "$ref": "#/definitions/metrics",
+          "default": []
         },
         "configurations": {
           "$ref": "#/definitions/configurations"
@@ -1210,12 +1396,7 @@
         "credits": {
           "$ref": "#/definitions/credits"
         },
-        "source": {
-          "$ref": "#/definitions/source"
-        },
-        "tags": {
-          "$ref": "#/definitions/adpTags"
-        },
+
         "taxonomyMappings": {
           "$ref": "#/definitions/taxonomyMappings"
         }
@@ -1227,7 +1408,11 @@
       "patternProperties": {
         "^x_": {}
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "options": {
+        "display_required_only": false,
+        "remove_empty_properties": false
+      }
     },
     "affected": {
       "type": "array",
@@ -1240,6 +1425,137 @@
       "minItems": 1,
       "items": {
         "$ref": "#/definitions/product"
+      }
+    },
+    "cpeApplicabilityElement": {
+      "description": "Affected products defined using an implementation of the CPE Applicability Language, mostly copied/forked from the NIST NVD CVE API v2.0 schema (optional). An operator property allows AND or OR logic between CPEs or combinations of CPEs. The negate and vulnerable Boolean properties allow CPEs to be inverted and/or defined as vulnerable or not. Multiple version fields are provided for capturing ranges of products when defining a CPE Match String Range. NOTE: When defining a cpeApplicability block, it is recommended that it align with (as much as possible) the product data provided within the affected block.",
+      "properties": {
+        "operator": {
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "type": "string",
+          "format": "radio",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "negate": {
+          "type": "boolean",
+          "format": "checkbox",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/definitions/cpe_node"
+          },
+          "type": "array",
+          "options": {
+            "grid_columns": 10
+          }
+        }
+      },
+      "format": "grid",
+      "required": [
+        "nodes"
+      ]
+    },
+    "cpe_node": {
+      "description": "Defines a CPE configuration node in an applicability statement.",
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR"
+          ],
+          "format": "radio",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "negate": {
+          "type": "boolean",
+          "format": "checkbox",
+          "options": {
+            "grid_columns": 1
+          }
+        },
+        "cpeMatch": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cpe_match"
+          },
+          "options": {
+            "grid_columns": 9
+          }
+        }
+      },
+      "format": "grid",
+      "required": [
+        "operator",
+        "cpeMatch"
+      ]
+    },
+    "cpe_match": {
+      "description": "CPE match string or range",
+      "type": "object",
+      "format": "grid",
+      "properties": {
+        "vulnerable": {
+          "type": "boolean",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "criteria": {
+          "$ref": "#/definitions/cpe23",
+          "options": {
+            "grid_columns": 9
+          }
+        },
+        "versionStartExcluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionStartIncluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionEndExcluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        },
+        "versionEndIncluding": {
+          "$ref": "#/definitions/version",
+          "options": {
+            "grid_columns": 3
+          }
+        }
+      },
+      "required": [
+        "vulnerable",
+        "criteria"
+      ],
+      "additionalProperties": false
+    },
+    "cpe23": {
+      "type": "string",
+      "description": "Common Platform Enumeration (CPE) Name in 2.3 format",
+      "pattern": "(cpe:2\\.3:[aho*\\-](:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'\\(\\)+,/:;<=>@\\[\\]\\^`\\{\\|\\}~]))+(\\?*|\\*?))|[*\\-])){5}(:(([a-zA-Z]{2,3}(-([a-zA-Z]{2}|[0-9]{3}))?)|[*\\-]))(:(((\\?*|\\*?)([a-zA-Z0-9\\-._]|(\\\\[\\\\*?!\"#$%&'()+,/:;<=>@\\[\\]\\^`{|}~]))+(\\?*|\\*?))|[*\\-])){4})",
+      "minLength": 1,
+      "maxLength": 2048,
+      "options": {
+        "patternmessage": "Enter a valid CPE"
       }
     },
     "description": {
@@ -1371,18 +1687,9 @@
     "problemTypes": {
       "type": "array",
       "title": "Problem types",
-      "default": [
-        {
-          "descriptions": [
-            {
-              "lang": "en",
-              "description": "",
-              "type": "CWE"
-            }
-          ]
-        }
-      ],
       "options": {
+        "hide_header": true,
+        "table_class": "nobor",
         "class": "vgi-bug",
         "grid_columns": 6,
         "formClass": "lni"
@@ -1402,6 +1709,9 @@
             "type": "array",
             "format": "table",
             "options": {
+              "hide_header": true,
+              "class": "shd",
+              "table_class": "nobor",
               "disable_array_add": true
             },
             "items": {
@@ -1438,11 +1748,12 @@
                   "minLength": 1,
                   "maxLength": 4096,
                   "options": {
+                    "class": "vgi-bug",
                     "inputAttributes": {
                       "placeholder": "eg., CWE-20 Improper Input Validation"
                     }
                   },
-                  "$ref": "js/cwe-frequent.json"
+                  "$ref": "js/cwe-all.json"
                 },
                 "type": {
                   "type": "string",
@@ -1479,7 +1790,8 @@
       "title": "References",
       "type": "array",
       "options": {
-        "class": "vgi-ext tgap"
+        "class": "vgi-ext tgap",
+         "hide_header": true
       },
       "format": "table",
       "description": "This is reference data in the form of URLs or file objects (uuencoded and embedded within the JSON file, exact format to be decided, e.g. we may require a compressed format so the objects require unpacking before they are \"dangerous\").",
@@ -1496,19 +1808,11 @@
       "title": "Impacts",
       "description": "Collection of impacts of this vulnerability.",
       "minItems": 0,
-      "default": [
-        {
-          "descriptions": [
-            {
-              "lang": "en",
-              "value": ""
-            }
-          ]
-        }
-      ],
       "uniqueItems": true,
       "options": {
+        "hide_header": true,
         "class": "vgi-impact",
+        "table_class": "nobor",
         "grid_columns": 6,
         "formClass": "lni"
       },
@@ -1543,7 +1847,9 @@
             "format": "table",
             "minItems": 1,
             "options": {
-              "disable_array_add": true
+              "hide_header": true,
+              "disable_array_add": true,
+              "table_class": "nobor"
             },
             "items": {
               "type": "object",
@@ -1563,9 +1869,10 @@
                   "maxLength": 4096,
                   "$ref": "js/capec.json",
                   "options": {
+                    "class": "vgi-impact",
                     "inputAttributes": {
                       "placeholder": "eg., CAPEC-130 Excessive Allocation"
-                    }                    
+                    }
                   }
                 }
               },
@@ -1583,23 +1890,61 @@
       "title": "Metrics",
       "description": "Collection of impact scores with attribution.",
       "uniqueItems": true,
-      "minItems":0,
+      "minItems": 0,
       "options": {
         "class": "vgi-dial tgap"
       },
       "items": {
         "type": "object",
         "title": "Rating Metric",
-        "headerTemplate": "'Select the metric type ' + context.i1 + ' · ' + (context.self.format ? context.self.format: 'Other')",
+        "headerTemplate": "'Metric type ' + context.i1 + ' · ' + (context.self.format ? context.self.format: 'Other')",
         "options": {
           "remove_empty_properties": false,
           "display_required_only": true,
           "keep_oneof_values": false
         },
         "oneOf": [
-          { "required": ["format", "scenarios", "cvssV4_0"], "title": "CVSS 4.0" },
-          { "required": ["format", "scenarios", "cvssV3_1"], "title": "CVSS 3.1 (Obsolete)" },
-          { "required": ["other"], "title": "Other" }
+          {
+            "required": [
+              "format",
+              "scenarios",
+              "cvssV4_0"
+            ],
+            "title": "CVSS 4.0"
+          },
+          {
+            "required": [
+              "format",
+              "scenarios",
+              "cvssV3_1"
+            ],
+            "title": "CVSS 3.1 (Obsolete)"
+          },
+          {
+            "required": [
+              "other"
+            ],
+            "title": "Other",
+            "default": {
+              "other": {
+                "type": "text",
+                "content": {
+                  "text": ""
+                }
+              }
+            },
+            "properties": {
+              "other": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "pattern": "^(?!ssvc$).*"
+                  }
+                }
+              }
+            }
+          }
         ],
         "description": "This is impact type information (e.g. a text description, CVSSv2, CVSSv3, etc.). Must contain: At least one entry, can be text, CVSSv2, CVSSv3, others may be added.",
         "minimumProperties": 1,
@@ -1653,15 +1998,6 @@
             "propertyOrder": 2,
             "format": "grid",
             "properties": {
-              "version": {
-                "type": "string",
-                "enum": [
-                  "4.0"
-                ],
-                "options": {
-                  "hidden": "true"
-                }
-              },
               "attackVector": {
                 "title": "Attack Vector",
                 "type": "string",
@@ -1687,7 +2023,7 @@
                     "ADJACENT": "The vulnerable system is bound to a protocol stack, but the attack is limited at the protocol level to a logically adjacent topology. This can mean an attack must be launched from the same shared proximity (e.g., Bluetooth, NFC, or IEEE 802.11) or logical network (e.g., local IP subnet), or from within a secure or otherwise limited administrative domain (e.g., MPLS, secure VPN within an administrative network zone).",
                     "LOCAL": "The vulnerable system is not bound to the network stack and the attacker’s path is via read/write/execute capabilities. Either the attacker exploits the vulnerability by accessing the target system locally (e.g., keyboard, console), or through terminal emulation (e.g., SSH); or the attacker relies on User Interaction by another person to perform actions required to exploit the vulnerability (e.g., using social engineering techniques to trick a legitimate user into opening a malicious document).",
                     "PHYSICAL": "The attack requires the attacker to physically touch or manipulate the vulnerable system. Physical interaction may be brief (e.g., evil maid attack) or persistent."
-                   },
+                  },
                   "icons": {
                     "PHYSICAL": "cvss-physical",
                     "LOCAL": "cvss-user",
@@ -1707,10 +2043,10 @@
                 ],
                 "options": {
                   "infoText": "This metric captures measurable actions that must be taken by the attacker to actively evade or circumvent existing built-in security-enhancing conditions in order to obtain a working exploit. These are conditions whose primary purpose is to increase security and/or increase exploit engineering complexity. A vulnerability exploitable without a target-specific variable has a lower complexity than a vulnerability that would require non-trivial customization. This metric is meant to capture security mechanisms utilized by the vulnerable system.",
-                "tooltips": {
-                 "LOW": "The attacker must take no measurable action to exploit the vulnerability. The attack requires no target-specific circumvention to exploit the vulnerability. An attacker can expect repeatable success against the vulnerable system.",
-                 "HIGH": "The successful attack depends on the evasion or circumvention of security-enhancing techniques in place that would otherwise hinder the attack. These include: Evasion of exploit mitigation techniques, for example, circumvention of address space randomization (ASLR) or data execution prevention (DEP) must be performed for the attack to be successful; Obtaining target-specific secrets. The attacker must gather some target-specific secret before the attack can be successful. A secret is any piece of information that cannot be obtained through any amount of reconnaissance. To obtain the secret the attacker must perform additional attacks or break otherwise secure measures (e.g. knowledge of a secret key may be needed to break a crypto channel). This operation must be performed for each attacked target."
-                },
+                  "tooltips": {
+                    "LOW": "The attacker must take no measurable action to exploit the vulnerability. The attack requires no target-specific circumvention to exploit the vulnerability. An attacker can expect repeatable success against the vulnerable system.",
+                    "HIGH": "The successful attack depends on the evasion or circumvention of security-enhancing techniques in place that would otherwise hinder the attack. These include: Evasion of exploit mitigation techniques, for example, circumvention of address space randomization (ASLR) or data execution prevention (DEP) must be performed for the attack to be successful; Obtaining target-specific secrets. The attacker must gather some target-specific secret before the attack can be successful. A secret is any piece of information that cannot be obtained through any amount of reconnaissance. To obtain the secret the attacker must perform additional attacks or break otherwise secure measures (e.g. knowledge of a secret key may be needed to break a crypto channel). This operation must be performed for each attacked target."
+                  },
                   "grid_columns": 12,
                   "enum_titles": [
                     "High",
@@ -1733,10 +2069,10 @@
                 ],
                 "options": {
                   "infoText": "This metric captures the prerequisite deployment and execution conditions or variables of the vulnerable system that enable the attack. These differ from security-enhancing techniques/technologies (ref Attack Complexity) as the primary purpose of these conditions is not to explicitly mitigate attacks, but rather, emerge naturally as a consequence of the deployment and execution of the vulnerable system.",
-      "tooltips": {
-       "NONE": "The successful attack does not depend on the deployment and execution conditions of the vulnerable system. The attacker can expect to be able to reach the vulnerability and execute the exploit under all or most instances of the vulnerability.",
-       "PRESENT": "The successful attack depends on the presence of specific deployment and execution conditions of the vulnerable system that enable the attack. These include: a race condition must be won to successfully exploit the vulnerability (the successfulness of the attack is conditioned on execution conditions that are not under full control of the attacker, or the attack may need to be launched multiple times against a single target before being successful); the attacker must inject themselves into the logical network path between the target and the resource requested by the victim (e.g. vulnerabilities requiring an on-path attacker)."
-      },
+                  "tooltips": {
+                    "NONE": "The successful attack does not depend on the deployment and execution conditions of the vulnerable system. The attacker can expect to be able to reach the vulnerability and execute the exploit under all or most instances of the vulnerability.",
+                    "PRESENT": "The successful attack depends on the presence of specific deployment and execution conditions of the vulnerable system that enable the attack. These include: a race condition must be won to successfully exploit the vulnerability (the successfulness of the attack is conditioned on execution conditions that are not under full control of the attacker, or the attack may need to be launched multiple times against a single target before being successful); the attacker must inject themselves into the logical network path between the target and the resource requested by the victim (e.g. vulnerabilities requiring an on-path attacker)."
+                  },
                   "grid_columns": 12,
                   "enum_titles": [
                     "Present",
@@ -1760,11 +2096,11 @@
                 ],
                 "options": {
                   "infoText": "This metric describes the level of privileges an attacker must possess prior to successfully exploiting the vulnerability. The method by which the attacker obtains privileged credentials prior to the attack (e.g., free trial accounts), is outside the scope of this metric. Generally, self-service provisioned accounts do not constitute a privilege requirement if the attacker can grant themselves privileges as part of the attack.",
-                "tooltips": {
-                 "NONE": "The attacker is unauthorized prior to attack, and therefore does not require any access to settings or files of the vulnerable system to carry out an attack.",
-                 "LOW": "The attacker requires privileges that provide basic capabilities that are typically limited to settings and resources owned by a single low-privileged user. Alternatively, an attacker with Low privileges has the ability to access only non-sensitive resources.",
-                 "HIGH": "The attacker requires privileges that provide significant (e.g., administrative) control over the vulnerable system allowing full access to the vulnerable system’s settings and files."
-                },
+                  "tooltips": {
+                    "NONE": "The attacker is unauthorized prior to attack, and therefore does not require any access to settings or files of the vulnerable system to carry out an attack.",
+                    "LOW": "The attacker requires privileges that provide basic capabilities that are typically limited to settings and resources owned by a single low-privileged user. Alternatively, an attacker with Low privileges has the ability to access only non-sensitive resources.",
+                    "HIGH": "The attacker requires privileges that provide significant (e.g., administrative) control over the vulnerable system allowing full access to the vulnerable system’s settings and files."
+                  },
                   "grid_columns": 12,
                   "enum_titles": [
                     "High",
@@ -1782,7 +2118,7 @@
                 "title": "User Interaction",
                 "type": "string",
                 "format": "radio",
-                "default":"NONE",
+                "default": "NONE",
                 "enum": [
                   "ACTIVE",
                   "PASSIVE",
@@ -1791,11 +2127,11 @@
                 "options": {
                   "grid_columns": 12,
                   "infoText": "This metric captures the requirement for a human user, other than the attacker, to participate in the successful compromise of the vulnerable system. This metric determines whether the vulnerability can be exploited solely at the will of the attacker, or whether a separate user (or user-initiated process) must participate in some manner.",
-      "tooltips": {
-       "NONE": "The vulnerable system can be exploited without interaction from any human user, other than the attacker.",
-       "PASSIVE": "Successful exploitation of this vulnerability requires limited interaction by the targeted user with the vulnerable system and the attacker’s payload. These interactions would be considered involuntary and do not require that the user actively subvert protections built into the vulnerable system.",
-       "ACTIVE": "Successful exploitation of this vulnerability requires a targeted user to perform specific, conscious interactions with the vulnerable system and the attacker’s payload, or the user’s interactions would actively subvert protection mechanisms which would lead to exploitation of the vulnerability."
-      },
+                  "tooltips": {
+                    "NONE": "The vulnerable system can be exploited without interaction from any human user, other than the attacker.",
+                    "PASSIVE": "Successful exploitation of this vulnerability requires limited interaction by the targeted user with the vulnerable system and the attacker’s payload. These interactions would be considered involuntary and do not require that the user actively subvert protections built into the vulnerable system.",
+                    "ACTIVE": "Successful exploitation of this vulnerability requires a targeted user to perform specific, conscious interactions with the vulnerable system and the attacker’s payload, or the user’s interactions would actively subvert protection mechanisms which would lead to exploitation of the vulnerability."
+                  },
                   "enum_titles": [
                     "Active",
                     "Passive",
@@ -1820,11 +2156,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to the confidentiality of the information managed by the VULNERABLE SYSTEM due to a successfully exploited vulnerability. Confidentiality refers to limiting information access and disclosure to only authorized users, as well as preventing access by, or disclosure to, unauthorized ones.",
-      "tooltips": {
-       "HIGH": "There is a total loss of confidentiality, resulting in all information within the Vulnerable System being divulged to the attacker. Alternatively, access to only some restricted information is obtained, but the disclosed information presents a direct, serious impact. For example, an attacker steals the administrator's password, or private encryption keys of a web server.",
-       "LOW": "There is some loss of confidentiality. Access to some restricted information is obtained, but the attacker does not have control over what information is obtained, or the amount or kind of loss is limited. The information disclosure does not cause a direct, serious loss to the Vulnerable System.",
-       "NONE": "There is no loss of confidentiality within the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of confidentiality, resulting in all information within the Vulnerable System being divulged to the attacker. Alternatively, access to only some restricted information is obtained, but the disclosed information presents a direct, serious impact. For example, an attacker steals the administrator's password, or private encryption keys of a web server.",
+                    "LOW": "There is some loss of confidentiality. Access to some restricted information is obtained, but the attacker does not have control over what information is obtained, or the amount or kind of loss is limited. The information disclosure does not cause a direct, serious loss to the Vulnerable System.",
+                    "NONE": "There is no loss of confidentiality within the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1850,11 +2186,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to the confidentiality of the information managed by the SUBSEQUENT SYSTEM due to a successfully exploited vulnerability. Confidentiality refers to limiting information access and disclosure to only authorized users, as well as preventing access by, or disclosure to, unauthorized ones.",
-      "tooltips": {
-       "HIGH": "There is a total loss of confidentiality, resulting in all resources within the Subsequent System being divulged to the attacker. Alternatively, access to only some restricted information is obtained, but the disclosed information presents a direct, serious impact. For example, an attacker steals the administrator's password, or private encryption keys of a web server.",
-       "LOW": "There is some loss of confidentiality. Access to some restricted information is obtained, but the attacker does not have control over what information is obtained, or the amount or kind of loss is limited. The information disclosure does not cause a direct, serious loss to the Subsequent System.",
-       "NONE": "There is no loss of confidentiality within the Subsequent System or all confidentiality impact is constrained to the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of confidentiality, resulting in all resources within the Subsequent System being divulged to the attacker. Alternatively, access to only some restricted information is obtained, but the disclosed information presents a direct, serious impact. For example, an attacker steals the administrator's password, or private encryption keys of a web server.",
+                    "LOW": "There is some loss of confidentiality. Access to some restricted information is obtained, but the attacker does not have control over what information is obtained, or the amount or kind of loss is limited. The information disclosure does not cause a direct, serious loss to the Subsequent System.",
+                    "NONE": "There is no loss of confidentiality within the Subsequent System or all confidentiality impact is constrained to the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1880,11 +2216,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to integrity of a successfully exploited vulnerability. Integrity refers to the trustworthiness and veracity of information. Integrity of the VULNERABLE SYSTEM is impacted when an attacker makes unauthorized modification of system data. Integrity is also impacted when a system user can repudiate critical actions taken in the context of the system (e.g. due to insufficient logging).",
-      "tooltips": {
-       "HIGH": "There is a total loss of integrity, or a complete loss of protection. For example, the attacker is able to modify any/all files protected by the vulnerable system. Alternatively, only some files can be modified, but malicious modification would present a direct, serious consequence to the vulnerable system.",
-       "LOW": "Modification of data is possible, but the attacker does not have control over the consequence of a modification, or the amount of modification is limited. The data modification does not have a direct, serious impact to the Vulnerable System.",
-       "NONE": "There is no loss of integrity within the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of integrity, or a complete loss of protection. For example, the attacker is able to modify any/all files protected by the vulnerable system. Alternatively, only some files can be modified, but malicious modification would present a direct, serious consequence to the vulnerable system.",
+                    "LOW": "Modification of data is possible, but the attacker does not have control over the consequence of a modification, or the amount of modification is limited. The data modification does not have a direct, serious impact to the Vulnerable System.",
+                    "NONE": "There is no loss of integrity within the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1910,11 +2246,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to integrity of a successfully exploited vulnerability. Integrity refers to the trustworthiness and veracity of information. Integrity of the SUBSEQUENT SYSTEM is impacted when an attacker makes unauthorized modification of system data. Integrity is also impacted when a system user can repudiate critical actions taken in the context of the system (e.g. due to insufficient logging).",
-      "tooltips": {
-       "HIGH": "There is a total loss of integrity, or a complete loss of protection. For example, the attacker is able to modify any/all files protected by the Subsequent System. Alternatively, only some files can be modified, but malicious modification would present a direct, serious consequence to the Subsequent System.",
-       "LOW": "Modification of data is possible, but the attacker does not have control over the consequence of a modification, or the amount of modification is limited. The data modification does not have a direct, serious impact to the Subsequent System.",
-       "NONE": "There is no loss of integrity within the Subsequent System or all integrity impact is constrained to the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of integrity, or a complete loss of protection. For example, the attacker is able to modify any/all files protected by the Subsequent System. Alternatively, only some files can be modified, but malicious modification would present a direct, serious consequence to the Subsequent System.",
+                    "LOW": "Modification of data is possible, but the attacker does not have control over the consequence of a modification, or the amount of modification is limited. The data modification does not have a direct, serious impact to the Subsequent System.",
+                    "NONE": "There is no loss of integrity within the Subsequent System or all integrity impact is constrained to the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1940,11 +2276,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to the availability of the VULNERABLE SYSTEM resulting from a successfully exploited vulnerability. While the Confidentiality and Integrity impact metrics apply to the loss of confidentiality or integrity of data (e.g., information, files) used by the system, this metric refers to the loss of availability of the impacted system itself, such as a networked service (e.g., web, database, email). Since availability refers to the accessibility of information resources, attacks that consume network bandwidth, processor cycles, or disk space all impact the availability of a system.",
-      "tooltips": {
-       "HIGH": "There is a total loss of availability, resulting in the attacker being able to fully deny access to resources in the Vulnerable System; this loss is either sustained (while the attacker continues to deliver the attack) or persistent (the condition persists even after the attack has completed). Alternatively, the attacker has the ability to deny some availability, but the loss of availability presents a direct, serious consequence to the Vulnerable System (e.g., the attacker cannot disrupt existing connections, but can prevent new connections; the attacker can repeatedly exploit a vulnerability that, in each instance of a successful attack, leaks a only small amount of memory, but after repeated exploitation causes a service to become completely unavailable).",
-       "LOW": "Performance is reduced or there are interruptions in resource availability. Even if repeated exploitation of the vulnerability is possible, the attacker does not have the ability to completely deny service to legitimate users. The resources in the Vulnerable System are either partially available all of the time, or fully available only some of the time, but overall there is no direct, serious consequence to the Vulnerable System.",
-       "NONE": "There is no impact to availability within the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of availability, resulting in the attacker being able to fully deny access to resources in the Vulnerable System; this loss is either sustained (while the attacker continues to deliver the attack) or persistent (the condition persists even after the attack has completed). Alternatively, the attacker has the ability to deny some availability, but the loss of availability presents a direct, serious consequence to the Vulnerable System (e.g., the attacker cannot disrupt existing connections, but can prevent new connections; the attacker can repeatedly exploit a vulnerability that, in each instance of a successful attack, leaks a only small amount of memory, but after repeated exploitation causes a service to become completely unavailable).",
+                    "LOW": "Performance is reduced or there are interruptions in resource availability. Even if repeated exploitation of the vulnerability is possible, the attacker does not have the ability to completely deny service to legitimate users. The resources in the Vulnerable System are either partially available all of the time, or fully available only some of the time, but overall there is no direct, serious consequence to the Vulnerable System.",
+                    "NONE": "There is no impact to availability within the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1970,11 +2306,11 @@
                 ],
                 "options": {
                   "infoText": "This metric measures the impact to the availability of the SUBSEQUENT SYSTEM resulting from a successfully exploited vulnerability. While the Confidentiality and Integrity impact metrics apply to the loss of confidentiality or integrity of data (e.g., information, files) used by the system, this metric refers to the loss of availability of the impacted system itself, such as a networked service (e.g., web, database, email). Since availability refers to the accessibility of information resources, attacks that consume network bandwidth, processor cycles, or disk space all impact the availability of a system.",
-      "tooltips": {
-       "HIGH": "There is a total loss of availability, resulting in the attacker being able to fully deny access to resources in the Subsequent System; this loss is either sustained (while the attacker continues to deliver the attack) or persistent (the condition persists even after the attack has completed). Alternatively, the attacker has the ability to deny some availability, but the loss of availability presents a direct, serious consequence to the Subsequent System (e.g., the attacker cannot disrupt existing connections, but can prevent new connections; the attacker can repeatedly exploit a vulnerability that, in each instance of a successful attack, leaks a only small amount of memory, but after repeated exploitation causes a service to become completely unavailable).",
-       "LOW": "Performance is reduced or there are interruptions in resource availability. Even if repeated exploitation of the vulnerability is possible, the attacker does not have the ability to completely deny service to legitimate users. The resources in the Subsequent System are either partially available all of the time, or fully available only some of the time, but overall there is no direct, serious consequence to the Subsequent System.",
-       "NONE": "There is no impact to availability within the Subsequent System or all availability impact is constrained to the Vulnerable System."
-      },
+                  "tooltips": {
+                    "HIGH": "There is a total loss of availability, resulting in the attacker being able to fully deny access to resources in the Subsequent System; this loss is either sustained (while the attacker continues to deliver the attack) or persistent (the condition persists even after the attack has completed). Alternatively, the attacker has the ability to deny some availability, but the loss of availability presents a direct, serious consequence to the Subsequent System (e.g., the attacker cannot disrupt existing connections, but can prevent new connections; the attacker can repeatedly exploit a vulnerability that, in each instance of a successful attack, leaks a only small amount of memory, but after repeated exploitation causes a service to become completely unavailable).",
+                    "LOW": "Performance is reduced or there are interruptions in resource availability. Even if repeated exploitation of the vulnerability is possible, the attacker does not have the ability to completely deny service to legitimate users. The resources in the Subsequent System are either partially available all of the time, or fully available only some of the time, but overall there is no direct, serious consequence to the Subsequent System.",
+                    "NONE": "There is no impact to availability within the Subsequent System or all availability impact is constrained to the Vulnerable System."
+                  },
                   "grid_columns": 6,
                   "enum_titles": [
                     "None",
@@ -1988,19 +2324,57 @@
                   }
                 }
               },
+              "exploitMaturity": {
+                "title": "Exploit Maturity",
+                "type": "string",
+                "format": "radio",
+                "default": "NOT_DEFINED",
+                "enum": [
+                  "UNREPORTED",
+                  "PROOF_OF_CONCEPT",
+                  "ATTACKED",
+                  "NOT_DEFINED"
+                ],
+                "options": {
+                  "infoText": "This metric measures the likelihood of the vulnerability being attacked, and is based on the current state of exploit techniques, exploit code availability, or active, “in-the-wild” exploitation.",
+                  "tooltips": {
+                    "NOT_DEFINED": "Reliable threat intelligence is not available to determine Exploit Maturity characteristics.",
+                    "UNREPORTED": "Based on available threat intelligence each of the following must apply:\nNo knowledge of publicly available proof-of-concept exploit code No knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability (i.e., neither the “POC” nor “Attacked” values apply)",
+                    "PROOF_OF_CONCEPT": "Based on available threat intelligence each of the following must apply:\nProof-of-concept exploit code is publicly available\nNo knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability",
+                    "ATTACKED": "Based on available threat intelligence each of the following must apply:\nNo knowledge of publicly available proof-of-concept exploit code No knowledge of reported attempts to exploit this vulnerability\nNo knowledge of publicly available solutions used to simplify attempts to exploit the vulnerability (i.e., neither the “POC” nor “Attacked” values apply)"
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Unreported",
+                    "Published Proof-of-Concept",
+                    "Attacked",
+                    "Not Defined"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "UNREPORTED": "what",
+                    "PROOF_OF_CONCEPT": "text",
+                    "ATTACKED": "bomb"
+                  }
+                }
+              },
               "Safety": {
                 "title": "Safety Impact",
                 "type": "string",
                 "format": "radio",
-                "enum": [ "NOT_DEFINED", "NEGLIGIBLE", "PRESENT" ],
+                "enum": [
+                  "NOT_DEFINED",
+                  "NEGLIGIBLE",
+                  "PRESENT"
+                ],
                 "default": "NOT_DEFINED",
                 "options": {
                   "infoText": "When a system does have an intended use or fitness of purpose aligned to safety, it is possible that exploiting a vulnerability within that system may have Safety impact which can be represented in the Supplemental Metrics group. Lack of a Safety metric value being supplied does NOT mean that there may not be any Safety-related impacts.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "NEGLIGIBLE": "Consequences of the vulnerability meet definition of IEC 61508 consequence category \"negligible.\"",
-       "PRESENT": "Consequences of the vulnerability meet definition of IEC 61508 consequence categories of \"marginal,\" \"critical,\" or \"catastrophic.\""
-      },
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "NEGLIGIBLE": "Consequences of the vulnerability meet definition of IEC 61508 consequence category \"negligible.\"",
+                    "PRESENT": "Consequences of the vulnerability meet definition of IEC 61508 consequence categories of \"marginal,\" \"critical,\" or \"catastrophic.\""
+                  },
                   "grid_columns": 12,
                   "enum_titles": [
                     "Not defined",
@@ -2013,175 +2387,210 @@
                     "PRESENT": "ambulance"
                   }
                 }
-             },
-             "Automatable": {
-              "title": "Automatable attack",
-              "type": "string",
-              "format": "radio",
-              "enum": [ "NOT_DEFINED", "NO", "YES"],
-              "default": "NOT_DEFINED",
-              "options": {
-                "infoText": "The “ The “Automatable” metric captures the answer to the question ”Can an attacker automate exploitation events for this vulnerability across multiple targets?” based on steps 1-4 of the kill chain [Hutchins et al., 2011]. These steps are reconnaissance, weaponization, delivery, and exploitation.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "NO": "Attackers cannot reliably automate all 4 steps of the kill chain for this vulnerability for some reason. These steps are reconnaissance, weaponization, delivery, and exploitation.",
-       "YES": "Attackers can reliably automate all 4 steps of the kill chain. These steps are reconnaissance, weaponization, delivery, and exploitation (e.g., the vulnerability is “wormable”)."
-      },
-                "grid_columns": 12,
-                "enum_titles": [
-                  "Not defined",
-                  "No",
-                  "Yes"
+              },
+              "Automatable": {
+                "title": "Automatable attack",
+                "type": "string",
+                "format": "radio",
+                "enum": [
+                  "NOT_DEFINED",
+                  "NO",
+                  "YES"
                 ],
-                "icons": {
-                  "NOT_DEFINED": "what",
-                  "NO": "manual",
-                  "YES": "cog"
+                "default": "NOT_DEFINED",
+                "options": {
+                  "infoText": "The “ The “Automatable” metric captures the answer to the question ”Can an attacker automate exploitation events for this vulnerability across multiple targets?” based on steps 1-4 of the kill chain [Hutchins et al., 2011]. These steps are reconnaissance, weaponization, delivery, and exploitation.",
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "NO": "Attackers cannot reliably automate all 4 steps of the kill chain for this vulnerability for some reason. These steps are reconnaissance, weaponization, delivery, and exploitation.",
+                    "YES": "Attackers can reliably automate all 4 steps of the kill chain. These steps are reconnaissance, weaponization, delivery, and exploitation (e.g., the vulnerability is “wormable”)."
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Not defined",
+                    "No",
+                    "Yes"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "NO": "manual",
+                    "YES": "cog"
+                  }
                 }
-              }
-           },
-           "Recovery": {
-            "title": "Recovery",
-            "type": "string",
-            "format": "radio",
-            "enum": [ "NOT_DEFINED", "AUTOMATIC", "USER", "IRRECOVERABLE"],
-            "default": "NOT_DEFINED",
-            "options": {
-              "infoText": "Recovery describes the resilience of a system to recover services, in terms of performance and availability, after an attack has been performed.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "AUTOMATIC": "The system recovers services automatically after an attack has been performed.",
-       "USER": "The system requires manual intervention by the user to recover services, after an attack has been performed.",
-       "IRRECOVERABLE": "The system services are irrecoverable by the user, after an attack has been performed."
-      },
-              "grid_columns": 12,
-              "enum_titles": [
-                "Not defined",
-                "Automatic",
-                "User",
-                "Irrecoverable"
-              ],
-              "icons": {
-                "NOT_DEFINED": "what",
-                "AUTOMATIC": "reuse",
-                "USER": "manual",
-                "IRRECOVERABLE": "bomb"
-              }
-            }
-         },
-         "valueDensity": {
-          "title": "Value Density",
-          "type": "string",
-          "format": "radio",
-          "enum": [ "NOT_DEFINED", "DIFFUSE", "CONCENTRATED"],
-          "default": "NOT_DEFINED",
-          "options": {
-            "infoText": "Value Density describes the resources that the attacker will gain control over with a single exploitation event.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "DIFFUSE": "The vulnerable system has limited resources. That is, the resources that the attacker will gain control over with a single exploitation event are relatively small. An example of Diffuse (think: limited) Value Density would be an attack on a single email client vulnerability.",
-       "CONCENTRATED": "The vulnerable system is rich in resources. Heuristically, such systems are often the direct responsibility of “system operators” rather than users. An example of Concentrated (think: broad) Value Density would be an attack on a central email server."
-      },
-            "grid_columns": 12,
-            "enum_titles": [
-              "Not defined",
-              "Diffuse",
-              "Concentrated"
-            ],
-            "icons": {
-              "NOT_DEFINED": "what",
-              "DIFFUSE": "diffuse",
-              "CONCENTRATED": "box"
-            }
-          }
-       },
-       "vulnerabilityResponseEffort": {
-        "title": "Vulnerability Response Effort",
-        "type": "string",
-        "format": "radio",
-        "enum": [ "NOT_DEFINED", "LOW", "MODERATE", "HIGH"],
-        "default": "NOT_DEFINED",
-        "options": {
-          "infoText": "The intention of the Vulnerability Response Effort metric is to provide supplemental information on how difficult it is for consumers to provide an initial response to the impact of vulnerabilities for deployed products and services in their infrastructure. The consumer can then take this additional information on effort required into consideration when applying mitigations and/or scheduling remediation.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "LOW": "The effort required to respond to a vulnerability is low/trivial. Examples include: communication on better documentation, configuration workarounds, or guidance from the vendor that does not require an immediate update, upgrade, or replacement by the consuming entity, such as firewall filter configuration.",
-       "MODERATE": "The actions required to respond to a vulnerability require some effort on behalf of the consumer and could cause minimal service impact to implement. Examples include: simple remote update, disabling of a subsystem, or a low-touch software upgrade such as a driver update.",
-       "HIGH": "The actions required to respond to a vulnerability are significant and/or difficult, and may possibly lead to an extended, scheduled service impact.  This would need to be considered for scheduling purposes including honoring any embargo on deployment of the selected response. Alternatively, response to the vulnerability in the field is not possible remotely. The only resolution to the vulnerability involves physical replacement (e.g. units deployed would have to be recalled for a depot level repair or replacement). Examples include: a highly privileged driver update, microcode or UEFI BIOS updates, or software upgrades requiring careful analysis and understanding of any potential infrastructure impact before implementation. A UEFI BIOS update that impacts Trusted Platform Module (TPM) attestation without impacting disk encryption software such as Bit locker is a good recent example. Irreparable failures such as non-bootable flash subsystems, failed disks or solid-state drives (SSD), bad memory modules, network devices, or other non-recoverable under warranty hardware, should also be scored as having a High effort."
-      },
-          "grid_columns": 12,
-          "enum_titles": [
-            "Not defined",
-            "Low",
-            "Moderate",
-            "High"
-          ],
-          "icons": {
-            "NOT_DEFINED": "what",
-            "LOW": "feather",
-            "MODERATE": "mop",
-            "HIGH": "tanker"
-          }
-        }
-     },
-     "providerUrgency": {
-      "title": "Urgency",
-      "type": "string",
-      "format": "radio",
-      "enum": [ "NOT_DEFINED", "CLEAR", "GREEN", "AMBER", "RED"],
-      "default": "NOT_DEFINED",
-      "options": {
-        "infoText": "To facilitate a standardized method to incorporate additional provider-supplied assessment, an optional “pass-through” Supplemental Metric called Provider Urgency is available. Note: While any assessment provider along the product supply chain may provide a Provider Urgency rating. The Penultimate Product Provider (PPP) is best positioned to provide a direct assessment of Provider Urgency.",
-      "tooltips": {
-       "NOT_DEFINED": "The metric has not been evaluated.",
-       "CLEAR": "Provider has assessed the impact of this vulnerability as having no urgency (Informational).",
-       "GREEN": "Provider has assessed the impact of this vulnerability as having a reduced urgency.",
-       "AMBER": "Provider has assessed the impact of this vulnerability as having a moderate urgency.",
-       "RED": "Provider has assessed the impact of this vulnerability as having the highest urgency."
-      },
-        "grid_columns": 12,
-        "enum_titles": [
-          "Not defined",
-          "Informational",
-          "Reduced",
-          "Moderate",
-          "Hightest"
-        ],
-        "icons": {
-          "NOT_DEFINED": "what",
-          "CLEAR": "info",
-          "GREEN": "sit",
-          "AMBER": "walk",
-          "RED": "run"
-        }
-      }
-   },
+              },
+              "Recovery": {
+                "title": "Recovery",
+                "type": "string",
+                "format": "radio",
+                "enum": [
+                  "NOT_DEFINED",
+                  "AUTOMATIC",
+                  "USER",
+                  "IRRECOVERABLE"
+                ],
+                "default": "NOT_DEFINED",
+                "options": {
+                  "infoText": "Recovery describes the resilience of a system to recover services, in terms of performance and availability, after an attack has been performed.",
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "AUTOMATIC": "The system recovers services automatically after an attack has been performed.",
+                    "USER": "The system requires manual intervention by the user to recover services, after an attack has been performed.",
+                    "IRRECOVERABLE": "The system services are irrecoverable by the user, after an attack has been performed."
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Not defined",
+                    "Automatic",
+                    "User",
+                    "Irrecoverable"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "AUTOMATIC": "reuse",
+                    "USER": "manual",
+                    "IRRECOVERABLE": "bomb"
+                  }
+                }
+              },
+              "valueDensity": {
+                "title": "Value Density",
+                "type": "string",
+                "format": "radio",
+                "enum": [
+                  "NOT_DEFINED",
+                  "DIFFUSE",
+                  "CONCENTRATED"
+                ],
+                "default": "NOT_DEFINED",
+                "options": {
+                  "infoText": "Value Density describes the resources that the attacker will gain control over with a single exploitation event.",
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "DIFFUSE": "The vulnerable system has limited resources. That is, the resources that the attacker will gain control over with a single exploitation event are relatively small. An example of Diffuse (think: limited) Value Density would be an attack on a single email client vulnerability.",
+                    "CONCENTRATED": "The vulnerable system is rich in resources. Heuristically, such systems are often the direct responsibility of “system operators” rather than users. An example of Concentrated (think: broad) Value Density would be an attack on a central email server."
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Not defined",
+                    "Diffuse",
+                    "Concentrated"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "DIFFUSE": "diffuse",
+                    "CONCENTRATED": "box"
+                  }
+                }
+              },
+              "vulnerabilityResponseEffort": {
+                "title": "Vulnerability Response Effort",
+                "type": "string",
+                "format": "radio",
+                "enum": [
+                  "NOT_DEFINED",
+                  "LOW",
+                  "MODERATE",
+                  "HIGH"
+                ],
+                "default": "NOT_DEFINED",
+                "options": {
+                  "infoText": "The intention of the Vulnerability Response Effort metric is to provide supplemental information on how difficult it is for consumers to provide an initial response to the impact of vulnerabilities for deployed products and services in their infrastructure. The consumer can then take this additional information on effort required into consideration when applying mitigations and/or scheduling remediation.",
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "LOW": "The effort required to respond to a vulnerability is low/trivial. Examples include: communication on better documentation, configuration workarounds, or guidance from the vendor that does not require an immediate update, upgrade, or replacement by the consuming entity, such as firewall filter configuration.",
+                    "MODERATE": "The actions required to respond to a vulnerability require some effort on behalf of the consumer and could cause minimal service impact to implement. Examples include: simple remote update, disabling of a subsystem, or a low-touch software upgrade such as a driver update.",
+                    "HIGH": "The actions required to respond to a vulnerability are significant and/or difficult, and may possibly lead to an extended, scheduled service impact.  This would need to be considered for scheduling purposes including honoring any embargo on deployment of the selected response. Alternatively, response to the vulnerability in the field is not possible remotely. The only resolution to the vulnerability involves physical replacement (e.g. units deployed would have to be recalled for a depot level repair or replacement). Examples include: a highly privileged driver update, microcode or UEFI BIOS updates, or software upgrades requiring careful analysis and understanding of any potential infrastructure impact before implementation. A UEFI BIOS update that impacts Trusted Platform Module (TPM) attestation without impacting disk encryption software such as Bit locker is a good recent example. Irreparable failures such as non-bootable flash subsystems, failed disks or solid-state drives (SSD), bad memory modules, network devices, or other non-recoverable under warranty hardware, should also be scored as having a High effort."
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Not defined",
+                    "Low",
+                    "Moderate",
+                    "High"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "LOW": "feather",
+                    "MODERATE": "mop",
+                    "HIGH": "tanker"
+                  }
+                }
+              },
+              "providerUrgency": {
+                "title": "Urgency",
+                "type": "string",
+                "format": "radio",
+                "enum": [
+                  "NOT_DEFINED",
+                  "CLEAR",
+                  "GREEN",
+                  "AMBER",
+                  "RED"
+                ],
+                "default": "NOT_DEFINED",
+                "options": {
+                  "infoText": "To facilitate a standardized method to incorporate additional provider-supplied assessment, an optional “pass-through” Supplemental Metric called Provider Urgency is available. Note: While any assessment provider along the product supply chain may provide a Provider Urgency rating. The Penultimate Product Provider (PPP) is best positioned to provide a direct assessment of Provider Urgency.",
+                  "tooltips": {
+                    "NOT_DEFINED": "The metric has not been evaluated.",
+                    "CLEAR": "Provider has assessed the impact of this vulnerability as having no urgency (Informational).",
+                    "GREEN": "Provider has assessed the impact of this vulnerability as having a reduced urgency.",
+                    "AMBER": "Provider has assessed the impact of this vulnerability as having a moderate urgency.",
+                    "RED": "Provider has assessed the impact of this vulnerability as having the highest urgency."
+                  },
+                  "grid_columns": 12,
+                  "enum_titles": [
+                    "Not defined",
+                    "Informational",
+                    "Reduced",
+                    "Normal",
+                    "Highest"
+                  ],
+                  "icons": {
+                    "NOT_DEFINED": "what",
+                    "CLEAR": "info",
+                    "GREEN": "sit",
+                    "AMBER": "walk",
+                    "RED": "run"
+                  }
+                }
+              },
+              "version": {
+                "type": "string",
+                "enum": [
+                  "4.0"
+                ],
+                "options": {
+                  "hidden": "true"
+                }
+              },
               "baseSeverity": {
-                "title": "Base Severity",
+                "title": "Severity",
                 "type": "string",
                 "format": "string",
-                "template": "cvssjs.severity(context.sc).name",
+                "template": "context.sc != undefined && (cvssjs.severity(context.sc).name)",
                 "watch": {
                   "sc": "cvss4.baseScore"
                 },
                 "options": {
                   "grid_columns": 2,
-                  "class": "vgi-dial"
+                  "class": "vgi-cvss-logo",
+                  "input_width": "5em"
                 }
               },
               "baseScore": {
-                "title": "Score (TBD)",
+                "title": "Score",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 10,
-                "default":0,
-                "template": "context.vs && (new window.CVSS40(context.vs)).Score()",
+                "default": 0,
+                "template": "context.vs && window.CVSS40 && (new window.CVSS40(context.vs).Score())",
                 "watch": {
                   "vs": "cvss4.vectorString"
-                 },                
+                },
                 "options": {
                   "grid_columns": 1,
-                  "input_width": "3em"
+                  "input_width": "3em",
+                  "class": "vgi-cvss-logo"
                 }
               },
               "vectorString": {
@@ -2205,6 +2614,7 @@
                   "subIntegrityImpact": "cvss4.subIntegrityImpact",
                   "vulnAvailabilityImpact": "cvss4.vulnAvailabilityImpact",
                   "subAvailabilityImpact": "cvss4.subAvailabilityImpact",
+                  "exploitMaturity": "cvss4.exploitMaturity",
                   "Safety": "cvss4.Safety",
                   "Automatable": "cvss4.Automatable",
                   "Recovery": "cvss4.Recovery",
@@ -2216,9 +2626,26 @@
                   {
                     "place": "header",
                     "class": "vgi-ext indent",
-                    "href": "'https://www.first.org/cvss/calculator/4.0#' + context.self",
+                    "href": "'https://www.first.org/cvss/calculator/4.0#' + cvssjs.vector4(context)",
                     "title": "CVSS Calculator",
-                    "rel": "' Open in CVSS Calculator'"
+                    "rel": "' First.org Calc'"
+                  },
+                  {
+                    "place": "header",
+                    "target": "_self",
+                    "class": "indent vgi-copy",
+                    "href": "'javascript:copyToClipboard(\"' + cvssjs.vector4(context) + '\");void(0);'",
+                    "title": "Copy Vector",
+                    "rel": "' Copy'"
+                  },
+                  {
+                    "place": "header",
+                    "target": "_self",
+                    "class": "indent vgi-in",
+                    "href": "'javascript:void(0);'",
+                    "onclick": "'return pasteCvssVectorFromClipboard(this);'",
+                    "title": "Paste CVSS Vector text",
+                    "rel": "' Paste'"
                   }
                 ]
               }
@@ -2325,7 +2752,7 @@
                 "title": "User Interaction",
                 "type": "string",
                 "format": "radio",
-                "default":"NONE",
+                "default": "NONE",
                 "enum": [
                   "REQUIRED",
                   "NONE"
@@ -2346,7 +2773,7 @@
                 "title": "Scope",
                 "type": "string",
                 "format": "radio",
-                "default":"CHANGED",
+                "default": "CHANGED",
                 "enum": [
                   "UNCHANGED",
                   "CHANGED"
@@ -2742,24 +3169,7 @@
             }
           }
         }
-      },
-      "default": [
-        {
-          "format": "CVSS",
-          "scenarios": [
-            {
-              "lang": "en",
-              "value": "GENERAL"
-            }
-          ],
-          "cvssV4_0": {
-            "version": "4.0",
-            "baseScore": 10,
-            "baseSeverity": "CRITICAL",
-            "vectorString": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H"
-          }
-        }
-      ]
+      }
     },
     "solutions": {
       "title": "Solution (optional)",
@@ -2769,7 +3179,8 @@
       "uniqueItems": true,
       "options": {
         "class": "vgi-safe tgap",
-        "disable_array_add": false
+        "disable_array_add": false,
+        "hide_header": true
       },
       "items": {
         "title": "Solution",
@@ -2787,9 +3198,8 @@
       "description": "Workarounds and mitigations for this vulnerability.",
       "uniqueItems": true,
       "options": {
-        "class": "vgi-avoid tgap",
-        "disable_array_delete": false,
-        "disable_array_delete_last_row": false
+        "hide_header": true,
+        "class": "vgi-avoid tgap"
       },
       "items": {
         "title": "Workaround",
@@ -2804,6 +3214,7 @@
       "type": "array",
       "format": "table",
       "options": {
+        "hide_header": true,
         "class": "vgi-cog tgap"
       },
       "title": "Required Configuration for Exposure (optional)",
@@ -2821,6 +3232,7 @@
     "exploits": {
       "title": "Exploit Status (optional)",
       "options": {
+        "hide_header": true,
         "class": "vgi-bomb tgap"
       },
       "type": "array",
@@ -2840,7 +3252,8 @@
       "title": "Timeline (optional)",
       "format": "table",
       "options": {
-        "class": "vgi-time tgap"
+        "class": "vgi-time tgap",
+        "hide_header":true
       },
       "description": "This is timeline information for significant events about this vulnerability or changes to CVE Record.",
       "uniqueItems": true,
@@ -2856,10 +3269,7 @@
           "time": {
             "title": "Timestamp",
             "description": "Timestamp representing when the event in the timeline occurred. The timestamp format is based on RFC3339 and ISO ISO8601, with an optional timezone. yyyy-MM-ddTHH:mm:ssZZZZ - if the timezone offset is not given, GMT (0000) is assumed.",
-            "$ref": "#/definitions/timestamp",
-            "options": {
-              "grid_columns": 3
-            }
+            "$ref": "#/definitions/timestamp"
           },
           "lang": {
             "description": "The language used in the description of the event. The language field is included so that CVE Records can support translations. The value must be a BCP 47 language code.",
@@ -2872,7 +3282,10 @@
             "minLength": 1,
             "maxLength": 4096,
             "options": {
-              "grid_columns": 9
+              "inputAttributes": {
+                "placeholder": "Summary of the event"
+              },
+              "input_width": "100%"
             }
           }
         }
@@ -2882,7 +3295,8 @@
       "type": "array",
       "title": "Credits (optional)",
       "options": {
-        "class": "vgi-like tgap"
+        "class": "vgi-like tgap",
+        "hide_header": true
       },
       "format": "table",
       "description": "Statements acknowledging specific people, organizations, or tools recognizing the work done in researching, discovering, remediating or helping with activities related to this CVE.",
@@ -2891,7 +3305,7 @@
         "type": "object",
         "title": "Credit",
         "options": {
-          "remove_empty_properties":true
+          "remove_empty_properties": true
         },
         "properties": {
           "lang": {
@@ -2902,7 +3316,13 @@
             "title": "Name",
             "type": "string",
             "minLength": 1,
-            "maxLength": 4096
+            "maxLength": 4096,
+            "options": {
+              "inputAttributes": {
+                "placeholder": "Names of people, organizations, or tools"
+              },
+              "class": "vgi-like"
+            }
           },
           "user": {
             "options": {
@@ -2917,6 +3337,12 @@
             "type": "string",
             "description": "Type or role of the entity being credited (optional). finder: identifies the vulnerability.\nreporter: notifies the vendor of the vulnerability to a CNA.\nanalyst: validates the vulnerability to ensure accuracy or severity.\ncoordinator: facilitates the coordinated response process.\nremediation developer: prepares a code change or other remediation plans.\nremediation reviewer: reviews vulnerability remediation plans or code changes for effectiveness and completeness.\nremediation verifier: tests and verifies the vulnerability or its remediation.\ntool: names of tools used in vulnerability discovery or identification.\nsponsor: supports the vulnerability identification or remediation activities.",
             "default": "finder",
+            "options": {
+              "input_width": "7em",
+              "inputAttributes":{
+                "class":"txt"
+              }
+            },
             "enum": [
               "finder",
               "reporter",
@@ -2998,11 +3424,11 @@
               "undefined"
             ],
             "icons": {
-              "INTERNAL":"hardhat",
+              "INTERNAL": "hardhat",
               "EXTERNAL": "hat",
-              "USER":"cap",
-              "UPSTREAM":"in",
-              "UNKNOWN":"what"
+              "USER": "cap",
+              "UPSTREAM": "in",
+              "UNKNOWN": "what"
             }
           }
         }
@@ -3010,15 +3436,20 @@
     },
     "language": {
       "type": "string",
+      "format": "languagePicker",
       "description": "BCP 47 language code, language-region.",
       "default": "en",
       "pattern": "^[A-Za-z]{2,4}([\\-_][A-Za-z]{4})?([\\-_]([A-Za-z]{2}|[0-9]{3}))?$",
       "options": {
-        "hidden": true
+        "hidden": true,
+        "inputAttributes": {
+          "placeholder": "BCP 47 code (e.g., en-US)"
+        }
       }
     },
     "englishLanguage": {
       "type": "string",
+      "format": "languagePicker",
       "description": "BCP 47 language code, language-region, required to be English.",
       "pattern": "^en([_-][A-Za-z]{4})?([_\\-]([A-Za-z]{2}|[0-9]{3}))?$"
     },
@@ -3137,7 +3568,16 @@
           "unsupported-when-assigned",
           "exclusively-hosted-service",
           "disputed"
-        ]
+        ],
+        "options": {
+          "icons": {
+            "x_known-exploited-vulnerability":"vgi-bomb",
+            "x_open-source":"text",
+            "unsupported-when-assigned":"ghost",
+            "exclusively-hosted-service":"cloud",
+            "disputed":"comment"
+          }
+        }
       }
     },
     "adpTags": {
@@ -3189,7 +3629,7 @@
             "adp": {
               "title": "Information from Authorized Data Providers (ADP) - experimental!",
               "options": {
-                "class":"vgi-alert"
+                "class": "vgi-info"
               },
               "type": "array",
               "items": {
@@ -3212,15 +3652,6 @@
         "containers"
       ],
       "links": [
-        {
-          "place": "container",
-          "class": "lbl gap2 tred fbn vgi-no flr",
-          "style": "",
-          "target": false,
-          "href": "'javascript:rejectRecord()'",
-          "title": "'Reject this CVE ID'",
-          "rel": "'Reject this ID'"
-        }
       ],
       "additionalProperties": false
     },
@@ -3242,7 +3673,7 @@
           "type": "object",
           "options": {
             "class": "hid"
-          },          
+          },
           "properties": {
             "cna": {
               "$ref": "#/definitions/cnaRejectedContainer"
@@ -3261,7 +3692,7 @@
         "containers"
       ],
       "additionalProperties": false,
-      "links" : [
+      "links": [
         {
           "place": "container",
           "class": "btn sfe vgi-put gap2",
@@ -3269,7 +3700,7 @@
           "target": false,
           "href": "'javascript:cvePost()'",
           "title": "'Publish this record to CVE.org'",
-          "rel": "'Post to CVE.org'"
+          "rel": "'Publish CVE'"
         }
       ]
     }

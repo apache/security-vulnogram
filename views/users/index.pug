@@ -1,14 +1,21 @@
 //- Copyright (c) 2017 Chandan B N. All rights reserved.
 
 extends ../layout
+include ../util
+
+block append topHeaderLeft
+  a.btn.sfe.vgi-magic(href="/users/profile") Add user
+  a.fbn.vgi-user(href="/users/list") User list
+
 block content
-    table.tbl.wht.sortable
+    +tablesort
+    table.vtbl.wht.sortable
         thead
             tr
                 th 
                 th Username
                 th Name
-                th email
+                th Email
                 th CNA/group
                 th Privilege
         tbody

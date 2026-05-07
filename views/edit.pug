@@ -2,27 +2,36 @@
 
 extends layout
   
-block info
-    if doc && doc.updatedAt
-        ='Last updated ' + textUtil.timeSince(doc.updatedAt) + ' ago by ' + doc.author + ' (v' + doc.__v + ')'
-
 block append head
     if !min
         link(rel='stylesheet', href= '/users/list/css')
     link(href=conf.basedir + "css/tagify.css",rel="stylesheet",type="text/css")
+    link(rel='stylesheet', href=conf.basedir + 'css/simplehtml.css')
 
-block prepend bannerItemsLeft
+block prepend topHeaderLeft
     if !min
-        a.fbn(href=(confOpts[schemaName].conf.uri? confOpts[schemaName].conf.uri : '/' + schemaName + '/' ), title=confOpts[schemaName].conf.title) ☰
-    
-block append bannerItemsLeft
+        a.rbtn.vgi-larrow(href=(confOpts[schemaName].conf.uri? confOpts[schemaName].conf.uri : '/' + schemaName + '/' ), title=confOpts[schemaName].conf.title)
+
+block append topHeaderLeft
     if !confOpts[schemaName].conf.readonly
         block openButton
             input#importJSON.hid(type="file",accept="application/json",onchange="loadFile(event,this);")
-            a.fbn.vgi-folder(type="file",onclick='importFile(event, this);') Open
+            button.fbn.vgi-folder(type="file",onclick='importFile(event, this);')
+    
+block prepend outputButtons
+    if !confOpts[schemaName].conf.readonly
         if !min
-            button.fbn.sfe.vgi-put(id="save1") SAVE    
-        a.fbn.vgi-download(type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download") Download
+            button.fbn.vgi-put(id="save1") Save    
+        a.rbtn.vgi-download(title="Download JSON" type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download")
+
+block append sidebarNav
+    if !(opts && opts.conf && opts.conf.disableDrafts)
+        details#draftsGroup.sidebar-expandable.bort
+            summary.lbl.vgi-edit Drafts
+                span.pad.tgrey#draftsCount
+                block draftsSummaryActions
+            #draftsEmpty.lbl No drafts yet.
+            #draftsList.flx
 
 block scripts
     if opts
@@ -52,11 +61,17 @@ block scripts
         if opts && opts.conf && !opts.conf.readonly
             - var compileScript = pugLib.compileFileClient('views/subcontent.pug', {name: "subdocRender",basedir: 'views',compileDebug: false,inlineRuntimeFunctions: true})
             script !{compileScript}
-            script(src=conf.basedir + 'js/comment.js')
 
 block content
     div#mainTabGroup
         span.lbl &nbsp;
+        div#statusArea.nobr
+            span.lbl#infoMsg
+                if doc && doc.updatedAt
+                    ='Updated ' + textUtil.formatFriendlyDate(doc.updatedAt) + ' by ' + doc.author
+            if !min && conf.realtime && conf.realtime.enabled
+                span.lbl#realtimeStatus Offline
+                span.lbl#realtimeViewers
         block editorTab
             input.tab(name='tabs', type='radio', id='editorTab', value="1",checked)
             label.lbl#editorLabel(for='editorTab')
@@ -65,10 +80,10 @@ block content
                         | Editor
                     details.popup#errPop
                         summary.sml.hid#errCount
-                        div.wht.pop.pad.bor.shd#errList
-            .wht.fil.bor.pad
+                        div.wht.pop.pad.bor.rnd.shd#errList
+            #editorContent.fil.bort.tpad
                 block editorArea
-                    iframe(name="x",style="display:none",src="about:blank")
+                    iframe.hid(name="x",src="about:blank")
                     form.editor(target="x",action="",id="docEditor")
                     if !min
                         a#remove.gap.flr.fbn.vgi-del.tred Delete this entry from local Vulnogram database
@@ -77,7 +92,7 @@ block content
             label.lbl(for='sourceTab')
                 block sourceLabel 
                     | Source
-            .wht.fil.bor.pad
+            .fil.bort.pad
                 div(id="output",rows="40",cols="100%")
                     p
 
@@ -86,25 +101,29 @@ block content
         if !min
             input.tab(name='tabs', type='radio', id='changesTab', value="6")
             label.lbl(for='changesTab') Changes
-            .wht.fil.bor.pad
-                div#unSavedChanges
+            .bort
+                div#unSavedChanges.gap.bor.rnd.wht
                 div#changelog
-
-        
-    if !min
-        div(style="clear:both")
-            button.gap.btn.save(id="save2",style="visibility:hidden") SAVE
     
     block initGlobals
         script
             if conf.publicDefectURL
                 | var defectURL = "!{conf.publicDefectURL}";
             | var idpath = "#{idpath}";
-            | var allowAjax = "#{allowAjax}";
+            | var allowAjax = #{allowAjax === true};
+            | var soloMode = #{min === true};
             | var schemaName = "#{schemaName}";
+            | var draftsEnabled = #{!(opts && opts.conf && opts.conf.disableDrafts)};
             | var postUrl = "#{postUrl?postUrl:''}";
             | var csrfToken = "#{csrfToken}";
             | var ajaxBase  = "#{conf.basedir}";
+            if !min && conf.realtime && conf.realtime.enabled
+                | var realtimeEnabled = true;
+                - var rtConf = JSON.stringify(conf.realtime).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029').replace(/</g, '\\u003C').replace(/>/g, '\\u003E').replace(/\//g, '\\u002F');
+                | var realtimeConfig = !{rtConf};
+            else
+                | var realtimeEnabled = false;
+                | var realtimeConfig = {};
             if doc && doc.body
                 | var initJSON=!{JSON.stringify(doc.body).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029').replace(/</g, '\\u003C').replace(/>/g, '\\u003E').replace(/\//g, '\\u002F')};
             else
@@ -113,22 +132,22 @@ block content
                 | var docSchema=!{JSON.stringify(opts && opts.schema ? opts.schema : '{}').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029').replace(/</g, '\\u003C').replace(/>/g, '\\u003E').replace(/\//g, '\\u002F')};
 
 
-    script(src=conf.basedir + 'js/util.js')
-    script(src=conf.basedir + "js/wy/simple.js")
-    script(src=conf.basedir + "js/wy/wysihtml-toolbar.min.js")
     if !min && opts && opts.schema
         script(src=conf.basedir + schemaName + '/schema.js')
     if conf.ajv && conf.ajvHash
       script(src=conf.ajv,integrity=conf.ajvHash,crossorigin="anonymous")
     script(src=conf.jsoneditor,integrity=conf.jsoneditorHash,crossorigin="anonymous")
-    script(src=conf.basedir + "js/tagify.min.js")
     script(src=conf.ace,integrity=conf.aceHash,crossorigin="anonymous")
-    script(src=conf.basedir + 'js/editor.js')
+    if !min && conf.realtime && conf.realtime.enabled
+        script(src="/socket.io/socket.io.js")
+        script(src=conf.basedir + "js/json-patch-extended.min.js")
+    script(src=conf.basedir + 'js/vg-editor.js')
     script(src=conf.basedir + 'js/tablesort.min.js')
 
     block loadEditor
     block loadEditorloadJSON
-        script loadJSON(initJSON);
+        - var msg = doc && doc.updatedAt ? 'Updated ' + textUtil.formatFriendlyDate(doc.updatedAt) + ' by ' + doc.author : '';
+        script loadJSON(initJSON,"#{doc_id}",!{JSON.stringify(msg)});
 
     if doc && doc.body
         script getChanges("#{doc_id}");
@@ -155,14 +174,14 @@ block subcontent
 
 block logolink
     br
-    a.logo(href="https://github.com/Vulnogram/Vulnogram") Vulnogram Project
+    a.vgi-logo(href="https://github.com/Vulnogram/Vulnogram") Vulnogram Project
 
 mixin alertDialog
-    dialog.bor.rnd.shd.pad2#alertDialog
+    dialog.bor.rndx.shd.pad2#alertDialog
       center
         form(onsubmit="event.preventDefault();return false;")
             h2.vgi-alert#alertMessage
             .gap#smallAlert  
             center.gap
                 input#alertOk.btn.sfe(type="reset" onclick="document.getElementById('alertDialog').close();" value="OK")
-                input#alertCancel.btn.red(type="reset" onclick="document.getElementById('alertDialog').close();" value="Cancel" dstyle="display:none")
+                input#alertCancel.btn.red.alert-cancel(type="reset" onclick="document.getElementById('alertDialog').close();" value="Cancel")

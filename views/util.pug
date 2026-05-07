@@ -1,3 +1,54 @@
+include formatters.pug
+
+mixin diffOpIcon(op)
+    if op == 'add'
+        span.lbl +
+    else
+        span.lbl &rarr;
+
+mixin diffOpRow(op)
+    - var leftClass = op.op == 'remove' ? 'diff-del' : op.op == 'replace' ? 'diff-chg-l' : ''
+    - var rightClass = op.op == 'add' ? 'diff-add' : op.op == 'replace' ? 'diff-chg-r' : ''
+    - if (op.op == 'remove') { op.old = op.value; delete op.value; }
+    .row
+        .col.s6.fil.pad.bor(class=leftClass)
+            if op.op == 'replace' && typeof op.old === 'string' && typeof op.value === 'string'
+                if textUtil
+                    - var diffs = textUtil.diffline(op.old, op.value)
+                    .pre
+                        for s in diffs.lhs
+                            case s.t
+                                when 0
+                                    = s.str
+                                when 1
+                                    span.yel= s.str
+                else
+                    .pre= op.old
+            else if op.old instanceof Object
+                .pre= JSON.stringify(op.old, null, 1)
+            else
+                = op.old
+        .col.center
+            +diffOpIcon(op.op)
+        .col.s6.fil.pad.bor(class=rightClass)
+            if op.op == 'replace' && typeof op.old === 'string' && typeof op.value === 'string'
+                if textUtil
+                    .pre
+                        for s in diffs.rhs
+                            case s.t
+                                when 0
+                                    = s.str
+                                when 1
+                                    span.grn= s.str
+                else
+                    .pre= op.value
+            else if op.value == null
+                i.vgi-del deleted
+            else if op.value instanceof Object
+                .pre= JSON.stringify(op.value, null, 1)
+            else
+                = op.value
+
 mixin hyperlevel(obj, name)
     - var value = obj[name];
     span.nobr.icn(class="l" + value.charAt(0),title=value)
@@ -55,14 +106,12 @@ mixin hyperdate(obj, name)
         - var nowt = Date.now();
         - var vtime = v.getTime();
         - var delta = nowt-vtime;
-        - var hidet = '';
-        - if (Math.abs(delta) > 43000000) { hidet = 'hid';}
         - var cl = "date y"+ (nowt > vtime ? Math.floor(Math.log2((delta/31536000000)+1)*2) : 'f tag-s');
         span.nobr(class=cl, title=v.toString())
-            = v.toISOString().slice(0,10)
-            span.nobr(class=hidet)
-                |  
-                = v.toLocaleTimeString("de-US", {hour:"2-digit", minute:"2-digit"})
+            if textUtil && textUtil.formatFriendlyDate
+                = textUtil.formatFriendlyDate(v.toISOString())
+            else
+                = v.toISOString().slice(0,10)
     else
         = obj[name]
 
@@ -71,12 +120,14 @@ mixin hyperLink(value, url, mid, suffix, target, cls, onclick)
 
 mixin hyperVal(obj, name)
     - var value = (obj !== Object(obj) || Array.isArray(obj))? obj : obj[name];
-    if value instanceof Date || name == 'date' || name == 'updatedAt' || name == 'createdAt'
+    if value instanceof Date || name == 'date' || name == 'updatedAt' || name == 'createdAt' || (fields && fields[name] && fields[name].type === Date)
         +hyperdate(obj, name)
     else
         case name
             when 'size'
                 +hypersize(obj, name)
+            when 'quantity'
+                +compactNumber(value)
             when 'level'
                 +hyperlevel(obj, name)
             when 'CVSS'
@@ -86,7 +137,7 @@ mixin hyperVal(obj, name)
             default
                 if fields && fields[name]
                     - var cls = fields[name].class ? fields[name].class : '';
-                    - var onlick = fields[name].onclick ? fields[name].onclick : false;
+                    - var onclick = fields[name].onclick ? fields[name].onclick : false;
                     if fields[name].xref && fields[name].xref.class
                         - cls = cls + obj[fields[name].xref.class]
                     if Array.isArray(fields[name].links) && (value != '')
@@ -122,7 +173,7 @@ mixin hyperVal(obj, name)
                                     - cls = (cls ? cls + ' ' : '')+ 'vgi-'+fields[name].icons[value]
                                 else
                                     - cls = (cls ? cls + ' ' : '')+ value
-                            span(class=cls title=value onclick=onlick)=value
+                            span(class=cls title=value onclick=onclick)=value
                 else
                     =value
 
@@ -133,7 +184,7 @@ mixin table(docs, columns, showCheckboxes, id)
         p
             b No items found!
     else
-        table.tbl.wht.sortable(id=id)
+        table.vtbl.wht.sortable(id=id)
             if fields
                 colgroup
                     if showCheckboxes
@@ -158,7 +209,7 @@ mixin table(docs, columns, showCheckboxes, id)
             tbody
                 each doc, i in docs
                     - rowCount ++
-                    tr
+                    tr(id='vgListItem'+doc.ID)
                         if showCheckboxes
                             td.rowCheckLabel
                                 label.rowCheckLabel
@@ -177,4 +228,5 @@ mixin tablesort
         }
         
 mixin asis(x)
-    |!{x}
+    - var sanitized = typeof sanitizeRichHtml === 'function' ? sanitizeRichHtml(x) : (x || '');
+    |!{sanitized}

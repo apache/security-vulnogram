@@ -13,8 +13,7 @@ const conf = require('./config/conf');
 
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-const mongoose = require('mongoose');
+const http = require('http');
 const flash = require('connect-flash');
 const https = require('https');
 const pug = require('pug');
@@ -30,27 +29,20 @@ const passport = require('passport');
 const crypto = require('crypto');
 const compress = require('compression');
 
+if (process.cwd() !== __dirname) {
+    try {
+        process.chdir(__dirname);
+    } catch (err) {
+        console.error('Failed to set working directory to app root:', err.message);
+        process.exit(1);
+    }
+}
+
 const optSet = require('./models/set');
+const { sanitizeRichHtml } = require('./lib/html-sanitize');
+const mongo = require('./lib/mongo');
 
-mongoose.Promise = global.Promise;
-mongoose.set('strictQuery', false);
-mongoose.connect(conf.database, {
-    keepAlive: true,
-}).catch(function(e){
-    console.log("Error"+e.message);
-});
-const db = mongoose.connection;
-
-//Check connection
-db.once('open', function () {
-    console.log('Connected to MongoDB');
-});
-
-//Check for db errors
-db.on('error', function (err) {
-   console.error(err.message);
-   console.error('Check mongodb connection URL configuration. Ensure Mongodb server is running!');
-});
+let db = null;
 
 const app = express();
 
@@ -75,6 +67,7 @@ app.set('view engine', 'pug');
 // make conf available for pug
 app.locals.conf = conf;
 app.locals.pugLib = pug;
+app.locals.sanitizeRichHtml = sanitizeRichHtml;
 
 // parse urlencoded forms
 app.use(express.urlencoded({
@@ -88,16 +81,20 @@ app.use(express.json({limit:'16mb'}));
 app.use(express.static('public'));
 
 // Express Session middleware
-app.use(session({
+const useSecureCookie = process.env.VULNOGRAM_SECURE_COOKIE === 'true' || !!conf.httpsOptions;
+if (process.env.VULNOGRAM_SECURE_COOKIE === 'true') {
+    app.set('trust proxy', 1);
+}
+const sessionMiddleware = session({
     secret: crypto.randomBytes(64).toString('hex'),
     resave: true,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV == "production",
       httpOnly: true,
-      sameSite: 'lax',
+      secure: useSecureCookie
     }
-}));
+});
+app.use(sessionMiddleware);
 
 // Passport config
 require('./config/passport')(passport);
@@ -132,7 +129,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 function ensureConnected(req, res, next) {
-    if (mongoose.connection.readyState == 1) {
+    if (mongo.isConnected()) {
         return next();
     } else {
         req.session.returnTo = req.originalUrl;
@@ -170,105 +167,123 @@ app.use(function (req, res, next) {
     next()
 })
 
-// ASF
-asf.asfroutes(ensureAuthenticated, app);
-// END ASF
-// set up routes
-let users = require('./routes/users');
-app.use('/users', users.public);
-app.use('/users', ensureAuthenticated, users.protected);
-
-let docs = require('./routes/doc');
-
-app.locals.confOpts = {};
-// ASF
-app.locals.docs = {};
-// END ASF
-
-var sections = require('./models/sections.js')();
-
-for(section of sections) {
-    var s = optSet(section, ['default', 'custom']);
-    //var s = conf.sections[section];
-    if(s.facet && s.facet.ID) {
-        // ASF
-        if (conf.sections.includes(section)){
-            app.locals.confOpts[section] = s;
-        }
-        let r = docs(section, s);
-        app.locals.docs[section] = r;
-        // END ASF
-        app.use('/' + section, ensureAuthenticated, r.router);
+async function bootstrap() {
+    try {
+        db = await mongo.connect(conf.database);
+        console.log('Connected to MongoDB');
+    } catch (err) {
+        console.error(err.message);
+        console.error('Check mongodb connection URL configuration. Ensure Mongodb server is running!');
+        process.exit(1);
     }
-}
+    // ASF
+    asf.asfroutes(ensureAuthenticated, app);
+    // END ASF
+    // set up routes
+    let users = require('./routes/users');
+    app.use('/users', users.public);
+    app.use('/users', ensureAuthenticated, users.protected);
 
-app.use('/home/stats', ensureAuthenticated, async function(req, res, next){
-    var sections = [];
-    for(section of conf.sections){
-        var s = {};
-        try {
-            var s = await db.collection(section+'s').stats();
-        } catch (e){
+    let docs = require('./routes/doc');
 
-        };
-        if (s === {}) {
-        try {
-            var s = await db.collection(section).stats();
-        } catch (e){
+    app.locals.confOpts = {};
+    // ASF
+    app.locals.docs = {};
+    // END ASF
 
-        };
-        };
+    var sections = require('./models/sections.js')();
 
-        sections.push({
-            name: section,
-            items: s.count,
-            size: s.size,
-            avgSize: s.avgObjSize
+    for (var section of sections) {
+        var s = optSet(section, ['default', 'custom']);
+        //var s = conf.sections[section];
+        if (s.facet && s.facet.ID) {
+            // ASF
+            if (conf.sections.includes(section)){
+                app.locals.confOpts[section] = s;
+            }
+            let r = docs(section, s);
+            app.locals.docs[section] = r;
+            // END ASF
+            app.use('/' + section, ensureAuthenticated, r.router);
+        }
+    }
+
+    app.use('/home/stats', ensureAuthenticated, async function (req, res, next) {
+        var sections = [];
+        for (var section of conf.sections) {
+            var s = {};
+            var sectionOpts = app.locals.confOpts[section];
+            var collectionName = sectionOpts && sectionOpts.conf && sectionOpts.conf.collectionName
+                ? sectionOpts.conf.collectionName
+                : section;
+            try {
+                s = await db.collection(collectionName).stats();
+            } catch (e) {
+            }
+
+            sections.push({
+                name: section,
+                items: s.count,
+                size: s.size,
+                avgSize: s.avgObjSize
+            });
+        }
+        res.render('list',
+            {
+                docs: sections,
+                columns: ['name', 'items', 'size', 'avgSize'],
+                fields: {
+                    'name': {
+                        className: 'icn'
+                    }
+                }
+            })
+    });
+
+    app.use(function (req, res, next) {
+        res.locals.confOpts = app.locals.confOpts;
+        next();
+    });
+
+    if (conf.customRoutes) {
+        for (var r of conf.customRoutes) {
+            app.use(r.path, require(r.route));
+        }
+    }
+
+    app.get('/', function (req, res, next) {
+        res.redirect(conf.homepage ? conf.homepage : '/home');
+    });
+
+    const realtimeEnabled = !conf.realtime || conf.realtime.enabled !== false;
+    const server = conf.httpsOptions ? https.createServer(conf.httpsOptions, app) : http.createServer(app);
+
+    if (realtimeEnabled) {
+        const { Server } = require('socket.io');
+        const io = new Server(server, {
+            maxHttpBufferSize: conf.realtime && conf.realtime.maxPatchBytes ? conf.realtime.maxPatchBytes * 2 : 1e6
+        });
+        require('./lib/realtime')(io, {
+            sessionMiddleware: sessionMiddleware,
+            passport: passport,
+            conf: conf,
+            confOpts: app.locals.confOpts
         });
     }
-    res.render('list',
-    {
-        docs: sections,
-        columns: ['name', 'items', 'size', 'avgSize'],
-        fields: {
-            'name': {
-                className: 'icn'
-            }
+
+    server.listen(conf.serverPort, conf.serverHost, function () {
+        console.log('Server started at ' + (conf.httpsOptions ? 'https://' : 'http://') + conf.serverHost + ':' + conf.serverPort);
+    });
+
+    server.on('error', function (err) {
+        if (err.code === 'EADDRINUSE') {
+            console.error('Error: Port ' + conf.serverPort + ' is already in use on ' + conf.serverHost + '.\n' +
+                'Please stop the other process or set a different port via the VULNOGRAM_PORT environment variable.');
+            process.exit(1);
+        } else {
+            throw err;
         }
-    })
-});
-
-app.use(function (req, res, next) {
-    res.locals.confOpts = app.locals.confOpts;
-    next();
-});
-
-//Configuring a reviewToken in conf file allows sharing drafts with 'people who have a link containing the configurable token'
-let review = require('./routes/review');
-
-if (review.public) {
-    app.use('/review', express.static('public'));
-    app.use('/review', review.public);
-}
-
-app.use('/review', ensureAuthenticated, review.protected);
-
-if(conf.customRoutes) {
-    for(r of conf.customRoutes) {
-        app.use(r.path, require(r.route));
-    }
-}
-
-app.get('/', function (req, res, next) {
-    res.redirect(conf.homepage? conf.homepage : '/home');
-});
-
-if(conf.httpsOptions) {
-    https.createServer(conf.httpsOptions, app).listen(conf.serverPort, conf.serverHost, function () {
-        console.log('Server started at https://' + conf.serverHost + ':' + conf.serverPort);
-    });
-} else {
-    app.listen(conf.serverPort, conf.serverHost, function () {
-        console.log('Server started at http://' + conf.serverHost + ':' + conf.serverPort);
     });
 }
+
+bootstrap();

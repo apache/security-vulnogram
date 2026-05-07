@@ -54,7 +54,7 @@ function plotCharts(container, charts) {
         .data(charts)
         .enter()
         .append('div')
-        .attr('class', 'vis bor wht rnd shd pad')
+        .attr('class', 'vis bor pur rnd shd pad')
         .html(function (d) {
             d.div = this;
             if (d.type == 'pie') {
@@ -64,7 +64,7 @@ function plotCharts(container, charts) {
             } else {
                 barChart(d);
             }
-            return '<a class="vgi-bar" href="/home/' + encodeURI(d.ID) + '#chart" class="center icn ' + encodeURI(d.key) + '">' + (d.title ? ' ' + d.title : '')
+            return '<a class="fbn vgi-bar" href="/home/' + encodeURI(d.ID) + '#chart" class="center icn ' + encodeURI(d.key) + '">' + (d.title ? ' ' + d.title : '')
                 + '</a>'
              +'<a class="fbn vgi-download" onclick="downloadElement(\''+encodeURI(d.ID)+'\',this)">download</a>'
              //+ '<a class="fbn vgi-pic" onclick="downloadPNG(\''+encodeURI(d.ID)+'\',this)">download PNG</a>';
@@ -389,12 +389,8 @@ function treemapSVG(a) {
 
         input = { "_id": "root", items: root };
 
-        console.log('Input');
-        console.log(input);
-        console.log('Processed');
         process = treemap.nodes(input);
         process.shift();
-        console.log(process);
 
         //  console.log(treemap.nodes(input));
 

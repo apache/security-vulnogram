@@ -20,11 +20,18 @@ var editTemplate = fs.existsSync('custom/cve5/edit.pug') ? 'custom/cve5/edit.pug
 var cveEdit = pug.compileFile(editTemplate, {compileDebug: false});
 confOpts = {
     cve: optSet('cve5', ['default'].concat(process.argv.slice(2))),
-    cvss4: optSet('cvss4', ['default'].concat(process.argv.slice(2)))
+    cvss4: optSet('cvss4', ['default'].concat(process.argv.slice(2))),
+    seaview: {conf:{
+        uri:'https://www.vulnogram.org/seaview/',
+        class:'vgi-wave',
+        title: 'Search and View CVEs',
+        name: 'Seaview - CVE Search',
+    }}
 }
-confOpts.cve.conf.uri = '/';
+confOpts.cve.conf.uri = './';
 confOpts.cve.conf.name = 'CVE';
-confOpts.cvss4.conf.uri = '/cvss4';
+confOpts.cve.conf.favicon = './css/logo.png'
+confOpts.cvss4.conf.uri = './cvss4';
 
 var cd = confOpts.cve.schema?.definitions;
 if (cd && cd.CNA_private) {
@@ -45,11 +52,11 @@ fs.writeFileSync("standalone/index.html", cveEdit({
     confOpts: confOpts,
     opts: confOpts.cve,
     schemaName: 'cve',
-    allowAjax: false,
+    allowAjax: true,
 }));
 
 fs.writeFileSync("standalone/cvss4.html", pug.compileFile('default/cvss4/edit.pug', {compileDebug: false})({
-    title: 'Vulnogram CVSS Calculator',
+    title: 'Common Vulnerability Scoring System CVSS 4',
     idpath: 'vectorString',
     min: true,
     doc: null,
@@ -58,5 +65,5 @@ fs.writeFileSync("standalone/cvss4.html", pug.compileFile('default/cvss4/edit.pu
     confOpts: confOpts,
     opts: confOpts.cvss4,
     schemaName: 'cvss4',
-    allowAjax: false,
+    allowAjax: true,
 }));

@@ -1,6 +1,5 @@
-docEditor.on('ready', async () => {
-/*    defaultTabs.sourceTab.getValue = function () {
-        var res = JSON.parse(sourceEditor.getSession().getValue());
-        return res;
-    };*/
+
+docEditor.on('change', () => {
+      var v = docEditor.getValue();
+      onCalcChange(v.vectorString, v.baseScore);
 });
