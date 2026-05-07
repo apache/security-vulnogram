@@ -131,11 +131,11 @@ function asflogin (req, res) {
 	    }
 	});
     } else {
-	delete  sess.user;
-	sess.state = uuidv4();
-	const authorization_endpoint= 'https://oauth.apache.org/auth'
-	redirecturl = authorization_endpoint+"?state="+sess.state+"&redirect_uri=https://"+req.get('host')+req.originalUrl;
-	res.redirect(redirecturl)
+        delete sess.user;
+        sess.state = uuidv4();
+        const callbackUrl = `https://${req.get('host')}${req.originalUrl}`;
+        const authorizationUrl = `https://oauth.apache.org/auth?state=${sess.state}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+        res.redirect(authorizationUrl)
     }
 }
 
