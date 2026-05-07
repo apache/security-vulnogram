@@ -1,9 +1,11 @@
 const fs = require("fs");
 const process = require("process");
-var package = require('../package.json');
-var secrets = require('./customsecrets.js');
+var package = require("../package.json");
 
-prod = !process.env["NODE_ENV"] || process.env["NODE_ENV"] == "production"
+// Production mode talks to the real CVE Services API and sends notification
+// emails, opt in explicitly with `NODE_ENV=production`.
+// Anything else (including unset) is treated as non-production.
+const prod = process.env.NODE_ENV === "production";
 if (prod) {
     console.log("");
     console.log("PRODUCTION MODE");
@@ -13,29 +15,45 @@ if (prod) {
     console.log("");
 }
 
-if (prod) {
-    cveapiurl = "https://cveawg.mitre.org/api",
+const cveapiurl = prod
+    ? process.env.CVE_API_URL || "https://cveawg.mitre.org/api"
+    : "http://localhost:3555";
 
-    //Add this block to enable HTTPs. Configure paths for valid SSL certificates.
-    // Either get them from your favorite Certificate Authority or generate self signed:
-    // Keep these safe and secured and readable only by account running vulnogram process!
-    // $ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
+// Built from env so secrets stay out of the repo. See example.env.
+const cveapiheaders = {
+    "CVE-API-ORG": process.env.CVE_API_ORG || "apache",
+    "CVE-API-USER": process.env.CVE_API_USER || "",
+    "CVE-API-KEY": process.env.CVE_API_KEY || "",
+};
 
-    httpsOptions = {
-        key: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem', 'utf8'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem', 'utf8'),
-        ca: fs.readFileSync('/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem', 'utf8'),
-        minVersion: 'TLSv1.2'
-    }
-} else {
-    cveapiurl = "http://localhost:3555"
-    httpsOptions = undefined
+// HTTPS is required (the OAuth callback URL must use it).
+// Override the paths with VULNOGRAM_TLS_KEY / VULNOGRAM_TLS_CERT / VULNOGRAM_TLS_CA;
+// the defaults assume the production Let's Encrypt layout on security-vm-he-fi.apache.org.
+const tlsKeyPath = process.env.VULNOGRAM_TLS_KEY
+    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem";
+const tlsCertPath = process.env.VULNOGRAM_TLS_CERT
+    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem";
+const tlsCaPath = process.env.VULNOGRAM_TLS_CA
+    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem";
+
+const httpsOptions = {
+    key: fs.readFileSync(tlsKeyPath, "utf8"),
+    cert: fs.readFileSync(tlsCertPath, "utf8"),
+    minVersion: "TLSv1.2",
+};
+// Self-signed dev certs have no CA chain; only attach one if present.
+if (fs.existsSync(tlsCaPath)) {
+    httpsOptions.ca = fs.readFileSync(tlsCaPath, "utf8");
 }
+
+const database =
+    process.env.VULNOGRAM_DB_URL ||
+    `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME || "admin"}:${process.env.MONGO_INITDB_ROOT_PASSWORD || "admin"}@${process.env.MONGO_HOST || "127.0.0.1"}:${process.env.MONGO_PORT || "27017"}`;
 
 module.exports = {
     // CVE automation configuration and CNA name
     cveorgid: "'f0158376-9dc2-43b6-827c-5f631a4d8d09'",
-    cveapiheaders: secrets.cveapiheaders,
+    cveapiheaders: cveapiheaders,
     cveapiurl: cveapiurl,
     cveapishortname: "apache",
     cveapiliveservice: prod,
@@ -49,7 +67,7 @@ module.exports = {
     // The Mongodb URL where CVE entries and users are stored.
     // WARNING! Configure MongoDB authentication and use a strong password
     // WARNING! Ensure MongoDB is not reachable from the network.
-    database: secrets.database,
+    database: database,
     //database: `mongodb://vulnogram:StrongLongPass@127.0.0.1:27017/vulnogram`,
     // database: `mongodb://127.0.0.1:27017/vulnogram`,
     // Name of the organization that should be used in page titles etc.,

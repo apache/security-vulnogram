@@ -32,6 +32,22 @@ function allowedtoallocatelive(pmcsiamin, specificpmc) {
     return false;
 }
 
+// In testmode, fabricate a CVE Services response locally so we never
+// touch the network and never consume a real CVE id.
+function makeFakeCveResponse() {
+    const cveId = "CVE-2000-" + (Math.floor(Math.random() * 9999) + 10000);
+    return {
+        cve_ids: [{
+            requested_by: { cna: "address", user: "joshuaburton@address.com" },
+            cve_id: cveId,
+            cve_year: String(new Date().getFullYear()),
+            state: "RESERVED",
+            owning_cna: "address",
+            reserved: new Date().toISOString(),
+        }],
+    };
+}
+
 // use 'number: 1' below if you want to allow more than one CVE to get alocated at once. probably not
 // very useful/likely even though we do support it
 
@@ -98,7 +114,9 @@ protected.post('/', csrfProtection, async function(req,res) {
                                   "text":"requestor: "+req.user.username+"\npmc: "+pmc+"\n\n"+req.body.cvetitle,
                                  }).then( (x) => {  console.log("sent CVE request mail "+x);});
         
-        req.flash('success',"An email has been sent to security@apache.org requesting the CVE name");
+        req.flash('success', testmode
+            ? 'Dev mode: CVE request email NOT sent (logged to console).'
+            : 'An email has been sent to security@apache.org requesting the CVE name');
         res.render('blank');
         return;
     }
@@ -107,17 +125,7 @@ protected.post('/', csrfProtection, async function(req,res) {
     
     console.log("Requesting "+req.body.number+" "+ req.body.year + " CVE for "+req.body.pmc+ " email list "+emaillist)
 
-    var opt = {
-        'method' : 'POST',
-        'url': conf.cveapiurl+'/cve-id?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
-        //'url': "https://cveprocess.apache.org/notfound",
-        'json': true,
-        'headers': conf.cveapiheaders,
-    };
-    await request(opt, async function (error, response, body) {
-	if (testmode) {
-            body = {"cve_ids":[{"requested_by":{"cna":"address","user":"joshuaburton@address.com"},"cve_id":"CVE-2021-20252","cve_year":"2021","state":"RESERVED","owning_cna":"address","reserved":"2020-10-26T17:20:04.291Z"}]};
-	}
+    const handleCveResponse = async function (error, response, body) {
         if (error) {
             req.flash('error',error);
             res.render('blank');
@@ -128,9 +136,6 @@ protected.post('/', csrfProtection, async function(req,res) {
             } else {
                 console.log("ok");
                 for (cveid in body.cve_ids) {
-		    if (testmode) {
-                        body.cve_ids[cveid].cve_id = "CVE-2000-" + (Math.floor(Math.random()*9999)+10000)
-		    }
 		    cve = body.cve_ids[cveid].cve_id
                     // MJC TEST
 //                    if (testmode) {
@@ -194,7 +199,20 @@ protected.post('/', csrfProtection, async function(req,res) {
                 res.end();
             }
         }
-    });
+    };
+
+    if (testmode) {
+        // Skip the HTTP round trip; fabricate a CVE Services response locally.
+        await handleCveResponse(null, undefined, makeFakeCveResponse());
+    } else {
+        const opt = {
+            'method': 'POST',
+            'url': conf.cveapiurl+'/cve-id?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
+            'json': true,
+            'headers': conf.cveapiheaders,
+        };
+        await request(opt, handleCveResponse);
+    }
 });
 
 

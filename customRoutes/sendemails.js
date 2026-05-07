@@ -23,7 +23,9 @@ protected.post('/', csrfProtection, async function(req,res) {
         var se1 = await email.sendemail({"from":"\""+req.user.name+"\" <"+req.user.email+">","to":to1,"replyTo":req.body.emailreplyto,"subject":req.body.emailsubject,"text":req.body.emailtext}).then( (x) => {  console.log("sent OSS notification mail "+x);});
         var se2 = await email.sendemail({"from":"\""+req.user.name+"\" <"+req.user.email+">","to":to2,"bcc":"security@apache.org","replyTo":req.body.emailreplyto,"subject":req.body.emailsubject,"text":req.body.emailtext}).then( (x) => {  console.log("sent ASF notification mail "+x);});    
     }
-    req.flash('error','Sent the emails!');
+    req.flash('success', conf.cveapiliveservice
+        ? 'Sent the emails!'
+        : 'Dev mode: emails NOT sent (logged to console).');
     res.render('blank');
     res.end();
 });

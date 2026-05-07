@@ -44,6 +44,12 @@ function allowedtopushlive(pmcsiamin, specificpmc) {
 }
 
 function getCveIdState(cveid, cb) {
+    if (!conf.cveapiliveservice) {
+        // Dev mode: skip the HTTP call. Pretend the CVE is fresh so the
+        // caller takes the "first publish" (POST) branch.
+        cb("RESERVED");
+        return;
+    }
     var opt = {
         'method' : 'GET',
         'url': conf.cveapiurl+'/cve-id/'+ cveid,
@@ -66,6 +72,13 @@ function getCveIdState(cveid, cb) {
 }
 
 function publishCve(cveid, isupdate, container, cb) {
+    if (!conf.cveapiliveservice) {
+        // Dev mode: skip the HTTP call. Log what would have been sent and
+        // report success to the caller without contacting cve.org.
+        console.log("Dev mode: would have " + (isupdate ? "PUT" : "POST") + "ed " + cveid + " to cve.org");
+        cb();
+        return;
+    }
     var opt = {
         'method' : 'POST',
         'url': conf.cveapiurl+'/cve/'+ cveid +"/cna",
@@ -141,7 +154,9 @@ protected.post('/', csrfProtection, async function(req,res) {
         var isupdate = (lateststate != "RESERVED")
         var result = await new Promise( res => { publishCve(j.cveMetadata.cveId, isupdate, j.containers.cna, res)})
         if (!result) {
-            res.json({"message":"Push to cve.org success."});
+            res.json({"message": conf.cveapiliveservice
+                ? "Push to cve.org success."
+                : "Dev mode: push to cve.org skipped (NODE_ENV is not 'production')."});
             
             var s2 = email.sendemail({"to":"security@apache.org",
                                       "subject":j.cveMetadata.cveId+" was pushed to cve.org",
