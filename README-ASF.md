@@ -22,20 +22,14 @@ Vulnogram app on the host.
    npm install
    ```
 
-2. Activate the ASF configuration:
-
-   ```shell
-   ln -s conf-asf.js config/conf.js
-   ```
-
-3. Copy `example-asf.env` to `.env`, then open `.env` and uncomment the
+2. Copy `example-asf.env` to `.env`, then open `.env` and uncomment the
    development overrides at the top of the file:
 
    ```shell
    cp example-asf.env .env
    ```
 
-4. Generate a self-signed TLS certificate (required because the
+3. Generate a self-signed TLS certificate (required because the
    `oauth.apache.org` callback URL must use HTTPS):
 
    ```shell
