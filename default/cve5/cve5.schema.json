@@ -751,6 +751,7 @@
         "platforms",
         "collectionURL",
         "packageName",
+        "packageURL",
         "repo",
         "modules",
         "programFiles",
