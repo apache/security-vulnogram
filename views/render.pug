@@ -44,15 +44,20 @@ mixin linklist(l, url)
                 =v
 
 mixin CVSS(value)
-    if value.baseScore
-        = value.baseScore.toFixed(1)
-    |  
-    if value.version >= "3"
-        | (
-        a(href="https://cvss.js.org/#" + value.vectorString)=value.vectorString
-        | )
-    else
-        a(href='https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector='+value.vectorString)=value.vectorString
+    if value && value.baseScore !== undefined && value.baseScore !== null && value.baseScore !== ''
+        - var baseScoreNum = Number(value.baseScore)
+        if isNaN(baseScoreNum)
+            = value.baseScore
+        else
+            = baseScoreNum.toFixed(1)
+    if !(value && value.baseScoreOnly)
+        |  
+        if value && value.version >= "3"
+            | (
+            a(href="https://cvss.js.org/#" + value.vectorString)=value.vectorString
+            | )
+        else if value && value.vectorString
+            a(href='https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator?vector='+value.vectorString)=value.vectorString
 
 mixin renderDate(value)
     - var v = false;
@@ -91,7 +96,6 @@ block content
     block pageDef
         mixin page(obj)
             +jsondump(obj)
-    .big=doc_id
     if doc
         if renderTemplate == 'default'
             - delete doc._id;

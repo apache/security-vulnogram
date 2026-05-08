@@ -1,8 +1,10 @@
 extends ../../default/cve5/edit
 
-block bannerItemsRightLoad
+block sidebarSections
 
-block bannerItemsLeft
+block topHeaderLeftLoad
+
+block topHeaderRight
     if !min
         a.fbn(href=(confOpts[schemaName].conf.uri? confOpts[schemaName].conf.uri : '/' + schemaName + '/' ), title=confOpts[schemaName].conf.title) ☰
     if !confOpts[schemaName].conf.readonly

@@ -4,7 +4,7 @@ const csurf = require('csurf');
 const asf =  require('../custom/asf.js');
 // END ASF
 var csrfProtection = csurf();
-const textUtil = require('../public/js/util.js');
+const textUtil = require('../src/js/edit/util.js');
 var jsonpatch = require('json-patch-extended');
 var _ = require('lodash');
 const docModel = require('../models/doc');
@@ -18,6 +18,14 @@ const {
 const validator = require('validator');
 
 module.exports = function (Document, opts) {
+    var idRegex = new RegExp('^' + opts.idpattern + '$');
+    function ensureRouteID(req, res, next) {
+        if (idRegex.test(req.params.id)) {
+            return next();
+        }
+        return next('route');
+    }
+
     var checkID = check(opts.jsonidpath)
         .exists()
         .custom((val, {
@@ -33,13 +41,14 @@ module.exports = function (Document, opts) {
     var router = module.router = express.Router();
 
     // GET docuemnt
-    router.get('/:id', csrfProtection, [checkID], function (req, res) {
+    router.get('/:id', ensureRouteID, csrfProtection, [checkID], async function (req, res) {
         var q = {};
         q[opts.idpath] = req.params.id;
-        Document.findOne(q, async function (err, doc) {
+        try {
+            var doc = await Document.findOne(q);
             var ucomments = undefined;
             if (!doc) {
-                if(req.params.id != 'new') {
+                if (req.params.id != 'new') {
                     req.flash('error', 'ID not found: ' + req.params.id);
                 }
             } else {
@@ -53,13 +62,13 @@ module.exports = function (Document, opts) {
             // END ASF
             res.locals.renderStartTime = Date.now();
             if (opts.conf.readonly) {
-                if (doc && doc._doc) {
-                    delete doc._doc._id;
+                if (doc) {
+                    delete doc._id;
                 }
                 res.setHeader("Content-Security-Policy", "default-src 'self'; connect-src 'none'; font-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'");
                 res.render((opts.render == 'render' ? 'readonly' : opts.render), {
                     title: req.params.id,
-                    doc: doc ? doc._doc : {},
+                    doc: doc ? doc : {},
                     textUtil: textUtil,
                     doc_id: req.params.id,
                     csrfToken: req.csrfToken(),
@@ -79,7 +88,12 @@ module.exports = function (Document, opts) {
                     ucomments: ucomments
                 });
             }
-        });
+        } catch (err) {
+            res.render('blank', {
+                title: 'Error',
+                message: 'failed. ' + err.message
+            });
+        }
     });
 
     if (opts.conf.readonly) {
@@ -117,7 +131,7 @@ module.exports = function (Document, opts) {
             res.redirect(req.querymen.query[opts.idpath]);
         } else {
             var doc = {};
-            for (a in req.querymen.query) {
+            for (var a in req.querymen.query) {
                 _.set(doc, a, req.querymen.query[a]);
             };
             //console.log(JSON.stringify(req.querymen.query));
@@ -159,13 +173,13 @@ module.exports = function (Document, opts) {
                 patch: jsonpatch.compare(oldDoc.body, newDoc.body),
             },
         };
-        //todo: eliminate mongoose and call InsertOne directly
+        //todo: replace bulkWrite callback with async insert for better error handling
         if (auditTrail.body.patch.length > 0) {
             model.bulkWrite([{
                 insertOne: {
                     document: auditTrail
                 }
-            }], function (err, d) {
+            }], function (err) {
                 if (err) {
                     console.log('Error: saving history ' + err);
                 } else {
@@ -176,13 +190,16 @@ module.exports = function (Document, opts) {
             return null;
         }
     }
-    var History = docModel(opts.schemaName + '_history');
+    var historyCollectionName = opts.historyCollectionName
+        || (opts.conf && opts.conf.historyCollectionName)
+        || (opts.schemaName + '_histories');
+    var History = docModel(historyCollectionName);
     var addHistory = function(oldDoc, newDoc) {
         return module.addModelHistory(History, oldDoc, newDoc);
     }
 
     // Creat a new document
-    router.post(/\/(new)$/, csrfProtection, [checkID, existCheck], function (req, res) {
+    router.post(/\/(new)$/, csrfProtection, [checkID, existCheck], async function (req, res) {
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -196,31 +213,33 @@ module.exports = function (Document, opts) {
             return;
         }
 
-        let entry = new Document({
-            "body": req.body,
-            "author": req.user.username
-        });
-        entry.save(function (err, doc) {
-            if (err) {
-                res.json({
-                    type: 'err',
-                    msg: 'Error ' + err
-                });
-                return;
-            } else {
-                addHistory(null, doc);
-                res.json({
-                    type: 'go',
-                    to: _.get(doc, opts.idpath)
-                });
-                return;
-            }
-        });
+        let now = new Date();
+        let entry = {
+            body: req.body,
+            author: req.user.username,
+            __v: 0,
+            createdAt: now,
+            updatedAt: now
+        };
+        try {
+            var inserted = await Document.insertOne(entry);
+            var doc = Object.assign({}, entry, { _id: inserted.insertedId });
+            addHistory(null, doc);
+            res.json({
+                type: 'go',
+                to: _.get(doc, opts.idpath)
+            });
+        } catch (err) {
+            res.json({
+                type: 'err',
+                msg: 'Error ' + err
+            });
+        }
         return;
     });
 
     // Update or insert existing Document ID 
-    router.post('/:id(' + opts.idpattern + ')', csrfProtection, [checkID], function (req, res) {
+    router.post('/:id', ensureRouteID, csrfProtection, [checkID], async function (req, res) {
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -236,10 +255,6 @@ module.exports = function (Document, opts) {
 
         //let doc = req.body;
         let inputID = _.get(req, opts.idpath);
-        let entry = {
-            "body": req.body,
-            "author": req.user.username
-        };
         let queryNewID = {};
         let queryOldID = {};
         queryNewID[opts.idpath] = inputID;
@@ -248,7 +263,8 @@ module.exports = function (Document, opts) {
         // ASF
         var dorefresh = false;
         // END ASF
-        Document.findOne(queryNewID).then((existingDoc) => {
+        try {
+            var existingDoc = await Document.findOne(queryNewID);
             if (existingDoc) {
                 // check Document ID is being renamed.
                 if (renaming) {
@@ -263,12 +279,12 @@ module.exports = function (Document, opts) {
             asf.asfhookupsertdoc(req,dorefresh);
             // END ASF
             var d = new Date();
-            newDoc = {
+            var newDoc = {
                 body: req.body,
                 author: req.user.username,
                 updatedAt: d
             };
-            Document.findOneAndUpdate(
+            var updateResult = await Document.findOneAndUpdate(
                 queryOldID,
                 {
                     "$set": newDoc,
@@ -279,41 +295,39 @@ module.exports = function (Document, opts) {
                         createdAt: d
                     }
                 }, {
-                "upsert": true
-            },
-                function (err, doc) {
-                    if (doc) {
-                        addHistory(doc, newDoc);
-                    } else {
-                        addHistory(null, newDoc);
-                    }
-                    if (err) {
-                        res.json({
-                            type: 'err',
-                            msg: 'Error! Document not Updated, ' + err
-                        });
-                    } else {
-                        // ASF
-                        if (renaming || dorefresh) {
-                        // END ASF
-                            res.json({
-                                type: 'go',
-                                to: inputID
-                            });
-                        } else {
-                            res.json({
-                                type: 'saved'
-                            });
-                        }
-                    }
-                    return;
+                    upsert: true,
+                    returnDocument: 'before'
+		});
+            var oldDoc = updateResult || null;
+            if (oldDoc) {
+                addHistory(oldDoc, newDoc);
+            } else {
+                var insertedDoc = await Document.findOne(queryNewID);
+                addHistory(null, insertedDoc || newDoc);
+            }
+            // ASF
+            if (renaming || dorefresh) {
+            // END ASF
+                res.json({
+                    type: 'go',
+                    to: inputID
                 });
-        });
+            } else {
+                res.json({
+                    type: 'saved'
+                });
+            }
+        } catch (err) {
+            res.json({
+                type: 'err',
+                msg: 'Error! Document not Updated, ' + err
+            });
+        }
         return;
     });
 
     //Delete Document
-    router.delete('/:id(' + opts.idpattern + ')', csrfProtection, function (req, res) {
+    router.delete('/:id', ensureRouteID, csrfProtection, async function (req, res) {
         let query = {};
         query[opts.idpath] = req.params.id;
 
@@ -325,14 +339,12 @@ module.exports = function (Document, opts) {
             return;                                                                       
         }     
         // END ASF
-        Document.deleteOne(query, function (err) {
-            if (err) {
-                res.send('Error Deleting');
-                return;
-            } else {
-                res.send('Deleted');
-            }
-        });
+        try {
+            await Document.deleteOne(query);
+            res.send('Deleted');
+        } catch (err) {
+            res.send('Error Deleting');
+        }
     });
 
     // ASF
@@ -341,7 +353,7 @@ module.exports = function (Document, opts) {
     // END ASF
         var q = {}
         q[opts.idpath] = doc_id;
-        parentDoc = await Document.findOne(q).exec();
+        var parentDoc = await Document.findOne(q);
         if (parentDoc) {
             // ASF
             if (parentDoc.body && parentDoc.body.CNA_private && !asf.asfgroupacls(parentDoc.body.CNA_private.owner, mypmcs)) {
@@ -352,11 +364,13 @@ module.exports = function (Document, opts) {
                 parent_id: parentDoc._id
             }
             var ret = await subSchema.find(subq, {
-                _id: 0,
-                parent_id: 0
+                projection: {
+                    _id: 0,
+                    parent_id: 0
+                }
             }).sort({
                 updatedAt: -1
-            }).exec();
+            }).toArray();
             return (ret);
         } else {
             return {
@@ -366,7 +380,7 @@ module.exports = function (Document, opts) {
     }
 
     // Get document chage history (JSON patches)
-    router.get('/log/:id', [checkID], function (req, res) {
+    router.get('/log/:id', ensureRouteID, [checkID], function (req, res) {
         // ASF
         console.log(History, opts.schemaName);
         getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
@@ -376,7 +390,7 @@ module.exports = function (Document, opts) {
     });
 
     // Get document comments
-    router.get('/comment/:id', [checkID], function (req, res) {
+    router.get('/comment/:id', ensureRouteID, [checkID], function (req, res) {
         // ASF
         getSubDocs(History, req.params.id, req.user.pmcs).then(r => {
             res.json(r);

@@ -1,5 +1,5 @@
 mixin cveLoginBox
-    div.sec.shd.rnd.pad#cpBox
+    div.sec.shd.rndx.pad#cpBox
         div#cpLogo
             img(width="100%" src="./static/CVE.svg")
         div#cpTitle
@@ -9,29 +9,43 @@ mixin cveLoginBox
         div#cpPrompt
             #loginErr=message
             form#cveLoginForm(method='POST', onclick='resetPortalLoginErr();' onkeypress='resetPortalLoginErr();' onchange='resetPortalLoginErr();' onsubmit='portalLogin(event, this); return false;')
-                label.lbl.vgi-globe(for="cpPortal") Portal
-                select#cpPortal.bor.txt(name='portal')
-                    option(value="https://cveawg.mitre.org/api" selected=(prevPortal == 'production')) production
-                    option(value="https://cveawg-test.mitre.org/api" selected=(prevPortal == 'test')) test
-                    option(value="https://cveawg-adp-test.mitre.org/api" selected=(prevPortal == 'adp-test')) adp-test
-                    option(value="http://127.0.0.1:3000/api" selected=(prevPortal == 'local')) local
+                label.lbl(for="cpPortal") Portal
+                span.txt-icon-wrap
+                    span.txt-input-icon.vgi-globe
+                    select#cpPortal.bor.txt.txt-has-icon(name='portal')
+                        option(value="https://cveawg.mitre.org/api" selected=(prevPortal == 'production')) production
+                        option(value="https://cveawg-test.mitre.org/api" selected=(prevPortal == 'test')) test
+                        option(value="https://cveawg-adp-test.mitre.org/api" selected=(prevPortal == 'adp-test')) adp-test
+                        option(value="http://127.0.0.1:3000/api" selected=(prevPortal == 'local')) local
 
-                label.lbl.vgi-org(for="cpOrg") CNA Short Name
-                input#cpOrg.bor.txt(name='org', type='text', autocomplete='on', "pattern"=".{2,64}" required=true value=prevOrg?prevOrg:'')
+                label.lbl(for="cpOrg") CNA Short Name
+                span.txt-icon-wrap
+                    span.txt-input-icon.vgi-org
+                    input#cpOrg.bor.txt.txt-has-icon(name='org', type='text', autocomplete='on', "pattern"=".{2,64}" required=true value=prevOrg?prevOrg:'')
 
-                label.lbl.vgi-user(for="cpUser") CVE User
-                input#cpUser.bor.txt(name='user', type='text', autocomplete="on", "pattern"=".+" required=true)
+                label.lbl(for="cpUser") CVE User
+                span.txt-icon-wrap
+                    span.txt-input-icon.vgi-user
+                    input#cpUser.bor.txt.txt-has-icon(name='user', type='text', autocomplete="on", "pattern"=".+" required=true)
 
-                label.lbl.vgi-key(for="cpKey") CNA API Key
-                input#cpKey.bor.txt(name='key', type='password', autocomplete='off' required=true)
-
-                input#cpSubmit.bor.fbn.sfe.vgi-export(type='submit', value='Login')
-
+                label.lbl(for="cpKey") CNA API Key
+                span.txt-icon-wrap
+                    span.txt-input-icon.vgi-key
+                    input#cpKey.bor.txt.txt-has-icon(name='key', type='password', autocomplete='off' required=true)
+                span
+                span.row
+                    input#cpRemember.chk(name='rememberMe', type='checkbox')
+                    label.lbl(for='cpRemember') Remember me
+                span
+                span
+                    input#cpSubmit.bor.fbn.sfe.vgi-export(type='submit', value='Login')
+                    |  
+                    button.fbn.vgi-x(onclick="return closeCvePortal(event);") Cancel
 mixin dlgHeader(icon, msg)
     header.ban.sec.pad(style="min-width:20em;")
         b.lbl(class=icon)=msg
         | 
-        a.sbn.right.vgi-fail(onclick="this.closest('dialog').close()")
+        a.rbtn.right.vgi-x(onclick="this.closest('dialog').close()")
 
 mixin cveErrors
     +dlgHeader('vgi-alert', typeof err == 'string' ? 'Error' : err.error)
@@ -51,28 +65,45 @@ mixin cveErrors
 mixin portal
     - var y = new Date().getFullYear()
     - var nextY = y+1
-    header.pad.ban.sec
-        .left
+    - var selectedState = (typeof filterState !== 'undefined' && filterState !== null) ? String(filterState) : 'RESERVED'
+    - var selectedYear = (typeof filterYear !== 'undefined' && filterYear !== null && filterYear !== '') ? String(filterYear) : String(y)
+    header.pad.ban
+        .left.flx
             label.vgi-globe.lbl Portal: 
-                =portalType
+                b=portalType
             span.btg.rnd
               block portalreserve
-                        button.btn.vgi-magic(onclick='cveReserveAndRender(0)') Reserve One CVE
-                        details.popup
-                            summary.btn.t9 ▼
-                            dl.pop.wht.bor.rnd.shd.rows
-                              .gap
-                                dt.flx
-                                    button.btn.vgi-magic(onclick='cveReserveAndRender(0, 5)' style="min-width:6em") Reserve  5
-                                    button.right.sbn.vgi-fail(onclick="this.closest('details').removeAttribute('open')")     
-                                dt
-                                    button.btn.vgi-magic(onclick='cveReserveAndRender(0, 10)'  style="min-width:6em") Reserve 10
-                                dt 
-                                    button.btn.vgi-magic(onclick='cveReserveAndRender(1)') Reserve one for the year 
-                                        = y+1
-                                dt
-                                    button.btn.vgi-magic(onclick='cveReserveAndRender(-1)') Reserve one for the year 
-                                        = y-1
+                button.btn.vgi-magic(onclick='cveReserveAndRender(0)') Reserve One CVE
+                details.popup
+                    summary.btn.t9 ▼
+                    dl.pop.wht.bor.rnd.shd.rows.pad.gap.vflx
+                        dt.flx
+                            button.btn.vgi-magic(onclick='cveReserveAndRender(0, 5)' style="min-width:6em") Reserve  5
+                            button.rbtn.right.vgi-x(onclick="this.closest('details').removeAttribute('open')")     
+                        dt
+                            button.btn.vgi-magic(onclick='cveReserveAndRender(0, 10)'  style="min-width:6em") Reserve 10
+                        dt 
+                            button.btn.vgi-magic(onclick='cveReserveAndRender(1)') Reserve one for 
+                                = y+1
+                        dt
+                            button.btn.vgi-magic(onclick='cveReserveAndRender(-1)') Reserve one for 
+                                = y-1
+                        dt
+                            - var reserveSelectedYear = selectedYear
+                            .flx
+                                button.btn.vgi-magic(onclick="cveReserveAndRender(((parseInt(document.getElementById('reserveSelectedYear').value, 10) || currentYear) - currentYear))")
+                                    | Reserve one for &nbsp;
+                                    span#reserveSelectedYearLabel=reserveSelectedYear
+                                |  
+                                select#reserveSelectedYear.lbl.txt(onclick='event.stopPropagation();' onchange="document.getElementById('reserveSelectedYearLabel').innerText=this.value")
+                                    option(value=nextY selected=(reserveSelectedYear == String(nextY)))=nextY
+                                    option(value=y selected=(reserveSelectedYear == String(y)))=y
+                                    - var j = y-1
+                                    while j > 1998
+                                        option(value=j selected=(reserveSelectedYear == String(j)))=j
+                                        - j--;
+            button.btn.vgi-forward#bulkTransferBtn(onclick='cveBulkTransfer()' disabled) Transfer
+            button.btn.vgi-del#bulkRejectBtn(onclick='cveBulkReject()' disabled) Reject
 
         .flx
             label#cveUser
@@ -85,24 +116,24 @@ mixin portal
         .lbl Show
         .rdg
             .form-control
-                input.hid(id="chkall" type="radio" name="fstate" value="")
+                input.hid(id="chkall" type="radio" name="fstate" value="" checked=(selectedState == ''))
                 label.lbl.vgi-misc(for="chkall") All
             .form-control
-                input.hid(id="chkres" type="radio" name="fstate" value="RESERVED" checked=true)
+                input.hid(id="chkres" type="radio" name="fstate" value="RESERVED" checked=(selectedState == 'RESERVED'))
                 label.lbl.vgi-tag(for="chkres") Reserved
             .form-control
-                input.hid(id="chkpub" type="radio" name="fstate" value="PUBLISHED")
+                input.hid(id="chkpub" type="radio" name="fstate" value="PUBLISHED" checked=(selectedState == 'PUBLISHED'))
                 label.lbl.vgi-globe(for="chkpub") Published
             .form-control
-                input.hid(id="chkrej" type="radio" name="fstate" value="REJECTED")
-                label.lbl.vgi-no(for="chkrej") Rejected
+                input.hid(id="chkrej" type="radio" name="fstate" value="REJECTED" checked=(selectedState == 'REJECTED'))
+                label.lbl.vgi-del(for="chkrej") Rejected
         .lbl Year
         select.lbl.txt(name="y")
-            option(value=nextY)=nextY
-            option(value=y selected)=y
+            option(value=nextY selected=(selectedYear == String(nextY)))=nextY
+            option(value=y selected=(selectedYear == String(y)))=y
             - var i = y-1
             while i > 1998
-                option(value=i)=i
+                option(value=i selected=(selectedYear == String(i)))=i
                 - i--;
         |  
         button.btn.vgi-reuse(onclick='event.preventDefault();cveGetList();return false;') Go
@@ -124,10 +155,10 @@ mixin userstats
             |  ▼ 
         dl.pop.wht.bor.rnd.shd.pad
             .gap.row
-                button.right.sbn.vgi-fail(onclick="this.closest('details').removeAttribute('open')")     
+                button.right.rbtn.vgi-x(onclick="this.closest('details').removeAttribute('open')")     
             +userDetail(userInfo)
             hr.bort
-            span.vgi-edit.fbn(onclick="cveUserEdit(this)" u=userInfo.username, f=userInfo.name?userInfo.name.first:'', l=userInfo.name?userInfo.name.last:'', ac=userInfo.active ad=userInfo.authority.active_roles.includes('ADMIN') title="Edit Info")
+            span.vgi-edit.fbn(onclick="cveUserEdit(this)" u=userInfo.username, f=userInfo.name?userInfo.name.first:'', l=userInfo.name?userInfo.name.last:'', ac=userInfo.active, ad=userInfo.authority.active_roles.includes('ADMIN') title="Edit Info")
                 | Update my details
             hr.bort
             dt Org:  
@@ -140,7 +171,7 @@ mixin userstats
             span.vgi-exit.fbn(onclick="portalLogout()") Logout!
 
 mixin userDetail(u)
-    a.td(onclick="cveUserEdit(this)",u=u.username, f=u.name?u.name.first:'', l=u.name?u.name.last:'' ac=u.active ad=u.authority.active_roles.includes('ADMIN') title="Edit Info")
+    a.td(onclick="cveUserEdit(this)", u=u.username, f=u.name?u.name.first:'', l=u.name?u.name.last:'', ac=u.active, ad=u.authority.active_roles.includes('ADMIN') title="Edit Info")
         b=u.name?u.name.first:''
             | 
             =u.name?u.name.last:''
@@ -162,8 +193,8 @@ mixin usermgmt
         div.pop.wht.bor.rnd.shd.usermgmt
             .gap.row
                 button.sfe.btn.vgi-magic(onclick="document.getElementById('userAddDialog').showModal()") Add a user  
-                button.right.sbn.vgi-fail(onclick="this.closest('details').removeAttribute('open')")     
-            .tbl.gap
+                button.right.rbtn.vgi-x(onclick="this.closest('details').removeAttribute('open')")     
+            .vtbl.gap
                 .tbody#userlist
                     .tr
                         .td(colspan=6)
@@ -183,24 +214,9 @@ mixin htext
         p=t
 
 mixin date(value)
-    - var v = false;
-    - if (value instanceof Date) { v = value;} else {
-    -   var timestamp = Date.parse(value);
-    -   v = isNaN(timestamp) ? false : new Date(timestamp)
-    - }
-    if v
-        - var nowt = Date.now();
-        - var vtime = v.getTime();
-        - var delta = nowt-vtime;
-        - var hidet = '';
-        - if (Math.abs(delta) > 43000000) { hidet = 'hid';}
-        span.nobr.date(class=cl, title=v.toString())
-            = v.toISOString().slice(0,10)
-            span.nobr(class=hidet)
-                |  
-                = v.toLocaleTimeString("de-US", {hour:"2-digit", minute:"2-digit"})
-    else
-        = obj[name]
+    if value
+        - var friendly = (typeof textUtil !== 'undefined' && textUtil.formatFriendlyDate) ? textUtil.formatFriendlyDate(value) : String(value).slice(0,10)
+        span.nobr.date(title=value)= friendly
 
 mixin editables
     each c in cveIds
@@ -210,7 +226,7 @@ mixin editables
             option(value=c.cve_id)='🌐 Published on '
                 +date(c.time.modified)
         if c.state == 'REJECTED'
-            option(value=c.cve_id)='⛔ Rejected on ' 
+            option(value=c.cve_id)='🗑️ Rejected on ' 
                 +date(c.time.modified)
 
 mixin reserveds
@@ -225,10 +241,14 @@ mixin reserveds
 
 mixin listIds
     if cveIds && cveIds.length > 0
-        - var stateIcons = {'RESERVED':'vgi-tag', 'PUBLISHED':'vgi-globe', 'REJECTED':'vgi-no', 'PUBLIC':'vgi-globe'}
-        table#cveListTable.tbl.sortable
+        - var stateIcons = {'RESERVED':'vgi-tag', 'PUBLISHED':'vgi-globe', 'REJECTED':'vgi-del', 'PUBLIC':'vgi-globe'}
+        - var canInlineLoad = (typeof inlineLoad === 'boolean') ? inlineLoad : true
+        - var docBase = docPathBase ? docPathBase : '/cve5/'
+        table#cveListTable.vtbl.sortable
             thead
                 tr
+                    th
+                        input#selectAllCves(type="checkbox" title="Select all" onchange="cveSelectionSelectAll(this)")
                     th ID
                     th Requester
                     th(aria-sort="ascending") Created
@@ -238,14 +258,20 @@ mixin listIds
                 each c in cveIds
                     tr(data=c.state)
                         td
+                            input.cve-select-cb(type="checkbox" data=c.cve_id onchange="cveSelectionChanged()")
+                        td
                             if editable
-                                a(class=stateIcons[c.state]?stateIcons[c.state]:'',href="javascript:cveLoad('"+c.cve_id+"')", title='Load ' + c.state + ' ' + c.cve_id + ' to edit')
-                                    =c.cve_id
+                                if canInlineLoad
+                                    a(class=stateIcons[c.state]?stateIcons[c.state]:'',href="javascript:cveLoad('"+c.cve_id+"')", title='Load ' + c.state + ' ' + c.cve_id + ' to edit')
+                                        =c.cve_id
+                                else
+                                    a(class=stateIcons[c.state]?stateIcons[c.state]:'',href=docBase + encodeURIComponent(c.cve_id), title='Open ' + c.cve_id)
+                                        =c.cve_id
                             else
                                 span(class=stateIcons[c.state]?stateIcons[c.state]:'', title=c.state)
                                     =c.cve_id
                             if c.state != 'RESERVED'
-                                a.vgi-ext(href="https://www.cve.org/CVERecord?id="+c.cve_id, target="_blank")
+                                a.vgi-ext(href="https://vulnogram.org/seaview/?"+c.cve_id, target="_blank")
                         td=c.requested_by.user
                         td
                             +date(c.time.created)
@@ -253,11 +279,12 @@ mixin listIds
                             if c.time.modified != c.time.created
                                 +date(c.time.modified)
                         td
-                            if editable 
+                            if editable
+                                a.fbn.vgi-forward(data=c.cve_id onclick="cveTransfer(this, event)", title="Transfer this CVE ID",) &nbsp;
                                 if c.state == 'RESERVED'
-                                    a.vgi-cancel(data=c.cve_id onclick="cveReject(this, event)", title="Reject this CVE ID",) &nbsp;
+                                    a.fbn.vgi-del(data=c.cve_id onclick="cveReject(this, event)", title="Reject this CVE ID",) &nbsp;
                                 else if c.state == 'PUBLISHED'
-                                    a.vgi-cancel(data=c.cve_id onclick="showAlert('Rejecting published record', 'To reject this published record, open this in the editor, click the Reject ID button at the bottom')", title="Reject this CVE ID!",) &nbsp;
+                                    a.fbn.vgi-del(data=c.cve_id onclick="showAlert('Rejecting published record', 'To reject this published record, open this in the editor, click the Reject ID button at the bottom')", title="Reject this CVE ID!",) &nbsp;
                                 else
                                     i.vgi-no.tgrey(title="This ID is already rejected!") &nbsp;
     else
