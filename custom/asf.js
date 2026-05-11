@@ -97,44 +97,80 @@ function asflogout (req, res) {
 }
 
 function asflogin (req, res) {
-    sess = req.session;
+    const sess = req.session;
+    const our_endpoint = "https://"+req.get('host')+"/users/login";
     if (req.query.code) {
-	const userinfo_endpoint= 'https://oauth.apache.org/token'
-	uri = userinfo_endpoint+"?code="+req.query.code
-	request(uri, {json:true},(err,cbres,body) => {
-	    if (err) {res.send(err);}
-	    else if (cbres.statusCode != 200) {res.send(body);}
-	    else if (body.state != sess.state) { res.send("auth is broken") }
-	    else {
-		pmcs = body.pmcs;
-		for (i=0; i< body.projects.length; i++) {
-		    if (!pmcs.includes(body.projects[i])) {
-			// we're a committer to project, but not in the PMC
-			if (conf.pmcswithsecurityemails.includes(body.projects[i])|| body.projects[i] == "security") {
-			    // but this project has a security list
-			    console.log("User "+body.uid+" is committer to "+body.projects[i]+" but not PMC, allowed");
-			    pmcs.push(body.projects[i]);
-			} else {
-			    console.log("User "+body.uid+" is committer to "+body.projects[i]+" but not PMC, ignored");
-			}
-		    }
-		}  
-		sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:pmcs};
-		//sess.user = {username:body.uid, email:body.email, name:body.fullname, pmcs:["airflow"]};		
-		if (sess.returnTo) {
-		    res.redirect(req.session.returnTo);
-		    delete req.session.returnTo;
-		} else {
-		    res.redirect("/");
-		}
-		console.log(body);
-	    }
-	});
+        if (req.query.state != sess.state) {
+            res.send("auth is broken");
+            return;
+        }
+        console.log(conf.oauth_token_endpoint)
+        request.post(conf.oauth_token_endpoint, {
+            'auth': {
+                'user': conf.oauth_client_id,
+                'pass': conf.oauth_client_secret,
+                'sendImmediately': true
+             },
+             'form': {
+                 'grant_type': "authorization_code",
+                 'redirect_uri': our_endpoint,
+                 'code': req.query.code
+             },
+             'json': true
+        }, (err, cbres, body) => {
+            if (err) {res.send("Failed to exchange token:" + err);return;}
+            if (cbres.statusCode != 200) {res.send(`Response code ${cbres.statusCode} while exchanging token, response body: ${body}`);return;}
+            const id_token = body.id_token
+            const id = JSON.parse(Buffer.from(id_token.split(".")[1], 'base64url'))
+            // We trust the TLS connection to the auth server for now,
+            // so no id signature validation. Might be something to add
+            // in the future.
+            if (id.aud != conf.oauth_client_id) {
+                console.log(`Unexpected client id: expected ${conf.oauth_client_id} got ${id.aud}`);
+                res.send("auth is broken");
+                return;
+            }
+            if (id.iss != conf.oauth_issuer) {
+                console.log(`Unexpected issuer: expected ${conf.oauth_issuer} got ${id.iss}`);
+                res.send("auth is broken");
+                return;
+            }
+            if (id.exp * 1000 < Date.now()) {
+                console.log(`Token expired: ${id.exp * 1000} < ${Date.now()}`);
+                res.send("auth is broken");
+                return;
+            }
+            const projects = id.groups.filter((group) => group.indexOf("-") == -1);
+            const pmcs = id.groups
+                .filter((group) => group.endsWith("-pmc"))
+                .map((group) => group.replaceAll("-pmc", ""));
+            // TODO don't see an obvious field?
+            const username = id.nickname;
+            for (var i=0; i< projects.length; i++) {
+                if (!pmcs.includes(projects[i])) {
+                    // we're a committer to project, but not in the PMC
+                    if (conf.pmcswithsecurityemails.includes(projects[i])|| projects[i] == "security") {
+                        // but this project has a security list
+                        console.log("User "+username+" is committer to "+projects[i]+" but not PMC, allowed");
+                        pmcs.push(projects[i]);
+                    } else {
+                        console.log("User "+username+" is committer to "+projects[i]+" but not PMC, ignored");
+                    }
+                }
+            }
+            sess.user = {username, email:id.email, name:id.given_name, pmcs:pmcs};
+            if (sess.returnTo) {
+                res.redirect(req.session.returnTo);
+                delete req.session.returnTo;
+            } else {
+                res.redirect("/");
+            }
+            console.log(id);
+        })
     } else {
         delete sess.user;
         sess.state = uuidv4();
-        const callbackUrl = `https://${req.get('host')}${req.originalUrl}`;
-        const authorizationUrl = `https://oauth.apache.org/auth?state=${sess.state}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+        const authorizationUrl = `${conf.oauth_authorization_endpoint}?client_id=${conf.oauth_client_id}&response_type=code&scope=openid profile email&state=${sess.state}&redirect_uri=${encodeURIComponent(our_endpoint)}`;
         res.redirect(authorizationUrl)
     }
 }
@@ -143,7 +179,7 @@ function asflogin (req, res) {
 
 function setpmc(req, res) {
     if (req.isAuthenticated()) {
-	groups = req.user.pmcs;
+	const groups = req.user.pmcs;
 	if (groups.includes(conf.admingroupname)) {
 	    if (req.query.pmc) {
 		req.session.user.pmcs = req.query.pmc.split(',');
@@ -159,7 +195,6 @@ function setpmc(req, res) {
 
 function usersmejson (req, res) {
     if (req.isAuthenticated()) {
-        groups = req.user.pmcs;
         res.json({
             default: req.user.email,
             value: req.user.email,
@@ -168,7 +203,7 @@ function usersmejson (req, res) {
 }
 
 function usersprofile (req,res) {
-    user = req.user;
+    const user = req.user;
     user.group = user.pmcs;
     res.render('users/view', {
         title: 'Profile: ' + user.username,
@@ -196,7 +231,7 @@ function cvenew (req,res,next) {
 
 function userslistjson (req, res) {
     if (req.isAuthenticated()) {
-	groups = req.user.pmcs;
+	const groups = req.user.pmcs;
 
 	if (groups && groups.includes(conf.admingroupname)) {
             res.json({
@@ -251,7 +286,7 @@ var self = module.exports = {
 	if (yourpmcs.includes(conf.admingroupname)) {
 	    return true;
 	}
-	for (i=0; i< yourpmcs.length; i++) {
+	for (let i=0; i< yourpmcs.length; i++) {
 	    if (yourpmcs[i] == documentacl) {
 		return true;
 	    }
