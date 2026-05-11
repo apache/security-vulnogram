@@ -2,10 +2,14 @@
 // Command line utility to add users.
 
 const pbkdf2 = require('../lib/pbkdf2.js');
+const passport = require('passport');
 const User = require('../models/user.js');
 const readline = require('readline');
-const mongo = require('../lib/mongo');
+const mongoose = require('mongoose');
 const config = require('../config/conf');
+
+mongoose.Promise = global.Promise;
+mongoose.set('strictQuery', false);
 
 function hidden(query, callback) {
     var stdin = process.openStdin();
@@ -42,68 +46,57 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-let newUser = {
-    name: args[4],
-    email: args[3],
-    username: (args[2] || '').toLowerCase(),
-    priv: Number(args[6]),
-    group: args[5],
-    emoji: '',
-    password: "dummy"
-};
+let newUser = new User({
+                name: args[4],
+                email: args[3],
+                username: args[2],
+                priv: args[6],
+                group: args[5],
+                password : "dummy"
+            }, { _id: false });
 
-let error = User.validateUserDocument(newUser);
-if (error) {
+if(error = newUser.validateSync()) {
     console.log("Error: " + error);
     process.exit(1);
 }
 
-function hashPassword(password) {
-    return new Promise(function (resolve, reject) {
-        pbkdf2.hash(password, function (err, hash) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(hash);
-            }
-        });
-    });
-}
+newUser = newUser._doc;
+delete newUser._id;
 
 hidden('Enter Password: ', (password1) => {
-    hidden('Enter Password again: ', async (password2) => {
+    hidden('Enter Password again: ', (password2) => {
         if (password1 && password1 == password2) {
-            try {
-                await mongo.connect(config.database);
-                var hash = await hashPassword(password1);
+            pbkdf2.hash(password1, function (err, hash) {
+                if (err) {
+                    console.error(err);
+                }
                 newUser.password = hash;
-                var doc = await User.findOneAndUpdate({
-                    username: newUser.username
-                },
-                    newUser, {
-                    upsert: true,
-                    setDefaultsOnInsert: true
+                mongoose.connect(config.database, {
+                    keepAlive: false,
                 });
-                if (doc) {
-                    console.log('Success', 'User ' + doc.username + ' is now updated.\n');
-                } else {
-                    console.log('Success', 'New user is now registered and can log in: ' + newUser.username);
-                }
-            } catch (err) {
-                console.error(err);
-                process.exitCode = 1;
-            } finally {
-                try {
-                    await mongo.close();
-                } catch (e) {
-
-                }
-                rl.close();
-            }
+                User.findOneAndUpdate({
+                        username: newUser.username
+                    },
+                    newUser, {
+                        upsert: true,
+                        setDefaultsOnInsert: true
+                    },
+                    function (err, doc) {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            if (doc) {
+                                console.log('Success', 'User ' + doc.username + ' is now updated.\n');
+                            } else {
+                                console.log('Success', 'New user is now registered and can log in: ' + newUser.username);
+                            }
+                        }
+                        mongoose.connection.close();
+                    });
+            });
         } else {
             console.error("Passwords do not match! Try again.");
-            process.exitCode = 1;
-            rl.close();
         }
+        rl.close();
     });
 });

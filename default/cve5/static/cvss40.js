@@ -400,7 +400,7 @@ export class CVSS40 {
         }
     }
     static roundup(score) {
-        return Math.round(score * 10) / 10;
+        return +(score.toFixed(1));
     }
     /**
      * Give the corresponding rating of the provided score.

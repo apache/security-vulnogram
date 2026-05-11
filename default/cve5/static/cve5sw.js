@@ -12,34 +12,12 @@
 
 const storage = {};
 const keyname = "cve-services.vulnogramkeyStore";
-const ALLOWED_PORTAL_ORIGINS = new Set([
-    'https://cveawg.mitre.org',
-    'https://cveawg-test.mitre.org',
-    'https://cveawg-adp-test.mitre.org',
-]);
-
-const isAllowedOrigin = (uri) => {
-    try {
-        return ALLOWED_PORTAL_ORIGINS.has(new URL(uri).origin);
-    } catch (_) {
-        return false;
-    }
-};
 /* Encryption API using JavaScript native crypto.js and indexeDB for storing private keys */
 const encrypt_storage_version = "1.1.14";
 const cacheName = 'private';
 const cacheURL = '/creds';
-let sessionTimer = null;
 
-const clearSessionTimer = () => {
-    if (sessionTimer) {
-        clearTimeout(sessionTimer);
-        sessionTimer = null;
-    }
-};
-
-const destroySession = () => {
-    clearSessionTimer();
+destroySession = () => {
     if ('creds' in storage) {
         delete storage['creds'];
         let bc = new BroadcastChannel('logout');
@@ -50,45 +28,41 @@ const destroySession = () => {
     });
 };
 
-const SESSION_6H = 1000 * 60 * 60 * 6;
+setSessionTimer = () => {
+    let defaultTimeout = 1000 * 60 * 60; //1 hour timeout
 
-const setSessionTimer = (duration) => {
-    clearSessionTimer();
-    sessionTimer = setTimeout(destroySession, duration);
+    setTimeout(
+        destroySession,
+        defaultTimeout
+    );
 };
 
-const setCredentials = async (e) => {
+setCredentials = (e) => {
     storage.creds = e.data.creds;
-    try {
-        const newkey = await check_create_key(e.data.creds.user);
-        const encBuffer = await encryptMessage(e.data.creds.key, newkey.publicKey);
-        const encURL = await arrayBuffertoURI(encBuffer);
-        let f = JSON.parse(JSON.stringify(e.data.creds));
-        delete f['key'];
-        f['keyURL'] = encURL;
-        f['rememberMe'] = !!e.data.creds.rememberMe;
-        if (!f['rememberMe']) {
-            f['loginTime'] = Date.now();
-            f['sessionDuration'] = SESSION_6H;
-        }
-        const cache = await caches.open(cacheName);
-        await cache.put(cacheURL, new Response(JSON.stringify(f)));
-        clientReply(e, { data: "ok" });
-        if (f['rememberMe']) {
-            clearSessionTimer();
-        } else {
-            setSessionTimer(f['sessionDuration']);
-        }
-    } catch (err) {
-        clientReply(e, { error: 'LOGIN_ERROR', message: String(err) });
-    }
+    check_create_key(e.data.creds.user).then(function (newkey) {
+        encryptMessage(e.data.creds.key, newkey.publicKey)
+            .then(function (encBuffer) {
+                arrayBuffertoURI(encBuffer)
+                    .then(function (encURL) {
+                        let f = JSON.parse(JSON.stringify(e.data.creds));
+                        delete f['key'];
+                        f['keyURL'] = encURL;
+                        clientReply(e, { data: "ok" });
+                        caches.open(cacheName).then(function (cache) {
+                            let cachecreds = new Response(JSON.stringify(f));
+                            cache.put(cacheURL, cachecreds);
+                        });
+                        setSessionTimer();
+                    });
+            });
+    });
 };
 
-const clientReply = (e, msg) => {
+clientReply = (e, msg) => {
     e.ports[0].postMessage(msg);
 };
 
-const deadSession = (e, debugString) => {
+deadSession = (e, debugString) => {
     clientReply(e, {
         error: "NO_SESSION",
         message: "Please login."
@@ -97,31 +71,18 @@ const deadSession = (e, debugString) => {
     return false;
 }
 
-const checkSession = async (e) => {
+checkSession = async (e) => {
     if (!('creds' in storage)) {
         try {
             let cache = await caches.open(cacheName);
             let cachecreds = await cache.match(cacheURL);
             if (cachecreds) {
                 let result = await cachecreds.json();
-                if (!result.rememberMe) {
-                    const sessionDuration = result.sessionDuration || SESSION_6H;
-                    const elapsed = result.loginTime ? Date.now() - result.loginTime : Infinity;
-                    if (elapsed >= sessionDuration) {
-                        destroySession();
-                        return deadSession(e);
-                    }
-                    setSessionTimer(sessionDuration - elapsed);
-                } else {
-                    clearSessionTimer();
-                }
                 let ekey = await check_create_key(result.user);
                 let encBuffer = URItoarrayBuffer(result.keyURL);
                 let rawKey = await decryptMessage(encBuffer, ekey.privateKey);
                 result.key = rawKey;
                 delete result.keyURL;
-                delete result.loginTime;
-                delete result.sessionDuration;
                 storage.creds = JSON.parse(JSON.stringify(result));
                 return true;
             } else {
@@ -134,7 +95,7 @@ const checkSession = async (e) => {
     return true;
 };
 
-const defaultOpts = () => {
+defaultOpts = () => {
     return {
         headers: {
             'content-type': 'application/json',
@@ -145,10 +106,7 @@ const defaultOpts = () => {
     };
 };
 
-const getURL = (path, query) => {
-    if (!isAllowedOrigin(storage.serviceUri)) {
-        throw new Error('Portal URL is not an allowed CVE Services origin.');
-    }
+getURL = (path, query) => {
     let url = new URL(`/api/${path}`, storage.serviceUri);
 
     if (query) {
@@ -160,7 +118,7 @@ const getURL = (path, query) => {
     return url.toString();
 };
 
-const doFetch = (event, url, opts) => {
+doFetch = (event, url, opts) => {
     return fetch(url, opts)
         .then(res => {
             if (res.ok) {
@@ -176,7 +134,7 @@ const doFetch = (event, url, opts) => {
         });
 };
 
-const requestService = (event) => {
+requestService = (event) => {
     let { query, path, method } = event.data;
 
     let opts = defaultOpts();
@@ -197,10 +155,6 @@ self.onmessage = e => {
     switch (e.data.type) {
         case 'init':
             if ('serviceUri' in e.data) {
-                if (!isAllowedOrigin(e.data.serviceUri)) {
-                    clientReply(e, { error: 'INVALID_PORTAL', message: 'Portal URL is not an allowed CVE Services origin.' });
-                    break;
-                }
                 storage.serviceUri = e.data.serviceUri;
                 clientReply(e, 'ok');
             }
@@ -214,11 +168,9 @@ self.onmessage = e => {
         case 'request':
             checkSession(e).then(function (success) {
                 if (success)
-                    return requestService(e);
+                    requestService(e);
                 else
                     clientReply(e, { error: "NO_SESSION" });
-            }).catch(function (err) {
-                clientReply(e, { error: 'REQUEST_ERROR', message: err.message || String(err) });
             });
             break;
         case 'getOrg':
@@ -227,18 +179,6 @@ self.onmessage = e => {
                     clientReply(e, storage.creds.org);
                 else
                     clientReply(e, { error: "NO_SESSION" })
-            });
-            break;
-        case 'getSession':
-            checkSession(e).then(function (success) {
-                if (success) {
-                    clientReply(e, {
-                        user: storage.creds.user,
-                        org: storage.creds.org
-                    });
-                } else {
-                    clientReply(e, { error: "NO_SESSION" });
-                }
             });
             break;
         case 'destroy':

@@ -8,7 +8,6 @@ const public = express.Router();
 const crypto = require('crypto');
 const passport = require('passport');
 const pbkdf2 = require('../lib/pbkdf2.js');
-const toErrorMessage = require('../lib/error-message');
 const User = require('../models/user');
 const conf = require('../config/conf');
 const csurf = require('csurf');
@@ -20,20 +19,14 @@ const {
 
 const validator = require('validator');
 var csrfProtection = csurf();
-const profileRoutes = ['/profile', '/profile/:id'];
 
 // If admin allow edits, otherwise display user
-protected.get(profileRoutes, csrfProtection, function (req, res) {
+protected.get('/profile/:id(' + conf.usernameRegex + ')?', csrfProtection, function (req, res) {
     var admin = false;
     if (req.user.priv == 0) {
         admin = true;
     }
     if (req.params.id) {
-        if (!validator.matches(req.params.id, new RegExp('^' + conf.usernameRegex + '$'))) {
-            req.flash('error', 'Invalid user id');
-            res.render('blank');
-            return;
-        }
         User.findOne({
             username: req.params.id
         }, function (err, user) {
@@ -83,7 +76,7 @@ protected.get(profileRoutes, csrfProtection, function (req, res) {
 });
 
 // Register or update an user
-protected.post(profileRoutes, csrfProtection, [
+protected.post('/profile/:id(' + conf.usernameRegex + ')?', csrfProtection, [
     check('name')
         .trim()
         .isLength({
@@ -210,7 +203,7 @@ protected.post(profileRoutes, csrfProtection, [
             };
             var updateResponse = function (err, doc) {
                 if (err) {
-                    req.flash('error', toErrorMessage(err));
+                    req.flash('error', err);
                     res.redirect('/users/profile/' + updates.username);
                 } else {
                     var msg = 'New user ' + updates.username + ' created';
@@ -235,18 +228,13 @@ protected.post(profileRoutes, csrfProtection, [
             }
         }
     } else {
-        req.flash('error', 'Authentication required!');
+        req.flash('error', 'Aunthentication required!');
         res.redirect('/users/login');
     }
 });
 
-protected.get('/delete/:id', csrfProtection, function (req, res) {
-    if (!validator.matches(req.params.id, new RegExp('^' + conf.usernameRegex + '$'))) {
-        req.flash('error', 'Invalid user id');
-        res.render('blank');
-        return;
-    }
-    req.flash('warning', 'Deleting users is not yet implemented. Fow now, users can be deleted in the backend database.');
+protected.get('/delete/:id(' + conf.usernameRegex + ')', csrfProtection, function (req, res) {
+    req.flash('warning', 'Deleteing users is not yet implemented. Fow now users can be deleted in the backend database.');
     res.render('blank');
 });
 
@@ -261,7 +249,7 @@ public.get('/login', csrfProtection, function (req, res) {
 // Login process
 public.post('/login', csrfProtection, function (req, res, next) {
     passport.authenticate('local', {
-        successRedirect: req.session.returnTo || '/home',
+        successRedirect: req.session.returnTo || '/cve',
         failureRedirect: '/users/login',
         failureFlash: true
     })(req, res, next);

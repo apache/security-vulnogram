@@ -5,11 +5,9 @@
 extends ../../views/edit
 block banner 
     header.ban.pad.ht4.wht.shd
-        #cvssSummary.left.flx
+        .left.flx
             include cvss.svg
-            #finalScore.CVSS 
-            #finalSeverity.CVSS
-            #finalUrgency.CVSS
+            h2.indent CVSS 4.0 Pocket Calc
 
 block editorLabel
     | Calculator
@@ -18,21 +16,6 @@ block sourceLabel
     | JSON
 
 block append scripts
-    script
-        include static/cvss40.js
+    script(type="module")
+        | import {CVSS40} from './static/cvss40.js';
         | window.CVSS40 = CVSS40;
-
-block prepend loadEditor
-    script 
-        include preload.js
-
-block append loadEditor
-    script 
-        include postload.js
-
-block outputButtons
-    if !confOpts[schemaName].conf.readonly
-        a.rbtn.vgi-download(title="Download JSON" type="button",oncontextmenu='downloadFile(event, this);',onclick='downloadFile(event, this);',value="Download")
-
-block append content
-    - min = true

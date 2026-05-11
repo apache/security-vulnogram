@@ -329,11 +329,6 @@ module.exports = {
                                     }
                                 }
                             },
-                            "cpeApplicability": {
-                                "options": {
-                                    "hidden": "true",
-                                }
-                            },
                             "descriptions": {
 				"title": "CVE Description: Please also include the product and version information in the description itself",       
                                 "items": {
@@ -366,9 +361,9 @@ module.exports = {
                                 "title":"Metrics. A text severity rating is required (additional CVSS rating is optional)",
                                 "items": {
                                     "oneOf": [
-                                        { "required": ["format", "scenarios", "cvssV4_0"], "title": "CVSS 4.0" },
-                                        { "required": ["format", "scenarios", "cvssV3_1"], "title": "CVSS 3.1 (Obsolete)" },
                                         { "required": ["other"], "title": "ASF severity rating" },
+                                        { "required": ["format", "scenarios", "cvssV4_0"], "title": "CVSS 4.0" },
+                                        { "required": ["format", "scenarios", "cvssV3_1"], "title": "CVSS 3.1 (Obsolete)" }
                                     ],
                                     "properties": {
                                         "other": {
@@ -513,7 +508,7 @@ module.exports = {
                 }
             } else if (path.startsWith('root.containers.cna.metrics') && path.endsWith(".other")) {
                 if (!value.content) {
-                    errors.push({path: path.replaceAll(".other", "") + ".oneOf[2].other.content.text", property: 'format', message: 'Severity level is required'});
+                    errors.push({path: path.replaceAll(".other", "") + ".oneOf[1].other.content.text", property: 'format', message: 'Severity level is required'});
                 }
             } else if (path.startsWith('root.CNA_private.userslist')) {
                 value.trim().split(/[ ,]+/).forEach(address => {

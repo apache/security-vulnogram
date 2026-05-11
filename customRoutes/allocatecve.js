@@ -158,8 +158,8 @@ protected.post('/', csrfProtection, async function(req,res) {
                         }).then( (x) => {  console.log("sent CVE notification mail "+x);});
                     }
 
-                    // probably some better way of doing this for sure; we could render the schema i suppose?
-                    newdoc = { "dataType" : "CVE_RECORD",
+		    // probably some better way of doing this for sure; we could render the schema i suppose?
+		    newdoc = { "dataType" : "CVE_RECORD",
                                "dataVersion" : "5.0",
                                "cveMetadata" : {
                                    "cveId" : cve,
@@ -178,18 +178,20 @@ protected.post('/', csrfProtection, async function(req,res) {
                                }
                              };
 
-                    try {
-                        console.log("Saving new doc");
-                        let entry = await Document.insertOne({
-                            "body": newdoc,
-                            "author": req.user.username
-                        });
-                        console.log("saved",doc);
-                        //res.redirect('/cve/' + cve.slice());
-                        //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
-                    } catch (err) {
-                        req.flash('error',JSON.stringify(err));
-                    }
+		    let entry = new Document({
+			"body": newdoc,
+			"author": req.user.username
+		    });
+                    console.log("Saving new doc");
+		    await entry.save(function (err, doc) {
+			if (err || !doc._id) {
+			    req.flash('error',JSON.stringify(err));
+			} else {
+			    console.log("saved",doc);
+                            //res.redirect('/cve/' + cve.slice());
+                            //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
+			}
+		    });
                 }
                 console.log("Now display links");
                 for (cveid in body.cve_ids) {

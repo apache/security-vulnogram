@@ -8,16 +8,15 @@ var cve5 = require('./cve5.schema.json');
 module.exports = {
     conf: {
         title: 'CVE: Common Vulnerabilities and Exposures',
-        name: 'CVE',
+        name: 'CVE 5.0',
         uri: '/cve5/',
-        class: 'vgi-cvev',
-        disableDrafts: false,
+        class: 'vgi-alert',
         order: 0.12, //Where to place the section on heading?
         shortcuts: [
             {
                 label: 'My CVEs',
                 href: function (g) {
-                    return ('/cve5/?state=draft,new,open,review,waiting,pending&owner=' + g.user.username);
+                    return ('/cve/?state=RESERVED,DRAFT,REVIEW,READY&owner=' + g.user.username);
                 },
                 class: 'vgi-folder'
             },
@@ -121,26 +120,70 @@ module.exports = {
         },        
         state: {
             path: 'body.CNA_private.state',
+            //chart: true,
             tabs: true,
             bulk: true,
+            enum: cve5.definitions.CNA_private.properties.state.enum,
+            class: 'nobr ',
+            icons: {
+                new: 'inbox',
+                open: 'inbox1',
+                draft: 'edit',
+                review: 'eye',
+                waiting: 'wait',
+                pending: 'cal',
+                closed: 'closed'
+            }
         },
         type: {
             path: 'body.CNA_private.type',
+            //chart: true,
             tabs: true,
-            bulk: true
+            bulk: true,
+            enum: cve5.definitions.CNA_private.properties.type.enum,
+            class: 'nobr ',
+            icons: {
+                unsure: 'what',
+                'no-vuln': 'safe',
+                advisory: 'alert',
+                'no-advisory': 'no',
+                doc: 'text',
+                misc: 'misc',
+                duplicate: 'ext'
+            }
+        },
+        cveState: {
+            path: 'body.cveMetadata.state',
+            //chart: true,
+            tabs: true,
+            enum: ["RESERVED", "PUBLISHED", "REJECTED"],
+            class: 'nobr ',
+            icons: {
+                RESERVED: 'edit',
+                PUBLISHED: 'globe',
+                REJECTED: 'no'
+            }
         },
         cvss: {
-            path: 'body.containers.cna.metrics.cvssV4_0.baseScore',
+            path: 'body.containers.cna.metrics.cvssV3_1.baseScore',
         },
         severity: {
-            path: 'body.containers.cna.metrics.cvssV4_0.baseSeverity',
+            path: 'body.containers.cna.metrics.cvssV3_1.baseSeverity',
             chart: true,
             hideColumn: true
         },
         discovery: {
             path: 'body.containers.cna.source.discovery',
             chart: true,
-            bulk: true
+            bulk: true,
+            enum: ['INTERNAL', 'EXTERNAL', 'USER', 'UNKNOWN'],
+            icons: {
+                INTERNAL: 'hardhat',
+                EXTERNAL: 'hat',
+                USER: 'cap',
+                UNKNOWN: 'what'
+            },
+            class: 'nobr '
         },
         defect: {
             path: 'body.containers.cna.source.defect',
@@ -150,7 +193,7 @@ module.exports = {
         /*        Advisory: {
                     path: 'body.containers.cna.source.advisory'
                 },*/
-        publicOn: {
+        date: {
             path: 'body.containers.cna.datePublic',
             bulk: true
         },
@@ -173,68 +216,60 @@ module.exports = {
             path: 'body.CNA_private.publish.ym',
             chart: true,
             hideColumn: true,
-            sort: -1,
-            icon: 'vgi-cal'
+            sort: -1
         },
         owner: {
             path: 'body.CNA_private.owner',
             chart: true,
-            bulk: true
-        }
+            bulk: true,
+            enum: ['example', 'team', 'memebers', 'change', 'in', 'conf.js'],
+            class: 'nobr '
+        },
+        /*  'state!': {
+              path: 'body.CVE_data_meta.STATE',
+              chart: false,
+              bulk: false,
+              queryOperator: '$ne'
+          }*/
     },
     schema: cve5,
     validators: [
         function (schema, value, path) {
-            const semverPattern = /^((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)|0|\*$/;
             var errors = [];
-            var getDescriptionEditorPath = function (currentPath, currentValue) {
-                if (currentValue && Array.isArray(currentValue.supportingMedia) && currentValue.supportingMedia.length > 0) {
-                    return currentPath + '.supportingMedia.0.value';
-                }
-                return currentPath + '.value';
-            };
-            var getDescriptionListEditorPath = function (currentPath, currentValue, index) {
-                if (!Array.isArray(currentValue) || !currentValue[index]) {
-                    return currentPath;
-                }
-                return getDescriptionEditorPath(currentPath + '.' + index, currentValue[index]);
-            };
             if (schema.id == "desc") {
-                if(!value.value || (value.value == "")) {
+                if((value.value == "")) {
                     value = {}
                 } else if(value.value.match(/^\s+$/) || value.value.length < 10) {
                     errors.push({
-                        path: getDescriptionEditorPath(path, value),
+                        path: path,
                         property: 'format',
                         message: 'Valid description required'
                     });
                 }
             }
             if(schema.id == "pE") {
-                var notMissing = function(a){return (a != undefined && a != 'n/a')};
-                var missing = function(a){return (a == undefined || a == 'n/a')};
-                if ((notMissing(value.vendor) && notMissing(value.product)) || (notMissing(value.collectionURL) && notMissing(value.packageName))) {
+                if((value.vendor != undefined && value.product != undefined) || (value.collectionURL != undefined && value.packageName != undefined)) {
                     // it is valid 
                 } else {
-                    if (missing(value.vendor) && notMissing(value.product)) {
+                    if (value.vendor == undefined && value.product != undefined) {
                         errors.push({
                             path: path+'.vendor',
                             property: 'format',
                             message: 'Enter vendor name'
                         });
-                    } else if (missing(value.product) && notMissing(value.vendor)) {
+                    } else if (value.product == undefined && value.vendor != undefined) {
                         errors.push({
                             path: path+'.product',
                             property: 'format',
                             message: 'Enter product name'
                         });
-                    } else if (missing(value.collectionURL) && notMissing(value.packageName)) {
+                    } else if (value.collectionURL == undefined && value.packageName != undefined) {
                         errors.push({
                             path: path+'.collectionURL',
                             property: 'format',
                             message: 'Enter a URL for the package collection'
                         });
-                    } else if (missing(value.packageName) && notMissing(value.collectionURL)) {
+                    } else if (value.packageName == undefined && value.collectionURL != undefined) {
                         errors.push({
                             path: path+'.packageName',
                             property: 'format',
@@ -318,40 +353,6 @@ module.exports = {
                         message: 'Changes are used only for ranges. Clear this or define a range'
                     });
                 }
-                if(value.versionType === 'semver') {
-                    if(value.version != undefined && !semverPattern.test(value.version) && value.version != '0') {
-                        errors.push({
-                            path: path+'.version',
-                            property: 'format',
-                            message: 'Enter a valid semver version'
-                        });
-                    }
-                    if(value.lessThan != undefined && !semverPattern.test(value.lessThan)) {
-                        errors.push({
-                            path: path+'.lessThan',
-                            property: 'format',
-                            message: 'Enter a valid semver version'
-                        });
-                    }
-                    if(value.lessThanOrEqual != undefined && !semverPattern.test(value.lessThanOrEqual)) {
-                        errors.push({
-                            path: path+'.lessThanOrEqual',
-                            property: 'format',
-                            message: 'Enter a valid semver version'
-                        });
-                    }
-                    if(Array.isArray(value.changes)) {
-                        for(var i = 0; i < value.changes.length; i++) {
-                            if(value.changes[i] && value.changes[i].at != undefined && !semverPattern.test(value.changes[i].at)) {
-                                errors.push({
-                                    path: path+'.changes.'+i+'.at',
-                                    property: 'format',
-                                    message: 'Enter a valid semver version'
-                                });
-                            }
-                        }
-                    }
-                }
             }
             if(schema.id == "xtag") {
                 if(value && schema.items && schema.items.examples) {
@@ -369,10 +370,9 @@ module.exports = {
             }
             if(schema.id == "description") { // check for bad descriptions
                 if(value && value[0] 
-                    && value[0].value
                     && value[0].value.match(/\[(PROBLEMTYPE|COMPONENT|VENDOR|PRODUCT|VERSION|PLATFORMS|ATTACKER|IMPACT|VECTOR)\]/)) {
                     errors.push({
-                        path: getDescriptionListEditorPath(path, value, 0),
+                        path: path,
                         property: 'format',
                         message: 'Replace the placeholders in the template.'
                     });
@@ -380,34 +380,11 @@ module.exports = {
             }
             if (schema.id == "datePublic") {
                 if(value && (new Date(value) > new Date())) {
-                    //TODO. this should be a warning, not error.
-                    /*errors.push({
+                    errors.push({
                         path: path,
                         property: 'format',
                         message: 'Date is in the future!'
-                    });*/
-                }
-            }
-            if (path == "root.containers.adp") {
-                if (value && Array.isArray(value)) {
-                    var seenOrgIds = {};
-                    for (var i = 0; i < value.length; i++) {
-                        var orgId = value[i]
-                            && value[i].providerMetadata
-                            && value[i].providerMetadata.orgId;
-                        if (!orgId) {
-                            continue;
-                        }
-                        if (seenOrgIds[orgId] != undefined) {
-                            errors.push({
-                                path: path+'.' + i,
-                                property: 'format',
-                                message: 'An extra ADP containers from the same organization. Keep one.'
-                            });
-                        } else {
-                            seenOrgIds[orgId] = i;
-                        }
-                    }
+                    });
                 }
             }
             return errors;

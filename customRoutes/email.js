@@ -21,7 +21,6 @@ module.exports = {
 		return info.messageId;
 	} else {
 		console.log(mailinfo.text)
-		return "(not live, no message id)"
 	}
     }
 }

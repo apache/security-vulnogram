@@ -29,7 +29,7 @@ module.exports = function (passport) {
     }));
 
     passport.serializeUser(function (user, done) {
-        done(null, String(user._id || user.id));
+        done(null, user.id);
     });
 
     passport.deserializeUser(function (id, done) {

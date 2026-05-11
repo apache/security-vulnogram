@@ -48,7 +48,7 @@
 }
 
 .arc path {
-    stroke: var(--bg1);
+    stroke: #fff;
 }
 
 .chart rect,
@@ -85,7 +85,7 @@
 }
 
 svg {
-    background: var(--wht);
+    background: #ffffff;
 }
 
 .grd {
@@ -100,6 +100,7 @@ svg {
     min-height: 300px;
     min-width: 320px;
     height: 100%;
+    background-color: var(--wht);
 }
 
 .vis .chart {
@@ -107,12 +108,12 @@ svg {
 }
 
 rect {
-    stroke: var(--bg1);
+    stroke: #fff;
     stroke-width: 1px;
 }
 
 .node {
-    border: solid 1px var(--bg1);
+    border: solid 1px white;
     font: 10px sans-serif;
     line-height: 12px;
     overflow: hidden;
