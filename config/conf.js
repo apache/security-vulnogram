@@ -63,6 +63,13 @@ module.exports = {
     pmcswithsecurityemails: ["airflow","ambari","commons","couchdb","dolphinscheduler","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","logging","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","orc","ozone","sentry","shiro","singa","sling","solr","spamassassin","spark","struts","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
     // which PMC are allowed to live allocate a CNA name from CVE Project
     pmcstrustedascna: ["*","-zeppelin"],
+    // from https://mfa.apache.org/application/o/cveprocess-apache-org/.well-known/openid-configuration
+    oauth_issuer: "https://mfa.apache.org/application/o/cveprocess-apache-org/",
+    oauth_authorization_endpoint: "https://mfa.apache.org/application/o/authorize/",
+    oauth_token_endpoint: "https://mfa.apache.org/application/o/token/",
+    oauth_userinfo_endpoint: "https://mfa.apache.org/application/o/userinfo/",
+    oauth_client_id: "cveprocess.apache.org",
+    oauth_client_secret: process.env.OAUTH_SECRET || 'none',
 
     // The Mongodb URL where CVE entries and users are stored.
     // WARNING! Configure MongoDB authentication and use a strong password
