@@ -10,3 +10,16 @@ github:
   # Explicitly enables Dependabot Alerts and Updates
   dependabot_alerts: true
   dependabot_updates: true
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
