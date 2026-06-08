@@ -91,9 +91,13 @@ async function asfpublicjson(req, res) {
 }
 
 function asflogout (req, res) {
-    req.logout();
-    req.session.returnTo = null;
-    res.redirect('/users/login');    
+    req.logout(function(err) {
+        if (err) {
+            return next(err);
+        }
+        req.session.returnTo = null;
+        res.redirect(conf.oauth_end_session_endpoint);
+    });
 }
 
 function asflogin (req, res) {

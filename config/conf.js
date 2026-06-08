@@ -68,6 +68,7 @@ module.exports = {
     oauth_authorization_endpoint: "https://mfa.apache.org/application/o/authorize/",
     oauth_token_endpoint: "https://mfa.apache.org/application/o/token/",
     oauth_userinfo_endpoint: "https://mfa.apache.org/application/o/userinfo/",
+    oauth_end_session_endpoint: "https://mfa.apache.org/application/o/cveprocess-apache-org/end-session/",
     oauth_client_id: "cveprocess.apache.org",
     oauth_client_secret: process.env.OAUTH_SECRET || 'none',
 
