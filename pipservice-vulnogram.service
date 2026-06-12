@@ -17,7 +17,7 @@ PrivateDevices=yes
 RestrictSUIDSGID=true
 User=vulnogram
 Group=vulnogram
-TemporaryFileSystem=/
+TemporaryFileSystem=/ /nonexistent
 BindReadOnlyPaths=/usr /bin /lib
 BindPaths=/opt/vulnogram
 
