@@ -4,7 +4,7 @@ Description=ASF Vulnogram instance for the CVE process
 [Service]
 Type=simple
 WorkingDirectory=/opt/vulnogram
-ExecStart=/usr/bin/npm install; /usr/bin/node app.js
+ExecStart=/usr/bin/npm install
 Restart=always
 ProtectHome=yes
 PrivateTmp=yes
