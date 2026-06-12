@@ -1,0 +1,25 @@
+[Unit]
+Description=ASF Vulnogram instance for the CVE process
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/vulnogram
+ExecStart=/usr/bin/npm install; /usr/bin/node app.js
+Restart=always
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=true
+ProtectSystem=strict
+RestrictNamespaces=uts ipc pid user cgroup
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+PrivateDevices=yes
+RestrictSUIDSGID=true
+User=vulnogram
+Group=vulnogram
+TemporaryFileSystem=/
+BindReadOnlyPaths=/usr /bin /lib
+BindPaths=/opt/vulnogram
+
+[Install]
+WantedBy=multi-user.target
