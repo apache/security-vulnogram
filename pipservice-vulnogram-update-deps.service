@@ -1,11 +1,11 @@
 [Unit]
-Description=ASF Vulnogram instance for the CVE process
+Description=Job to run manually to update vulnogram deps inside the sandbox
 
 [Service]
 Type=simple
 Environment=HOME=/opt/vulnogram
 WorkingDirectory=/opt/vulnogram
-ExecStart=/usr/bin/node app.js
+ExecStart=/usr/bin/npm install
 Restart=always
 PrivateTmp=yes
 NoNewPrivileges=true
@@ -17,9 +17,8 @@ PrivateDevices=yes
 RestrictSUIDSGID=true
 User=vulnogram
 Group=vulnogram
-TemporaryFileSystem=/ /nonexistent
+TemporaryFileSystem=/
 BindReadOnlyPaths=/usr /bin /lib
 BindPaths=/opt/vulnogram
 
 [Install]
-WantedBy=multi-user.target
