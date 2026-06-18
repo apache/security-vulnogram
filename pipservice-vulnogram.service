@@ -18,8 +18,7 @@ RestrictSUIDSGID=true
 User=vulnogram
 Group=vulnogram
 TemporaryFileSystem=/ /nonexistent
-BindReadOnlyPaths=/usr /bin /lib
-BindPaths=/opt/vulnogram
+BindReadOnlyPaths=/usr /bin /lib /opt/vulnogram
 
 [Install]
 WantedBy=multi-user.target
