@@ -53,6 +53,7 @@ var limiter = rateLimit({
 });
 // apply rate limiter to all requests
 app.use(limiter);
+app.set('trust proxy', 'loopback')
 
 app.disable('x-powered-by');
 
