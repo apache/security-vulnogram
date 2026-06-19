@@ -26,25 +26,34 @@ const cveapiheaders = {
     "CVE-API-KEY": process.env.CVE_API_KEY || "",
 };
 
-// HTTPS is required (the OAuth callback URL must use it).
-// Override the paths with VULNOGRAM_TLS_KEY / VULNOGRAM_TLS_CERT / VULNOGRAM_TLS_CA;
-// the defaults assume the production Let's Encrypt layout on security-vm-he-fi.apache.org.
-const tlsKeyPath = process.env.VULNOGRAM_TLS_KEY
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem";
-const tlsCertPath = process.env.VULNOGRAM_TLS_CERT
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem";
-const tlsCaPath = process.env.VULNOGRAM_TLS_CA
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem";
-
-const httpsOptions = {
-    key: fs.readFileSync(tlsKeyPath, "utf8"),
-    cert: fs.readFileSync(tlsCertPath, "utf8"),
-    minVersion: "TLSv1.2",
-};
-// Self-signed dev certs have no CA chain; only attach one if present.
-if (fs.existsSync(tlsCaPath)) {
-    httpsOptions.ca = fs.readFileSync(tlsCaPath, "utf8");
+function getHttpsOptions() {
+    // HTTPS is required (the OAuth callback URL must use it), so enable by default,
+    // but allow disabling it (as on prod it's offloaded by the webserver)
+    const httpsEnabled = !('VULNOGRAM_TLS_ENABLED' in process.env) || process.env.VULNOGRAM_TLS_ENABLED == "true"
+    if (!httpsEnabled) {
+        return false;
+    }
+    // Override the paths with VULNOGRAM_TLS_KEY / VULNOGRAM_TLS_CERT / VULNOGRAM_TLS_CA;
+    // the defaults assume the production Let's Encrypt layout on security-vm-he-fi.apache.org.
+    const tlsKeyPath = process.env.VULNOGRAM_TLS_KEY
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem";
+    const tlsCertPath = process.env.VULNOGRAM_TLS_CERT
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem";
+    const tlsCaPath = process.env.VULNOGRAM_TLS_CA
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem";
+    const httpsOptions = {
+        key: fs.readFileSync(tlsKeyPath, "utf8"),
+        cert: fs.readFileSync(tlsCertPath, "utf8"),
+        minVersion: "TLSv1.2",
+    };
+    // Self-signed dev certs have no CA chain; only attach one if present.
+    if (fs.existsSync(tlsCaPath)) {
+        httpsOptions.ca = fs.readFileSync(tlsCaPath, "utf8");
+    }
+    return httpsOptions;
 }
+
+const httpsOptions = getHttpsOptions();
 
 const database =
     process.env.VULNOGRAM_DB_URL ||
