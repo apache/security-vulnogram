@@ -60,7 +60,7 @@ module.exports = {
     // which PMC is admin group?
     admingroupname: "security",
     // which PMC have a security@ address?
-    pmcswithsecurityemails: ["airflow","ambari","commons","couchdb","dolphinscheduler","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","logging","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","ozone","sentry","shiro","singa","sling","solr","spamassassin","struts","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
+    pmcswithsecurityemails: ["airflow","ambari","commons","couchdb","dolphinscheduler","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","ignite","jackrabbit","kafka","libcloud","logging","lucene","metron","milagro","nifi","ofbiz","openmeetings","openoffice","ozone","sentry","shiro","singa","sling","solr","spamassassin","struts","superset","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
     // which PMC are allowed to live allocate a CNA name from CVE Project
     pmcstrustedascna: ["*","-zeppelin"],
     // from https://mfa.apache.org/application/o/cveprocess-apache-org/.well-known/openid-configuration
