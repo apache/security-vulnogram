@@ -19,6 +19,7 @@ User=vulnogram
 Group=vulnogram
 TemporaryFileSystem=/ /nonexistent
 BindReadOnlyPaths=/usr /bin /lib /opt/vulnogram
+BindPaths=/var/spool/postfix/maildrop /var/spool/postfix/public
 
 [Install]
 WantedBy=multi-user.target
