@@ -123,6 +123,20 @@ app.use(function (req, res, next) {
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
+    // ASF
+    } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-")) && req.headers['authentication']) {
+        const token = req.headers['authentication'].substring(7);
+        req.sessionStore.all((err, sessions)=>{
+            for (const s in sessions) {
+                if (sessions[s].token == token) {
+                    req.session.user = sessions[s].user;
+                    return next();
+                }
+            }
+            req.session.returnTo = req.originalUrl;
+            res.redirect('/users/login')
+        });
+    // END ASF
     } else {
         req.session.returnTo = req.originalUrl;
         res.redirect('/users/login')

@@ -179,6 +179,14 @@ function asflogin (req, res) {
     }
 }
 
+function token(req, res) {
+    if (!req.session.token) {
+        req.session.token = uuidv4();
+    }
+    req.flash('info',`Bearer token: ${req.session.token}`);
+    res.render('blank');
+}
+
 // If you are in security pmc allow you to specify a different pmc for testing
 
 function setpmc(req, res) {
@@ -278,6 +286,7 @@ var self = module.exports = {
         app.use('/publishcve', ensureAuthenticated, publishcve.protected);        
         let semail = require('../customRoutes/sendemails');
         app.use('/sendemails', ensureAuthenticated, semail.protected);
+        app.get('/users/token', ensureAuthenticated, token);
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
         app.get('/users/me/json', ensureAuthenticated, usersmejson);
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
