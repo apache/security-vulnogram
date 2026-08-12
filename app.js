@@ -124,8 +124,8 @@ function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     // ASF
-    } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-")) && req.headers['authentication']) {
-        const token = req.headers['authentication'].substring(7);
+    } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-")) && req.headers['authorization']) {
+        const token = req.headers['authorization'].substring(7);
         req.sessionStore.all((err, sessions)=>{
             for (const s in sessions) {
                 if (sessions[s].token == token) {
