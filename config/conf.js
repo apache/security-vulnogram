@@ -26,25 +26,34 @@ const cveapiheaders = {
     "CVE-API-KEY": process.env.CVE_API_KEY || "",
 };
 
-// HTTPS is required (the OAuth callback URL must use it).
-// Override the paths with VULNOGRAM_TLS_KEY / VULNOGRAM_TLS_CERT / VULNOGRAM_TLS_CA;
-// the defaults assume the production Let's Encrypt layout on security-vm-he-fi.apache.org.
-const tlsKeyPath = process.env.VULNOGRAM_TLS_KEY
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem";
-const tlsCertPath = process.env.VULNOGRAM_TLS_CERT
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem";
-const tlsCaPath = process.env.VULNOGRAM_TLS_CA
-    || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem";
-
-const httpsOptions = {
-    key: fs.readFileSync(tlsKeyPath, "utf8"),
-    cert: fs.readFileSync(tlsCertPath, "utf8"),
-    minVersion: "TLSv1.2",
-};
-// Self-signed dev certs have no CA chain; only attach one if present.
-if (fs.existsSync(tlsCaPath)) {
-    httpsOptions.ca = fs.readFileSync(tlsCaPath, "utf8");
+function getHttpsOptions() {
+    // HTTPS is required (the OAuth callback URL must use it), so enable by default,
+    // but allow disabling it (as on prod it's offloaded by the webserver)
+    const httpsEnabled = !('VULNOGRAM_TLS_ENABLED' in process.env) || process.env.VULNOGRAM_TLS_ENABLED == "true"
+    if (!httpsEnabled) {
+        return false;
+    }
+    // Override the paths with VULNOGRAM_TLS_KEY / VULNOGRAM_TLS_CERT / VULNOGRAM_TLS_CA;
+    // the defaults assume the production Let's Encrypt layout on security-vm-he-fi.apache.org.
+    const tlsKeyPath = process.env.VULNOGRAM_TLS_KEY
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/privkey.pem";
+    const tlsCertPath = process.env.VULNOGRAM_TLS_CERT
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/cert.pem";
+    const tlsCaPath = process.env.VULNOGRAM_TLS_CA
+        || "/etc/letsencrypt/live/security-vm-he-fi.apache.org/chain.pem";
+    const httpsOptions = {
+        key: fs.readFileSync(tlsKeyPath, "utf8"),
+        cert: fs.readFileSync(tlsCertPath, "utf8"),
+        minVersion: "TLSv1.2",
+    };
+    // Self-signed dev certs have no CA chain; only attach one if present.
+    if (fs.existsSync(tlsCaPath)) {
+        httpsOptions.ca = fs.readFileSync(tlsCaPath, "utf8");
+    }
+    return httpsOptions;
 }
+
+const httpsOptions = getHttpsOptions();
 
 const database =
     process.env.VULNOGRAM_DB_URL ||
@@ -77,6 +86,7 @@ module.exports = {
     // WARNING! Ensure MongoDB is not reachable from the network.
     database: database,
     //database: `mongodb://vulnogram:StrongLongPass@127.0.0.1:27017/vulnogram`,
+    // database: `mongodb://127.0.0.1:27017/vulnogram`,
     // Name of the organization that should be used in page titles etc.,
     orgName: ' ',
 
@@ -97,6 +107,16 @@ module.exports = {
     serverHost: process.env.VULNOGRAM_HOST || '0.0.0.0',
     serverPort: process.env.VULNOGRAM_PORT || 3555,
     basedir: '/',
+    realtime: {
+        enabled: process.env.VULNOGRAM_REALTIME !== 'false',
+        debounceMs: 350,
+        maxPatchBytes: 50000,
+        maxPatchOps: 2000,
+        rateLimit: {
+            windowMs: 1000,
+            max: 60
+        }
+    },
 
     httpsOptions: httpsOptions,
 
@@ -113,10 +133,10 @@ module.exports = {
 
 
     // JSON Editor
-    jsoneditor: 'https://cdnjs.cloudflare.com/ajax/libs/json-editor/2.8.0/jsoneditor.min.js',
-    jsoneditorHash: 'sha512-8y8kuGFzNGSgACEMNnXJGhOQaLAd4P9MdCXnJ37QjGTBPRrD5FCEVEKj/93xNihQehkO3yVKnOECFWGxxBsveQ==',
+    //jsoneditor: 'https://cdnjs.cloudflare.com/ajax/libs/json-editor/2.15.2/jsoneditor.js',
+    jsoneditorHash: 'sha512-Odi69X/i28s3GR3ZQyE+g4ieU30AMOovH50wJbehVMWxVChGa1KCUzyvOXkHfYr/2AQizFRNWI1R6oifT16ouQ==',
     // if you want this served locally, download above jsoneditor editor to /public/js/ directory and point to that:
-    //jsoneditor: '/js/jsoneditor.min.js',
+    jsoneditor: '/js/jsoneditor.min.js',
 
     // ajv - JSON schema draft-07 validation
     // NOTE -- including ajv is experimental and can be excluded if desired by commenting out the next two lines

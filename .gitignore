@@ -11,7 +11,7 @@ tmp
 standalone
 config/conf.js
 # Self-signed TLS certificate for local development (see README-ASF.md).
-key.pem
-cert.pem
+/key.pem
+/cert.pem
 # IntelliJ
 /.idea/

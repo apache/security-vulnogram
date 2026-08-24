@@ -1,22 +1,30 @@
-body{
- /*--hig:#f6f6f7;*/
- --hig: #e5ebec;
- --bck:#fafafc;
-}   
+:root {
+  --cve: #fcf0c0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cve: #534408;
+  }
+}
 
 #cveUser .pop {
   right: 2em !important;
 }
 table#vgListTable td.cvss span {
-  background-color: #CCC;
+  background-color: var(--bg2);
   display: inline-block;
   min-width: 2.4em;
   padding: 0.3em 0.5em;
-  color: #fff;
+  color: var(--bg1);
   line-height: normal;
   text-align: center;
   border-radius: 0.5em;
   font-weight: 700;
+}
+
+#draftPublishRows tr.dis {
+  opacity: 0.6;
 }
 
 #vgListTable .cvss span[title^="8"],
@@ -53,46 +61,42 @@ background-color:rgb(162, 213, 114);
 background-color: orangered;
 }
 
+div[data-schemaid="cvss4"] .je-indented-panel div div div.row:nth-child(6),
 div[data-schemaid="cvss4"] .je-indented-panel div div div.row:nth-child(7),
-div[data-schemaid="cvss4"] .je-indented-panel div div div.row:nth-child(8),
-div[data-schemaid="cvss4"] .je-indented-panel div div div.row:nth-child(9)
+div[data-schemaid="cvss4"] .je-indented-panel div div div.row:nth-child(8)
 {
-  background-color: var(--hig);
+  background-color: var(--bg1);
   border-radius: 5px;
     padding: 3px;
 }
 div[data-schemaid="cvss4"] .je-indented-panel div div div.row:last-child
 {
-  background-color: var(--sec);
+  background-color: var(--bg1);
   border-radius: 5px;
   padding: 10px;
   margin: 10px;
 }
 .CVSS.NONE {
-  background-color: rgb(162, 213, 114);
+  background-color: rgb(162, 213, 114) !important;
 }
 .CVSS.LOW {
-  background-color: gold;
+  background-color: gold !important;
 }
 .CVSS.MEDIUM {
-  background-color: orange;
+  background-color: orange !important;
 }
 .CVSS.HIGH {
-  background-color: salmon;
+  background-color: salmon !important;
 }
 .CVSS.CRITICAL {
   color: white;
-  background-color: orangered;
-}
-
-
-.lessThan::before {
-  content: '<';
+  background-color: orangered !important;
 }
 
 
 div[data-schemapath="root.containers.adp"] > div > div > [vg="array-obj"] {
-  background-color: #f5f3e8;
+  border: 2px solid var(--acc);
+  background-color: var(--wht);
 }
 
 
@@ -100,21 +104,43 @@ button.json-editor-btn-delete {
   margin-left: 1em;
 }
 
+.language-picker-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.language-picker-select {
+  flex: 1 1 18em;
+  min-width: 14em;
+}
+
+.language-picker-code {
+  flex: 0 0 11em;
+  min-width: 11em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.language-picker-code-hidden {
+  display: none;
+}
+
 
 .tags-look .tagify__dropdown__item{
   display: inline-block;
   border-radius: 3px;
   padding: .3em .5em;
-  border: 1px solid #CCC;
-  background: #F3F3F3;
+  border: 1px solid var(--bor);
+  background: var(--bg1);
   margin: .2em;
   font-size: .85em;
-  color: black;
+  color: var(--txt);
   transition: 0s;
 }
 
 .tags-look .tagify__dropdown__item--active{
-  color: black;
+  color: var(--txt);
 }
 
 .tags-look .tagify__dropdown__item:hover{
@@ -124,8 +150,8 @@ button.json-editor-btn-delete {
 
 #loginErr {
   font-weight: bold;
-  color: #880000;
   margin: 1em;
+  min-height: 1.5em;
 }
 
 .usermgmt {
@@ -146,9 +172,10 @@ button.json-editor-btn-delete {
 }
 
 .t9 {
-  color: gray;
+  color: var(--acc);
   padding: 8px;
   font-size: small;
+  height: 22px;
 }
 
 .formError {
@@ -156,19 +183,64 @@ button.json-editor-btn-delete {
   font-size: smaller;
 }
 
-.formReadOnly {
-    background-color: #eee;
-    pointer-events: none;
+#cvePortalNav {
+  position: relative;
 }
 
-label[for="cvePortalTab"] {
-  background-color: var(--sec) !important;
+#cvePortalNav::after {
+  content: "";
+  position: absolute;
+  top: 0.5em;
+  left: 3em;
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 999px;
+  background-color: #d73a3a;
+  box-shadow: 0 0 0 2px var(--wht);
+  pointer-events: none;
 }
 
+#cvePortalNav[data-portal-status="connected"]::after {
+  background-color: #2ea44f;
+}
+
+#cvePortalNav[data-portal-status="disconnected"]::after {
+  background-color: #d73a3a;
+}
+
+#draftPublishDialog,
+#cvePortalDialog {
+  width: min(96vw, 1200px);
+  height: min(90vh, 1000px);
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: auto;
+}
+
+#cvePortalDialog::backdrop {
+  backdrop-filter: blur(1px);
+  background-color: rgba(0, 0, 0, 0.18);
+}
+
+#cvePortalDialog #port {
+  max-height: calc(92vh - 3.5em);
+}
+
+#port .vtbl {
+  width: auto;
+}
 /* cveLogin box */
 
 #cpBox {
+  width: 85vw;
+  max-height: calc(92vh - 3.5em);
+  background: linear-gradient(135deg, var(--cve) 0%, var(--sev-med) 100%);
   padding: 2em 0px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 92vw;
   display: grid; 
   grid-template-columns: auto; 
   grid-template-rows: min-content min-content auto; 
@@ -184,17 +256,19 @@ label[for="cvePortalTab"] {
 
 #cveLoginForm {
   display: grid; 
-  grid-auto-rows: 1fr; 
-  grid-template-columns: min-content 1fr; 
-  gap: 1em .5em; 
-  padding: 1em;
+  grid-auto-rows: auto;
+  grid-template-columns: 1fr;
+  width: 75vw;
+  gap: .5em .5em; 
+  padding: 0.5em;
 }
 
 #cveLoginForm label {
-  text-align: right;
+  text-align: left;
+  padding: 1em 0 0 0;
+
 }
 #cveLoginForm #cpSubmit {
-  grid-area: 5 / 1 / 6 / 3; 
   justify-self: center; 
   align-self: center; 
 }
@@ -211,6 +285,7 @@ label[for="cvePortalTab"] {
   justify-items: center; 
   align-items: center; 
   text-align: center;
+  max-width: 1000px;
 }
 #cpTitle {
   align-self: start; 
@@ -229,14 +304,50 @@ label[for="cvePortalTab"] {
   border-left: 2px #999999 dotted;
   grid-area: 1 / 2 / 3 / 3;
 }
+
+#cveLoginForm {
+  grid-auto-rows: 1fr;
+  width: 100%;
+  grid-template-columns: min-content 1fr;
 }
 
-#render.render p {
+#cveLoginForm label {
+  display: block;
+  text-align: right;
+  padding: .5em .5em;
+}
+
+#cveLoginForm #cpSubmit {
+  grid-area: 5 / 1 / 6 / 3;
+}
+}
+
+.render p {
   margin-left: 2em;
   margin-top: .5em;
 }
 
-#render.render h4 {
+.render h4 {
   margin-bottom: 0.3em;
   margin-top: .3em;
+}
+.render table {border-spacing: 0; border: 1px solid var(--bor); border-collapse: collapse;}
+.render table th { text-align:center;background-color:var(--bg1)}
+.render table td { padding:5px;border: 1px solid var(--bor)}
+.render table tbody { background-color: var(--wht);}
+
+/* --- CVE portal user list: div-based table layout (cvelist.pug) --- */
+.tbody { display: table-row-group; }
+.tr    { display: table-row; }
+.th,
+.td    { display: table-cell; }
+
+.vtbl>.tbody>.tr>.td {
+  padding: 0.2em 0.3em;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--bor) !important;
+}
+
+.vtbl>.tbody>.tr:last-child>.td {
+  border-bottom: none !important;
 }

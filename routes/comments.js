@@ -5,6 +5,7 @@ const crypto = require('crypto');
 // ASF
 const asf = require('../custom/asf.js');
 // END ASF
+const { sanitizeRichHtml } = require('../lib/html-sanitize');
 
 var random_slug = function () {
     return crypto.randomBytes(13).toString('base64').replace(/[\+\/\=]/g, '-');
@@ -69,11 +70,11 @@ module.exports = function (Document, opts) {
                             updatedAt: dt,
                             author: username,
                             slug: slug,
-                            hypertext: text,
+                            hypertext: sanitizeRichHtml(text),
                         }], $position: 0
                     }
                 }
-            }, { new: true }).exec();
+            }, { returnDocument: 'after' });
 
             return ({
                 ok: 1,
@@ -95,12 +96,12 @@ module.exports = function (Document, opts) {
             q['comments.author'] = username;
             var ret = await Document.findOneAndUpdate(q, {
                 '$set': {
-                    "comments.$.hypertext": text,
+                    "comments.$.hypertext": sanitizeRichHtml(text),
                     "comments.$.updatedAt": date
                 }
             }, {
-                new: true
-            }).exec();
+                returnDocument: 'after'
+            });
             return ({
                 ok: 1,
                 ret: await unifiedComments(doc_id, ret ? ret.comments : [])
@@ -112,21 +113,20 @@ module.exports = function (Document, opts) {
             });
         }
     }
-    router = express.Router();
+    var router = express.Router();
     router.post('/comment', csrfProtection, async function (req, res) {
         // ASF we need to load the document so we can get the PMC
         var q = {};
         q[opts.idpath] = req.body.id;
-        var ret = await Document.findOne(q).exec();
+        var ret = await Document.findOne(q);
         asf.asfhookaddcomment(ret,req);
         // END ASF
         if (req.body.slug) {
             var r = await updateComment(req.body.id, req.user.username, req.body.text, req.body.slug, new Date());
             res.json(r);
         } else {
-            addComment(req.body.id, req.user.username, req.body.text).then(r => {
-                res.json(r);
-            })
+            var r = await addComment(req.body.id, req.user.username, req.body.text)
+            res.json(r);
         }
     });
     return router;

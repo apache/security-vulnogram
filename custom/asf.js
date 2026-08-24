@@ -179,6 +179,14 @@ function asflogin (req, res) {
     }
 }
 
+function token(req, res) {
+    if (!req.session.token) {
+        req.session.token = uuidv4();
+    }
+    req.flash('info',`Bearer token: ${req.session.token}`);
+    res.render('blank');
+}
+
 // If you are in security pmc allow you to specify a different pmc for testing
 
 function setpmc(req, res) {
@@ -207,6 +215,9 @@ function usersmejson (req, res) {
 }
 
 function usersprofile (req,res) {
+    // This ignores the username from the request and takes it
+    // from the validated authentication, so no need to validate
+    // req.params.id against conf.usernameRegex
     const user = req.user;
     user.group = user.pmcs;
     res.render('users/view', {
@@ -275,11 +286,12 @@ var self = module.exports = {
         app.use('/publishcve', ensureAuthenticated, publishcve.protected);        
         let semail = require('../customRoutes/sendemails');
         app.use('/sendemails', ensureAuthenticated, semail.protected);
+        app.get('/users/token', ensureAuthenticated, token);
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
         app.get('/users/me/json', ensureAuthenticated, usersmejson);
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing
         app.get('/users/list/', ensureAuthenticated, userslist); // replaces existing
-        app.get('/users/profile/:id(' + conf.usernameRegex + ')?', ensureAuthenticated, usersprofile); // replaces existing
+        app.get('/users/profile/:id', ensureAuthenticated, usersprofile); // replaces existing
         app.get('/asfemaillists', ensureAuthenticated, asfemaillists); // work around CORS
         app.get('/publicjson', asfpublicjsonlist);
         app.get('/publicjson/:id', asfpublicjson);
@@ -380,9 +392,8 @@ var self = module.exports = {
     // Send an email when someone adds a comment to a CVE
     
     asfhookaddcomment: function(doc,req) {
-        var pathcve = "cve";
+        var pathcve = "cve5";
         if (doc.body.cveMetadata && doc.body.cveMetadata.cveId)
-            pathcve = "cve5";
 	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
                               "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),

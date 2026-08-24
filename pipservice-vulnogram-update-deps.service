@@ -1,0 +1,24 @@
+[Unit]
+Description=Job to run manually to update vulnogram deps inside the sandbox
+
+[Service]
+Type=simple
+Environment=HOME=/opt/vulnogram
+WorkingDirectory=/opt/vulnogram
+ExecStart=/usr/bin/npm install
+Restart=always
+PrivateTmp=yes
+NoNewPrivileges=true
+ProtectSystem=strict
+RestrictNamespaces=uts ipc pid user cgroup
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+PrivateDevices=yes
+RestrictSUIDSGID=true
+User=vulnogram
+Group=vulnogram
+TemporaryFileSystem=/
+BindReadOnlyPaths=/usr /bin /lib
+BindPaths=/opt/vulnogram
+
+[Install]
