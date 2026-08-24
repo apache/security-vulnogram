@@ -22,7 +22,7 @@ async function asfemaillists (req, res) {
 }
 
 async function asfpublicjsonlist(req, res) {
-    let Document4 = docModel('cve')
+    let Document4 = docModel('cves')
     var r4 = await Document4.aggregate([
         { $match: { 'body.CVE_data_meta.STATE': 'PUBLIC' }},
         { $project: {
@@ -55,9 +55,6 @@ async function asfpublicjsonlist(req, res) {
 const nodoc = {"error":"nodoc"};
 
 async function asfpublicjson(req, res) {
-    var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
-    if (!ids?.[0]) return res.json(nodoc);
-
     const ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
     if (!ids?.[0]) return res.json(nodoc)
 
@@ -68,8 +65,8 @@ async function asfpublicjson(req, res) {
         return res.json(cve5doc.body);
     }
 
-    let Document4 = docModel('cve');
-    const cve4doc = await res.locals.docs.cve5.Document.findOne({
+    let Document4 = docModel('cves');
+    const cve4doc = await Document4.findOne({
         "body.CVE_data_meta.ID": ids[0]
     });
     if (cve4doc?.body?.CVE_data_meta?.STATE === "PUBLIC") {
