@@ -14,6 +14,7 @@ const request = require('request');
 const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
+const docModel = require('../models/doc');
 
 async function asfemaillists (req, res) {
     var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
@@ -21,7 +22,7 @@ async function asfemaillists (req, res) {
 }
 
 async function asfpublicjsonlist(req, res) {
-    let Document4 = res.locals.docs.cve.Document;
+    let Document4 = docModel('cve')
     var r4 = await Document4.aggregate([
         { $match: { 'body.CVE_data_meta.STATE': 'PUBLIC' }},
         { $project: {
@@ -45,49 +46,37 @@ async function asfpublicjsonlist(req, res) {
         }}
     ]);
 
-    res.json(r4.concat(r5));
+    res.json([
+      ...await r4.toArray(),
+      ...await r5.toArray()
+    ])
 }
 
 const nodoc = {"error":"nodoc"};
-async function findCVE(Document, idField, id, cb) {
-    var q = {};
-    q[idField] = id;
-    Document.findOne(q, async function (err, docs) {
-        if (err) {
-            res.json(nodoc);
-        } else {
-            cb(docs);
-        }
-    });
-}
 
 async function asfpublicjson(req, res) {
     var ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
-    if (!ids || !ids[0]) {
-        res.json(nodoc)
-        return;
+    if (!ids?.[0]) return res.json(nodoc);
+
+    const ids = req.params.id.match(RegExp('CVE-[0-9-]+', 'img'));
+    if (!ids?.[0]) return res.json(nodoc)
+
+    const cve5doc = await res.locals.docs.cve5.Document.findOne({
+        "body.cveMetadata.cveId": ids[0]
+    });
+    if (cve5doc?.body?.CNA_private?.state === "PUBLIC") {
+        return res.json(cve5doc.body);
     }
-    findCVE(
-        res.locals.docs.cve5.Document,
-        "body.cveMetadata.cveId",
-        ids[0],
-        async function (docs) {
-            if (docs && docs.body && docs.body.CNA_private && docs.body.CNA_private.state == "PUBLIC") {
-                res.json(docs.body)
-            } else {
-                findCVE(
-                    res.locals.docs.cve.Document,
-                    "body.CVE_data_meta.ID",
-                    ids[0],
-                    async function (docs) {
-                        if (docs && docs.body && docs.body.CVE_data_meta && docs.body.CVE_data_meta.STATE && docs.body.CVE_data_meta.STATE == "PUBLIC") {
-                            res.json(docs.body)
-                        } else {
-                            res.json(nodoc)
-                        }
-                    })
-            }
-        })
+
+    let Document4 = docModel('cve');
+    const cve4doc = await res.locals.docs.cve5.Document.findOne({
+        "body.CVE_data_meta.ID": ids[0]
+    });
+    if (cve4doc?.body?.CVE_data_meta?.STATE === "PUBLIC") {
+        return res.json(cve4doc.body);
+    }
+
+    return res.json(nodoc)
 }
 
 function asflogout (req, res) {
