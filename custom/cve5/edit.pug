@@ -87,13 +87,26 @@ block prepend loadEditor
         |         }
         |         mt = ""
         |         if (j.containers.cna.metrics) {
-        |             mt = mt + "Severity: "
+        |             var severity = ""
+        |             var cvss = ""
         |             for (m of j.containers.cna.metrics) {
         |                 if (m.other && m.other.content && m.other.content.text) {
-        |                     mt = mt + m.other.content.text+" "
+        |                     severity = severity + m.other.content.text + " "
+        |                 }
+        |                 var c = m.cvssV4_0 || m.cvssV3_1 || m.cvssV3_0 || m.cvssV2_0
+        |                 if (c && (c.baseScore != null || c.vectorString)) {
+        |                     cvss = cvss + "CVSS"
+        |                     if (c.version) cvss = cvss + " " + c.version
+        |                     cvss = cvss + ": "
+        |                     if (c.baseScore != null) cvss = cvss + c.baseScore
+        |                     if (c.baseSeverity) cvss = cvss + " (" + c.baseSeverity.toLowerCase() + ")"
+        |                     if (c.vectorString) cvss = cvss + " " + c.vectorString
+        |                     cvss = cvss + "\n"
         |                 }
         |             }
-        |             mt = mt + "\n\n"
+        |             if (severity) mt = mt + "Severity: " + severity + "\n"
+        |             if (cvss) mt = mt + cvss
+        |             if (severity || cvss) mt = mt + "\n"
         |         }
         |         mt = mt + "Affected versions:\n\n"
         |         for (a of j.containers.cna.affected) {
