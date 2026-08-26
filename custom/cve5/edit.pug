@@ -94,19 +94,14 @@ block prepend loadEditor
         |                     severity = severity + m.other.content.text + " "
         |                 }
         |                 var c = m.cvssV4_0 || m.cvssV3_1 || m.cvssV3_0 || m.cvssV2_0
-        |                 if (c && (c.baseScore != null || c.vectorString)) {
-        |                     cvss = cvss + "CVSS"
-        |                     if (c.version) cvss = cvss + " " + c.version
-        |                     cvss = cvss + ": "
-        |                     if (c.baseScore != null) cvss = cvss + c.baseScore
+        |                 if (c && c.vectorString) {
+        |                     var score = typeof c.baseScore == "number" ? c.baseScore.toFixed(1) : c.baseScore
+        |                     cvss = cvss + "CVSS " + c.version + ": " + score
         |                     if (c.baseSeverity) cvss = cvss + " (" + c.baseSeverity.toLowerCase() + ")"
-        |                     if (c.vectorString) cvss = cvss + " " + c.vectorString
-        |                     cvss = cvss + "\n"
+        |                     cvss = cvss + " " + c.vectorString + "\n"
         |                 }
         |             }
-        |             if (severity) mt = mt + "Severity: " + severity + "\n"
-        |             if (cvss) mt = mt + cvss
-        |             if (severity || cvss) mt = mt + "\n"
+        |             mt = mt + "Severity: " + severity + "\n" + cvss + "\n"
         |         }
         |         mt = mt + "Affected versions:\n\n"
         |         for (a of j.containers.cna.affected) {
