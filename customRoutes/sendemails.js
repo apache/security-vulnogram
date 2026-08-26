@@ -9,25 +9,19 @@ const email = require('./email.js');
 
 var csrfProtection = csurf();
 
-protected.get('/', csrfProtection, async function(req,res) {
-    req.flash('error',"Test");
-    res.render('blank');
-    console.log("sendemail");
-    res.end();
-});
-
 protected.post('/', csrfProtection, async function(req,res) {
     var to1 = req.body.emailto1;
     var to2 = req.body.emailto2;
     if (conf.cveapiliveservice) {
         var se1 = await email.sendemail({"from":"\""+req.user.name+"\" <"+req.user.email+">","to":to1,"replyTo":req.body.emailreplyto,"subject":req.body.emailsubject,"text":req.body.emailtext}).then( (x) => {  console.log("sent OSS notification mail "+x);});
         var se2 = await email.sendemail({"from":"\""+req.user.name+"\" <"+req.user.email+">","to":to2,"bcc":"security@apache.org","replyTo":req.body.emailreplyto,"subject":req.body.emailsubject,"text":req.body.emailtext}).then( (x) => {  console.log("sent ASF notification mail "+x);});    
+    } else {
+        console.log("Not actually sending OSS/ASF emails in dev mode")
     }
     req.flash('success', conf.cveapiliveservice
         ? 'Sent the emails!'
         : 'Dev mode: emails NOT sent (logged to console).');
     res.render('blank');
-    res.end();
 });
 
 module.exports = {
