@@ -1,6 +1,4 @@
 const express = require('express');
-const csurf = require('csurf');
-var csrfProtection = csurf();
 const crypto = require('crypto');
 // ASF
 const asf = require('../custom/asf.js');
@@ -114,7 +112,7 @@ module.exports = function (Document, opts) {
         }
     }
     var router = express.Router();
-    router.post('/comment', csrfProtection, async function (req, res) {
+    router.post('/comment', async function (req, res) {
         // ASF we need to load the document so we can get the PMC
         var q = {};
         q[opts.idpath] = req.body.id;

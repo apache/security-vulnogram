@@ -28,6 +28,8 @@ const session = require('express-session');
 const passport = require('passport');
 const crypto = require('crypto');
 const compress = require('compression');
+const csurf = require('csurf');
+var csrfProtection = csurf();
 
 if (process.cwd() !== __dirname) {
     try {
@@ -122,14 +124,21 @@ app.use(function (req, res, next) {
 // add this to route for authenticating before certain requests.
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        return next();
+        // Session (cookie) authentication is vulnerable to CSRF, so requests
+        // authenticated that way carry a CSRF token. Requests authenticated
+        // with a bearer token are not: the browser does not attach an
+        // Authorization header by itself, and we allow no cross-origin
+        // requests, so a third-party site cannot forge one.
+        return csrfProtection(req, res, next);
     // ASF
     } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-")) && req.headers['authorization']) {
         const token = req.headers['authorization'].substring(7);
         req.sessionStore.all((err, sessions)=>{
-            for (const s in sessions) {
+            for (const s in sessions || {}) {
                 if (sessions[s].token == token) {
-                    req.session.user = sessions[s].user;
+                    // asfinit() populates req.user from the session, but it
+                    // already ran for this request, so set it here as well.
+                    req.user = req.session.user = sessions[s].user;
                     return next();
                 }
             }

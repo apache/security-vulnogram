@@ -3,11 +3,9 @@ const docModel = require('../models/doc');
 const conf = require('../config/conf');
 const querymw = require('../lib/querymw');
 const package = require('../package.json');
-const csurf = require('csurf');
 // ASF
 const asf =  require('../custom/asf.js');
 // END ASF
-var csrfProtection = csurf();
 var querymen = require('querymen');
 var qs = require('querystring');
 const _ = require('lodash');
@@ -256,7 +254,7 @@ module.exports = function (name, opts) {
             res.json([]);
         }
     });
-    router.post('/json/', csrfProtection, async function (req, res) {
+    router.post('/json/', async function (req, res) {
         if (req.body.ids && req.body.ids.length > 0) {
             //console.log('REQ: ' + JSON.stringify(req.body.ids));
             var q = {};
@@ -511,7 +509,7 @@ module.exports = function (name, opts) {
         return pipeLine;
     };
     /* The Main listing routine */
-    router.get('/', csrfProtection, queryMW, async function (req, res) {
+    router.get('/', queryMW, async function (req, res) {
         try {
             // ASF
             var mychartCount = chartCount;
@@ -643,7 +641,7 @@ module.exports = function (name, opts) {
                 total: total,
                 columns: columns,
                 current: currentPage,
-                csrfToken: req.csrfToken(),
+                csrfToken: req.csrfToken ? req.csrfToken() : '',
                 bulkInput: bulkInput
             });
 
@@ -661,7 +659,6 @@ module.exports = function (name, opts) {
     var History = docModel(opts.historyCollectionName);
     //UPDATE many
     router.post('/update',
-        csrfProtection,
         queryMWBody,
         async function (req, res) {
             try {
