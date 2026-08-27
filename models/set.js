@@ -265,6 +265,11 @@ module.exports = function (setName, paths) {
         if (!conf.style && fs.existsSync(path.join(setDir, 'style.css'))) {
             result.style = fs.readFileSync(path.join(setDir, 'style.css'), 'utf8');
         }
+        // ASF
+        if (!conf.style_overrides && fs.existsSync(path.join(setDir, 'style_overrides.css'))) {
+            result.style = fs.readFileSync(path.join(setDir, 'style_overrides.css'), 'utf8');
+        }
+        // END ASF
         if (!conf.script && fs.existsSync(path.join(setDir, 'script.js'))) {
             result.script = (result.script ? result.script : '') + fs.readFileSync(path.join(setDir, 'script.js'), { encoding: 'utf8' });
         }
