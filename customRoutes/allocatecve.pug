@@ -21,7 +21,7 @@ block content
     if user.pmcs && user.pmcs.includes("security")
       .row
         label.lbl.icn PMC:
-        input.txt(name='pmc', type='text', value="security")
+        input.txt(name='pmc', type='text', value=pmc ? pmc : "security")
     else
       .row
         label.lbl.icn PMC:
@@ -29,10 +29,15 @@ block content
         if z
           select(name='pmc')
             for p in z
-              option(value=p) #{p}
+              option(value=p, selected=(p == pmc)) #{p}
     .row
       label.lbl.icn Short one line description/title (you can change this later):
-      input.txt(name='cvetitle', type='text', style="width:40em", value=cvetitle)      
+      input.txt(name='cvetitle', type='text', style="width:40em", value=cvetitle)
+    if messageid
+      .row
+        label.lbl.icn Message ID of the first email of the thread the issue was reported in, if known:
+        input.txt(name='messageid', type='text', style="width:30em", value=messageid)
+        input.txt(name='listid', type='text', style="width:14em", value=listid)
     .row
       p
       button.btn.sfe(type='submit', value='Request a CVE') Request a CVE
