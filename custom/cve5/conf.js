@@ -371,6 +371,11 @@ module.exports = {
                                         { "required": ["other"], "title": "ASF severity rating" },
                                     ],
                                     "properties": {
+                                        "scenarios": {
+                                          "options": {
+                                            "hidden": true
+                                          }
+                                        },
                                         "other": {
                                             "title": "Text version of Severity level",
                                             "links": [ {
