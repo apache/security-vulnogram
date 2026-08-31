@@ -56,6 +56,10 @@ function makeFakeCveResponse() {
 // isn't important.
 
 
+// GET parameters only prefill the form, the POST below still validates
+// everything, so a crafted link can't allocate anything the user couldn't
+// allocate by filling in the form by hand.
+
 protected.get('/', csrfProtection, function (req, res) {
     thisyear = new Date().getFullYear();
     var title = "This form will request a CVE direct from the CVE project.  It will create a new CVE document here and send an email with the CVE name to the security team and the PMC.";
@@ -66,11 +70,20 @@ protected.get('/', csrfProtection, function (req, res) {
     } else if (!req.user.pmcs || !req.user.pmcs.includes(conf.admingroupname)) {
         title = "This form will request a CVE either from the ASF Security team, or if your PMC is allowed, direct from the CVE project.  In either case an email will be sent to the security team and the PMC.";
     }
+    var pmcs = req.user.pmcs || [];
+    var pmc = req.query.pmc || "";
+    if (pmc && !pmcs.includes(conf.admingroupname) && !pmcs.includes(pmc)) {
+        // not one of theirs, don't prefill a value the form would reject
+        pmc = "";
+    }
     res.render('../customRoutes/allocatecve', {
         title: title,
 //        number: 1,
-	cvetitle: "",
+	cvetitle: req.query.title || "",
 //        year: thisyear,
+        pmc: pmc,
+        messageid: req.query.messageid || "",
+        listid: req.query.listid || "",
         csrfToken: req.csrfToken()
     });
 });
@@ -111,7 +124,10 @@ protected.post('/', csrfProtection, async function(req,res) {
         var s2 = email.sendemail({"to":"security@apache.org",
                                   "cc":eto,
                                   "subject":"CVE request for "+pmc,
-                                  "text":"requestor: "+req.user.username+"\npmc: "+pmc+"\n\n"+req.body.cvetitle,
+                                  "text":"requestor: "+req.user.username+"\npmc: "+pmc+"\n"
+                                      + (req.body.messageid ? "report thread: "+req.body.messageid+"\n" : "")
+                                      + (req.body.listid ? "report list: "+req.body.listid+"\n" : "")
+                                      + "\n"+req.body.cvetitle,
                                  }).then( (x) => {  console.log("sent CVE request mail "+x);});
         
         req.flash('success', testmode
@@ -177,6 +193,14 @@ protected.post('/', csrfProtection, async function(req,res) {
                                    }
                                }
                              };
+
+                    if (req.body.messageid && req.body.listid) {
+                        // TODO messageid might need partial escaping,
+                        // need to double-check exact ponymail semantics
+                        newdoc.CNA_private.internal_references = [
+                            "https://lists.apache.org/thread/" + req.body.messageid + "?<" + req.body.listid + ">"
+                        ];
+                    }
 
                     try {
                         console.log("Saving new doc");
