@@ -380,7 +380,7 @@ var self = module.exports = {
     asfhookaddcomment: function(doc,req) {
         var pathcve = "cve5";
         if (doc.body.cveMetadata && doc.body.cveMetadata.cveId)
-	var url = "https://"+req.client.servername+"/"+pathcve+"/"+req.body.id;
+	var url = "https://"+req.get('host')+"/"+pathcve+"/"+req.body.id;
 	se = email.sendemail({"from": "\""+req.user.name+"\" <"+req.user.email+">",
                               "to": self.getsecurityemailaddress(doc.body.CNA_private.owner),
                               "cc": "security@apache.org", 
