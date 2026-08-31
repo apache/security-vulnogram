@@ -551,11 +551,6 @@ function cveFixForVulnogram(j) {
     if (cna.metrics == undefined) {
         cna.metrics = [];
     }
-    cna.metrics.forEach(function (metric) {
-        if (metric && metric.other && !metric.other.type) {
-            metric.other.type = "Textual description of severity";
-        }
-    });
     return j;
 }
 
