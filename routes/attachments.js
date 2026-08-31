@@ -1,6 +1,4 @@
 const express = require('express');
-const csurf = require('csurf');
-var csrfProtection = csurf();
 const path = require('path');
 const os = require('os');
 const Busboy = require('busboy');
@@ -34,7 +32,7 @@ module.exports = function (Document, opts) {
             return next();
         }
     }
-    router.post('/:id/file', csrfProtection, checkPattern, checkDir, async function (req, res) {
+    router.post('/:id/file', checkPattern, checkDir, async function (req, res) {
         var fq = {};
         fq[opts.idpath] = req.params.id;
         var doc = await Document.findOne(fq);
@@ -156,7 +154,7 @@ module.exports = function (Document, opts) {
     );
 
     // delete file
-    router.delete('/:id/file/:filename', csrfProtection, checkPattern, checkDir, async function (req, res) {
+    router.delete('/:id/file/:filename', checkPattern, checkDir, async function (req, res) {
         var fq = {};
         fq[opts.idpath] = req.params.id;
         // ASF

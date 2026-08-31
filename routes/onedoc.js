@@ -1,9 +1,7 @@
 const express = require('express');
-const csurf = require('csurf');
 // ASF
 const asf =  require('../custom/asf.js');
 // END ASF
-var csrfProtection = csurf();
 const textUtil = require('../src/js/edit/util.js');
 var jsonpatch = require('json-patch-extended');
 var _ = require('lodash');
@@ -41,7 +39,7 @@ module.exports = function (Document, opts) {
     var router = module.router = express.Router();
 
     // GET docuemnt
-    router.get('/:id', ensureRouteID, csrfProtection, [checkID], async function (req, res) {
+    router.get('/:id', ensureRouteID, [checkID], async function (req, res) {
         var q = {};
         q[opts.idpath] = req.params.id;
         try {
@@ -71,7 +69,7 @@ module.exports = function (Document, opts) {
                     doc: doc ? doc : {},
                     textUtil: textUtil,
                     doc_id: req.params.id,
-                    csrfToken: req.csrfToken(),
+                    csrfToken: req.csrfToken ? req.csrfToken() : '',
                     renderTemplate: 'default',
                     ucomments: ucomments
                 });
@@ -83,7 +81,7 @@ module.exports = function (Document, opts) {
                     idpath: opts.jsonidpath,
                     doc: doc,
                     textUtil: textUtil,
-                    csrfToken: req.csrfToken(),
+                    csrfToken: req.csrfToken ? req.csrfToken() : '',
                     allowAjax: true,
                     ucomments: ucomments
                 });
@@ -120,7 +118,7 @@ module.exports = function (Document, opts) {
     var queryMW = querymw(opts.facet);
 
     // Render a NEW editable document
-    router.get('/new', csrfProtection, queryMW, async function (req, res) {
+    router.get('/new', queryMW, async function (req, res) {
         var doc = null;
         if (req.querymen.query[opts.idpath]) {
             var fq = {};
@@ -141,7 +139,7 @@ module.exports = function (Document, opts) {
                 opts: opts,
                 idpath: opts.jsonidpath,
                 textUtil: textUtil,
-                csrfToken: req.csrfToken(),
+                csrfToken: req.csrfToken ? req.csrfToken() : '',
                 allowAjax: true
             });
         }
@@ -199,7 +197,7 @@ module.exports = function (Document, opts) {
     }
 
     // Creat a new document
-    router.post(/\/(new)$/, csrfProtection, [checkID, existCheck], async function (req, res) {
+    router.post(/\/(new)$/, [checkID, existCheck], async function (req, res) {
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -239,7 +237,7 @@ module.exports = function (Document, opts) {
     });
 
     // Update or insert existing Document ID 
-    router.post('/:id', ensureRouteID, csrfProtection, [checkID], async function (req, res) {
+    router.post('/:id', ensureRouteID, [checkID], async function (req, res) {
         let errors = validationResult(req).array();
         if (errors.length > 0) {
             var msg = 'Error: ';
@@ -327,7 +325,7 @@ module.exports = function (Document, opts) {
     });
 
     //Delete Document
-    router.delete('/:id', ensureRouteID, csrfProtection, async function (req, res) {
+    router.delete('/:id', ensureRouteID, async function (req, res) {
         let query = {};
         query[opts.idpath] = req.params.id;
 
