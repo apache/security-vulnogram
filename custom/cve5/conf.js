@@ -386,6 +386,7 @@ module.exports = {
                                             } ],
                                             "properties": {
                                                 "type" : {
+                                                    "default": "Textual description of severity",
                                                     "options": {
                                                         "hidden": "true",
                                                     }
