@@ -87,13 +87,21 @@ block prepend loadEditor
         |         }
         |         mt = ""
         |         if (j.containers.cna.metrics) {
-        |             mt = mt + "Severity: "
+        |             var severity = ""
+        |             var cvss = ""
         |             for (m of j.containers.cna.metrics) {
         |                 if (m.other && m.other.content && m.other.content.text) {
-        |                     mt = mt + m.other.content.text+" "
+        |                     severity = severity + m.other.content.text + " "
+        |                 }
+        |                 var c = m.cvssV4_0 || m.cvssV3_1 || m.cvssV3_0 || m.cvssV2_0
+        |                 if (c && c.vectorString) {
+        |                     var score = typeof c.baseScore == "number" ? c.baseScore.toFixed(1) : c.baseScore
+        |                     cvss = cvss + "CVSS " + c.version + ": " + score
+        |                     if (c.baseSeverity) cvss = cvss + " (" + c.baseSeverity.toLowerCase() + ")"
+        |                     cvss = cvss + " " + c.vectorString + "\n"
         |                 }
         |             }
-        |             mt = mt + "\n\n"
+        |             mt = mt + "Severity: " + severity + "\n" + cvss + "\n"
         |         }
         |         mt = mt + "Affected versions:\n\n"
         |         for (a of j.containers.cna.affected) {
