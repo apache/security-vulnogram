@@ -1410,9 +1410,13 @@ async function cveSubmitDocToASFBackend(j) {
         body: JSON.stringify({cve:j.cveMetadata.cveId})
     });
     const out = await res.json();
+    if (res.status < 200 || res.status >= 300) {
+      throw out['message'];
+    }
+    console.log(res)
     return {
-	    response: res,
-	    doc: j
+      response: out,
+      doc: j
     };
 }
 // END ASF
@@ -2397,6 +2401,7 @@ async function cvePost() {
             try {
                 // ASF
                 var publishResult = await cveSubmitDocToASFBackend(j);
+                // END ASF
                 j = publishResult.doc;
                 ret = publishResult.response;
             } catch (e) {
