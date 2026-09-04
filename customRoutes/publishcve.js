@@ -117,6 +117,7 @@ protected.post('/', csrfProtection, async function(req,res) {
     let Document = res.locals.docs.cve5.Document;
     var doc = await Document.findOne(q);
     if (!doc) {
+        res.statusCode = 404;
         res.json({"message": req.body.cve+" not found"});
         res.end();
         return;
@@ -126,6 +127,7 @@ protected.post('/', csrfProtection, async function(req,res) {
     
     var cvepmcowner  = doc.body.CNA_private.owner;
     if (!allowedtopushlive(req.user.pmcs,cvepmcowner)) {
+        res.statusCode = 403;
         res.json({"message":"Sorry the PMC "+cvepmcowner+" has no push rights"});
         res.end();    
         return true;        
@@ -137,6 +139,7 @@ protected.post('/', csrfProtection, async function(req,res) {
     // We now have the document the same as the CVE-JSON tab had
 
     if (doc.body.CNA_private.state != "PUBLIC" && doc.body.CNA_private.state != "READY" ) {
+        res.statusCode = 400;
         res.json({"message":req.body.cve+" is not in state PUBLIC or READY"});
         res.end();
         return true;
@@ -163,6 +166,7 @@ protected.post('/', csrfProtection, async function(req,res) {
                                       "text":"push by "+req.user.username+" success",
                                      }).then( (x) => {  console.log("sent CVE push mail "+x);});
         } else {
+            res.statusCode = 500;
             res.json({"message":"Push to cve.org failed. "+result});
 
             var s2 = email.sendemail({"to":"security@apache.org",
