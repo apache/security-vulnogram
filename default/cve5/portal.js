@@ -2430,7 +2430,10 @@ async function cvePost() {
                 var publishMessage = ret.message ? ret.message : "Successfully submitted " + j.cveMetadata.cveId;
                 var cveRecordUrl = (csCache.portalType == 'test' ? 'https://test.cve.org/cverecord?id=' : 'https://vulnogram.org/seaview/?') + j.cveMetadata.cveId;
                 var countdownSecs = 5;
-                cveAlert("CVE Record is Published", publishMessage + "\nOpening CVE record in " + countdownSecs + " seconds...", 10000);
+                // ASF
+                //cveAlert("CVE Record is Published", publishMessage + "\nOpening CVE record in " + countdownSecs + " seconds...", 10000);
+                cveAlert("CVE Record is Published", publishMessage);
+                /*
                 var smallAlertEl = document.getElementById('smallAlert');
                 var countdownInterval = setInterval(function () {
                     countdownSecs--;
@@ -2442,6 +2445,8 @@ async function cvePost() {
                         window.open(cveRecordUrl, '_blank');
                     }
                 }, 1000);
+                */
+                // END ASF
                 var a = document.createElement('a');
                 a.setAttribute('href', cveRecordUrl);
                 a.setAttribute('target', '_blank');
