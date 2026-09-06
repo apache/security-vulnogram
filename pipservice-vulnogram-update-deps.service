@@ -6,7 +6,7 @@ Type=simple
 Environment=HOME=/opt/vulnogram
 WorkingDirectory=/opt/vulnogram
 ExecStart=/usr/bin/npm install
-Restart=always
+Restart=no
 PrivateTmp=yes
 NoNewPrivileges=true
 ProtectSystem=strict
