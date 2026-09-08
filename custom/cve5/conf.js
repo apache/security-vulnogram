@@ -421,6 +421,7 @@ module.exports = {
                                         }
                                     }
                                 ],
+                                "minItems": 1,
                             },
                             "configurations": {
                                 "options": {
