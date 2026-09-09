@@ -88,7 +88,7 @@ function asflogout (req, res) {
 
 function asflogin (req, res) {
     const sess = req.session;
-    const our_endpoint = "https://"+req.get('host')+"/users/login";
+    const our_endpoint = conf.oauth_redirect_uri || "https://"+req.get('host')+"/users/login";
     if (req.query.code) {
         if (req.query.state != sess.state) {
             res.send("auth is broken");
