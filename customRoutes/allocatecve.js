@@ -89,13 +89,19 @@ protected.get('/', csrfProtection, function (req, res) {
 });
 
 // number, year, pm
-protected.post('/', csrfProtection, async function(req,res) {
+protected.post('/', async function(req,res) {
     if (!res.locals.docs) {
         console.log(res.locals);
         return;
     }
     var testmode =!conf.cveapiliveservice;
     var pmc = req.body.pmc.toLowerCase();
+    if (req.token_pmc && req.token_pmc != pmc) {
+        res.statusCode = 403;
+        res.json({"message":"Token is not valid for this PMC"})
+        res.end()
+        return;
+    }
 
     var eto = asf.getsecurityemailaddress(pmc);
     if (pmc =="security" || testmode) {

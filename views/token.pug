@@ -1,0 +1,20 @@
+extends layout
+
+block content
+    .div These bearer tokens can be used when you want to give a tool temporary, scoped access to cveprocess.
+    .div Tokens are intentionally short-lived (hours); long-lived authentication tokens are not supported.
+    table
+      tr
+        th PMC
+        th Operations
+        th Token
+      tr
+        td (unrestricted)
+        td all
+        td !{token}
+      each ts,pmc in tokens
+        each tok,op in ts
+          tr 
+            td !{pmc} 
+            td !{op} 
+            td !{tok} 
