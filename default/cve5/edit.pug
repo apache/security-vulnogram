@@ -49,8 +49,6 @@ block append outputButtons
 block append scripts
     if min || !conf.realtime || !conf.realtime.enabled
         script(src=conf.basedir + "js/json-patch-extended.min.js")
-    //- ASF: purl parser, for auto-filling collectionURL/packageName
-    script(src=conf.basedir + "js/packageurl-js.js")
     script(type="module")
         | import {CVSS40} from './static/cvss40.js';
         | window.CVSS40 = CVSS40;

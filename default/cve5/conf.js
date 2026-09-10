@@ -250,35 +250,6 @@ module.exports = {
                         });
                     }
                 }
-                // ASF
-                // The CVE 5 schema states the Package URL MUST NOT include a
-                // version; the affected versions belong in `versions`.
-                if (typeof parsePurl === 'function' && value.packageURL) {
-                    const purl = parsePurl(value.packageURL);
-                    if (purl && purl.version) {
-                        errors.push({
-                            path: path + '.packageURL',
-                            property: 'format',
-                            message: 'The Package URL must not include a version'
-                        });
-                    }
-                }
-                // Validates that the data in packageURL, collectionURL, and packageName is consistent
-                if (typeof purlToLegacyIdentifiers === 'function' && value.packageURL) {
-                    const derived = purlToLegacyIdentifiers(value.packageURL);
-                    if (derived) {
-                        ['collectionURL', 'packageName'].forEach(function (field) {
-                            if (value[field] && value[field] !== derived[field]) {
-                                errors.push({
-                                    path: path + '.' + field,
-                                    property: 'format',
-                                    message: 'Does not match the Package URL'
-                                });
-                            }
-                        });
-                    }
-                }
-                // END ASF
                 /* 
                 p v c pkg
                 0 0 0 0 = vendor or pkg needed

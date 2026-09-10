@@ -13,13 +13,15 @@ assert(customValidators(undefined, "private@pulsar.apache.org", "root.CNA_privat
 // same way unittest/test.js does.
 document = { addEventListener: function () {} }
 window = {}
-global.PackageURL = require('packageurl-js').PackageURL
-global.parsePurl = require('../default/cve5/script.js').parsePurl
-global.purlToLegacyIdentifiers = require('../default/cve5/script.js').purlToLegacyIdentifiers
+// The validator reaches these as browser globals; on the page they come from
+// custom/cve5/script.js, inlined into opts.script.
+global.parsePurl = require('../custom/cve5/script.js').parsePurl
+global.purlToLegacyIdentifiers = require('../custom/cve5/script.js').purlToLegacyIdentifiers
 
-const productValidator = require('../default/cve5/conf.js').validators[0]
+// The purl checks now live in the ASF validator, not the default one.
+const productValidator = require('../custom/cve5/conf.js').validators[1]
 const mismatches = (product) => productValidator({ id: 'pE' }, product, 'root.containers.cna.affected.0')
-    .filter(e => e.message === 'Does not match the Package URL')
+    .filter(e => e.message.startsWith('Does not match the Package URL'))
 
 const maven = {
   vendor: 'Apache Software Foundation',
@@ -39,10 +41,12 @@ assert.deepEqual(mismatches(Object.assign({}, maven, { collectionURL: undefined,
 const badName = mismatches(Object.assign({}, maven, { packageName: 'commons-lang3' }))
 assert(badName.length === 1)
 assert(badName[0].path === 'root.containers.cna.affected.0.packageName')
+assert(badName[0].message.includes('org.apache.commons:commons-lang3'))
 
 // A stored collectionURL that disagrees with the purl.
 const badUrl = mismatches(Object.assign({}, maven, { collectionURL: 'https://pypi.python.org' }))
 assert(badUrl.length === 1)
+assert(badUrl[0].message.includes('https://repo.maven.apache.org/maven2'))
 assert(badUrl[0].path === 'root.containers.cna.affected.0.collectionURL')
 
 // Both wrong at once.

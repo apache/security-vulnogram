@@ -8,10 +8,14 @@ window = {
 
 // System under test
 const assert = require('node:assert').strict
-// script.js reaches for PackageURL as a browser global; in the page it comes
-// from public/js/packageurl-js.js, which is bundled from this same package.
-global.PackageURL = require('packageurl-js').PackageURL
 sut = require("../default/cve5/script.js")
+// Required with no globals set, deliberately: custom/cve5/script.js must
+// resolve packageurl-js on its own (see purlParserClass), because
+// customRoutes/publishcve.js requires it the same way.
+const purl = require("../custom/cve5/script.js")
+const textUtil = require("../src/js/edit/util.js")
+// reduceJSON reaches the derivation as a browser global; publishcve.js does this too.
+global.purlToLegacyIdentifiers = purl.purlToLegacyIdentifiers
 
 // Tests
 assert(sut.htmltoText('<a href="foo">foo</a>') == "foo")
@@ -23,7 +27,7 @@ assert(sut.htmltoText('<a href="foo">foo<br></a>bar') == "foo\n bar")
 
 // purlToLegacyIdentifiers: inputs mirror cases from the official purl test
 // suite at package-url/purl-spec (tests/spec + tests/types).
-const legacy = sut.purlToLegacyIdentifiers
+const legacy = purl.purlToLegacyIdentifiers
 
 // Maven uses groupId:artifactId, as the ASF packageName validator requires.
 assert.deepEqual(legacy('pkg:maven/org.apache.commons/commons-lang3'), {
@@ -75,3 +79,57 @@ assert(legacy('pkg:maven/commons-lang3') === null) // maven requires a groupId
 assert(legacy('not-a-purl') === null)
 assert(legacy('') === null)
 assert(legacy(undefined) === null)
+
+// Guards the silent-null trap: parsePurl swallows a missing PackageURL in its
+// own try/catch, so a broken server-side resolution would not throw - it would
+// just stop deriving, and every published record would quietly lose the fields.
+assert(purl.parsePurl('pkg:maven/g/a') !== null,
+  'purl parsing must work in plain Node, with no browser globals set')
+
+// reduceJSON derives the legacy identifiers when the record is serialised.
+// It is the only place they are produced: the CVE-JSON tab and
+// customRoutes/publishcve.js both go through it.
+global.getProductListNoVendor = (c) => c.containers.cna.affected.map(a => a.product).join(', ')
+
+const serialise = (affected) => textUtil.reduceJSON({
+  cveMetadata: { cveId: 'CVE-2024-0001' },
+  CNA_private: { state: 'READY' },
+  containers: { cna: { title: 'Apache Example: something', affected: affected } }
+}).containers.cna.affected
+
+// Derived when absent.
+assert.deepEqual(serialise([{ product: 'A', packageURL: 'pkg:maven/org.apache.commons/commons-lang3' }]),
+  [{ product: 'A', packageURL: 'pkg:maven/org.apache.commons/commons-lang3',
+     collectionURL: 'https://repo.maven.apache.org/maven2',
+     packageName: 'org.apache.commons:commons-lang3' }])
+
+// An unmappable type adds nothing.
+assert.deepEqual(serialise([{ product: 'B', packageURL: 'pkg:generic/openssl' }]),
+  [{ product: 'B', packageURL: 'pkg:generic/openssl' }])
+
+// No purl, nothing to do.
+assert.deepEqual(serialise([{ product: 'C' }]), [{ product: 'C' }])
+
+// Already carries the fields: left alone, even when they disagree with the purl.
+// Publishing must not rewrite authored data - the editor reports the mismatch.
+assert.deepEqual(serialise([{ product: 'D', packageURL: 'pkg:pypi/django',
+                              collectionURL: 'https://example.org', packageName: 'kept' }]),
+  [{ product: 'D', packageURL: 'pkg:pypi/django',
+     collectionURL: 'https://example.org', packageName: 'kept' }])
+
+// A half-filled pair is also left alone rather than half-derived.
+assert.deepEqual(serialise([{ product: 'E', packageURL: 'pkg:pypi/django', packageName: 'kept' }]),
+  [{ product: 'E', packageURL: 'pkg:pypi/django', packageName: 'kept' }])
+
+// The caller's document is never mutated.
+const original = { product: 'F', packageURL: 'pkg:pypi/django' }
+serialise([original])
+assert(original.collectionURL === undefined && original.packageName === undefined)
+
+// CNA_private is still stripped, and the title still prefixed.
+const published = textUtil.reduceJSON({
+  CNA_private: { state: 'READY' },
+  containers: { cna: { title: 'Something', affected: [{ product: 'Alpha' }] } }
+})
+assert(published.CNA_private === undefined)
+assert(published.containers.cna.title === 'Alpha: Something')

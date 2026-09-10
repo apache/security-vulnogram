@@ -283,6 +283,13 @@ module.exports = {
                                                 }
                                             }
                                         },
+                                        "packageURL": {
+                                            "options": {
+                                                // Selects the purlString editor
+                                                // in asfpreload.js.
+                                                "purlAutofill": true
+                                            }
+                                        },
                                         "versions": {
                                             "items":{
 		                                "properties": {
@@ -472,6 +479,39 @@ module.exports = {
         conf.validators,
         function (schema, value, path) {
             var errors = [];
+            // A product entry: check the Package URL against the legacy
+            // identifiers derived from it. purlToLegacyIdentifiers and parsePurl
+            // are globals from custom/cve5/script.js.
+            if (schema && schema.id == 'pE' && value.packageURL &&
+                typeof parsePurl === 'function' && typeof purlToLegacyIdentifiers === 'function') {
+                // The CVE 5 schema states the Package URL MUST NOT include a
+                // version; the affected versions belong in `versions`.
+                var purl = parsePurl(value.packageURL);
+                if (purl && purl.version) {
+                    errors.push({
+                        path: path + '.packageURL',
+                        property: 'format',
+                        message: 'The Package URL must not include a version'
+                    });
+                }
+                // The legacy identifiers are normally derived on publication and
+                // not shown at all. They are only present, and therefore only
+                // visible, on a record that already carried them - report it
+                // rather than silently republishing something inconsistent.
+                var derived = purlToLegacyIdentifiers(value.packageURL);
+                if (derived) {
+                    ['collectionURL', 'packageName'].forEach(function (field) {
+                        if (value[field] && value[field] !== derived[field]) {
+                            errors.push({
+                                path: path + '.' + field,
+                                property: 'format',
+                                message: 'Does not match the Package URL: expected "' +
+                                    derived[field] + '"'
+                            });
+                        }
+                    });
+                }
+            }
             if (path == 'root') {
                 if (value && value.CNA_private && value.CNA_private.state && value.containers.cna.references) {
                     var asf = 0;

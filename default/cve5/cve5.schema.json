@@ -516,7 +516,6 @@
             "show_errors": "always",
             "grid_columns": 12,
             "class": "vgi-package",
-            "purlAutofill": true,
             "inputAttributes": {
               "placeholder": "eg., pkg:maven/org.apache.commons/commons-lang3"
             }
@@ -750,8 +749,6 @@
         "vendor",
         "product",
         "platforms",
-        "collectionURL",
-        "packageName",
         "packageURL",
         "repo",
         "modules",

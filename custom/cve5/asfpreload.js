@@ -167,3 +167,69 @@ async function loadEmailLists(pmc) {
         return "";
     }
 }
+
+// The legacy package identifiers (collectionURL + packageName) are not stored:
+// packageURL is the single source of truth, and textUtil.reduceJSON derives the
+// pair when the record is serialized for publication.
+JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.defaults.editors.string {
+
+    build() {
+        super.build();
+        this.purlHint = document.createElement('div');
+        this.purlHint.className = 'lbl purl-hint';
+        this.control.appendChild(this.purlHint);
+        // The legacy editors are created after this one - they are not in
+        // defaultProperties, so setValue appends them - and the user can edit
+        // them once they exist. Neither notifies this editor, so watch them.
+        this.legacyWatchListener = () => this.refreshPurlHint();
+        this.legacyWatchPaths = ['collectionURL', 'packageName']
+            .map((key) => this.parent.path + '.' + key);
+        this.legacyWatchPaths.forEach(
+            (path) => this.jsoneditor.watch(path, this.legacyWatchListener));
+        this.refreshPurlHint();
+    }
+
+    destroy() {
+        this.legacyWatchPaths.forEach(
+            (path) => this.jsoneditor.unwatch(path, this.legacyWatchListener));
+        super.destroy();
+    }
+
+    onChange(bubble, fromTemplate) {
+        super.onChange(bubble, fromTemplate);
+        // Covers the programmatic paths too - load, import, draft restore,
+        // realtime - so the hint always matches the committed value.
+        this.refreshPurlHint();
+    }
+
+    // True when the record already carries a legacy identifier.
+    hasLegacyIdentifiers() {
+        const editors = this.parent && this.parent.editors;
+        if (!editors) {
+            return false;
+        }
+        return ['collectionURL', 'packageName'].some((key) => {
+            const editor = editors[key];
+            return !!(editor && String(editor.getValue() || '').trim());
+        });
+    }
+
+    refreshPurlHint(rawValue) {
+        if (!this.purlHint) {
+            return;
+        }
+        const derived = this.hasLegacyIdentifiers() ? null : purlToLegacyIdentifiers(
+            rawValue === undefined ? this.getValue() : rawValue);
+        this.purlHint.textContent = derived
+            ? 'Legacy identifiers, added when this record is published \u2014 '
+                + 'collectionURL: ' + derived.collectionURL
+                + ' \u00b7 packageName: ' + derived.packageName
+            : '';
+    }
+};
+
+JSONEditor.defaults.resolvers.unshift(function (schema) {
+    if (schema.type === "string" && schema.options && schema.options.purlAutofill) {
+        return "purlString";
+    }
+});
