@@ -250,6 +250,23 @@ module.exports = {
                         });
                     }
                 }
+                // ASF
+                // Validates that the data in packageURL, collectionURL, and packageName is consistent
+                if (typeof purlToLegacyIdentifiers === 'function' && value.packageURL) {
+                    const derived = purlToLegacyIdentifiers(value.packageURL);
+                    if (derived) {
+                        ['collectionURL', 'packageName'].forEach(function (field) {
+                            if (value[field] && value[field] !== derived[field]) {
+                                errors.push({
+                                    path: path + '.' + field,
+                                    property: 'format',
+                                    message: 'Does not match the Package URL'
+                                });
+                            }
+                        });
+                    }
+                }
+                // END ASF
                 /* 
                 p v c pkg
                 0 0 0 0 = vendor or pkg needed
