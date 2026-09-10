@@ -168,9 +168,20 @@ function asflogin (req, res) {
 function token(req, res) {
     if (!req.session.token) {
         req.session.token = uuidv4();
+        req.session.tokens = new Map();
+      const ops = [ "allocate", "write" ];
+      for (const pmc in req.user.pmcs) {
+        req.session.tokens[req.user.pmcs[pmc]] = new Map();
+        for (const op in ops) {
+          req.session.tokens[req.user.pmcs[pmc]][ops[op]] = uuidv4();
+        }
+      }
     }
-    req.flash('info',`Bearer token: ${req.session.token}`);
-    res.render('blank');
+    res.render('token', {
+      token: req.session.token,
+      pmcs: req.user.pmcs,
+      tokens: req.session.tokens
+    });
 }
 
 // If you are in security pmc allow you to specify a different pmc for testing

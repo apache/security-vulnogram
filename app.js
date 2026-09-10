@@ -131,7 +131,7 @@ function ensureAuthenticated(req, res, next) {
         // requests, so a third-party site cannot forge one.
         return csrfProtection(req, res, next);
     // ASF
-    } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-")) && req.headers['authorization']) {
+    } else if ((req.originalUrl.startsWith("/cve5/CVE-") || req.originalUrl.startsWith("/cve5/json/CVE-") || req.originalUrl.startsWith("/allocatecve")) && req.headers['authorization']) {
         const token = req.headers['authorization'].substring(7);
         req.sessionStore.all((err, sessions)=>{
             for (const s in sessions || {}) {
@@ -140,6 +140,27 @@ function ensureAuthenticated(req, res, next) {
                     // already ran for this request, so set it here as well.
                     req.user = req.session.user = sessions[s].user;
                     return next();
+                }
+                for (const pmc in sessions[s].tokens || {}) {
+                    for (const op in sessions[s].tokens[pmc]) {
+                        if (sessions[s].tokens[pmc][op] == token) {
+                            req.user = req.session.user = sessions[s].user;
+                            if (op == "allocate" && req.originalUrl != "/allocatecve") {
+                                res.statusCode = 403;
+                                res.json({"message":"allocate token not valid for this endpoint"})
+                                res.end()
+                                return true
+                            }
+                            if (op == "write" && !req.originalUrl.startsWith("/cve5/CVE-") && !req.originalUrl.startsWith("/cve5/json/CVE-")) {
+                                res.statusCode = 403;
+                                res.json({"message":"write token not valid for this endpoint"})
+                                res.end()
+                                return true
+                            }
+                            req.token_pmc = pmc;
+                            return next();
+                        }
+                    }
                 }
             }
             req.session.returnTo = req.originalUrl;
