@@ -221,9 +221,8 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
         const derived = this.hasLegacyIdentifiers() ? null : purlToLegacyIdentifiers(
             rawValue === undefined ? this.getValue() : rawValue);
         this.purlHint.textContent = derived
-            ? 'Legacy identifiers, added when this record is published \u2014 '
-                + 'collectionURL: ' + derived.collectionURL
-                + ' \u00b7 packageName: ' + derived.packageName
+            ? 'Package collection URL: ' + derived.collectionURL
+                + ' \u00b7 Package name: ' + derived.packageName
             : '';
     }
 };

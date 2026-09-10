@@ -285,6 +285,10 @@ module.exports = {
                                         },
                                         "packageURL": {
                                             "options": {
+                                                // 4 + 8 fills the 12-column
+                                                // grid row, so the purl sits
+                                                // beside the product name.
+                                                "grid_columns": 8,
                                                 // Selects the purlString editor
                                                 // in asfpreload.js.
                                                 "purlAutofill": true
