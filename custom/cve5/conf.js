@@ -285,6 +285,10 @@ module.exports = {
                                         },
                                         "packageURL": {
                                             "options": {
+                                                // The legacy fields are hidden
+                                                // and derived, so say where
+                                                // they come from.
+                                                "infoText": "Package collection URL and Package name are derived from this when the record is published.",
                                                 // 4 + 8 fills the 12-column
                                                 // grid row, so the purl sits
                                                 // beside the product name.
