@@ -14,6 +14,7 @@ assert(customValidators(undefined, "private@pulsar.apache.org", "root.CNA_privat
 document = { addEventListener: function () {} }
 window = {}
 global.PackageURL = require('packageurl-js').PackageURL
+global.parsePurl = require('../default/cve5/script.js').parsePurl
 global.purlToLegacyIdentifiers = require('../default/cve5/script.js').purlToLegacyIdentifiers
 
 const productValidator = require('../default/cve5/conf.js').validators[0]
@@ -60,3 +61,36 @@ assert.deepEqual(mismatches({
   vendor: 'n/a', product: 'n/a',
   collectionURL: 'https://pypi.python.org', packageName: 'django'
 }), [])
+
+// The CVE 5 schema: "The Package URL MUST NOT include a version."
+const versionErrors = (product) => productValidator({ id: 'pE' }, product, 'root.containers.cna.affected.0')
+    .filter(e => e.message === 'The Package URL must not include a version')
+
+const versioned = Object.assign({}, maven, {
+  packageURL: 'pkg:maven/org.apache.commons/commons-lang3@3.12.0'
+})
+
+// A version is reported...
+const versionErr = versionErrors(versioned)
+assert(versionErr.length === 1)
+assert(versionErr[0].path === 'root.containers.cna.affected.0.packageURL')
+
+// ...but the legacy identifiers are still derived from it, so a versioned purl
+// does not also produce a spurious mismatch.
+assert.deepEqual(mismatches(versioned), [])
+
+// Without a version there is nothing to report.
+assert.deepEqual(versionErrors(maven), [])
+
+// Qualifiers and a subpath are legitimate; only the version is forbidden.
+assert.deepEqual(versionErrors(Object.assign({}, maven, {
+  packageURL: 'pkg:maven/org.apache.commons/commons-lang3?type=pom'
+})), [])
+assert.deepEqual(versionErrors({
+  vendor: 'ASF', product: 'X',
+  packageURL: 'pkg:golang/google.golang.org/genproto#googleapis/api/annotations',
+  collectionURL: 'https://golang.org/pkg', packageName: 'google.golang.org/genproto'
+}), [])
+
+// Not a purl at all: no version complaint.
+assert.deepEqual(versionErrors(Object.assign({}, maven, { packageURL: 'not-a-purl' })), [])

@@ -1388,18 +1388,26 @@ const purlLegacyTypes = {
     'vscode-extension': {collection: 'https://marketplace.visualstudio.com', name: 'path'}
 };
 
+// Returns a parsed PackageURL, or null when the string is not a purl (yet) or
+// is invalid for its type - callers stay quiet rather than reporting on
+// half-typed input.
+function parsePurl(purlString) {
+    if (!purlString) {
+        return null;
+    }
+    try {
+        return PackageURL.fromString(String(purlString).trim());
+    } catch (e) {
+        return null;
+    }
+}
+
 // Returns {collectionURL, packageName}, or null when nothing can be derived:
 // the string is not a valid purl, its type is not officially registered,
 // or the type has no well-known package collection.
 function purlToLegacyIdentifiers(purlString) {
-    if (!purlString) {
-        return null;
-    }
-    let purl;
-    try {
-        purl = PackageURL.fromString(String(purlString).trim());
-    } catch (e) {
-        // Not a purl (yet), or invalid for its type - say nothing.
+    const purl = parsePurl(purlString);
+    if (!purl) {
         return null;
     }
     const rule = purlLegacyTypes[purl.type];
@@ -1435,6 +1443,7 @@ function purlToLegacyIdentifiers(purlString) {
 
 if (typeof exports !== 'undefined') {
     exports.htmltoText = htmltoText
+    exports.parsePurl = parsePurl
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers
 }
 // END ASF
