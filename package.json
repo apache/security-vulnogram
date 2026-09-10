@@ -6,6 +6,7 @@
   "scripts": {
     "unittest": "node ./unittest/test.js && node ./unittest/validation.js",
     "bundle:editor": "node ./scripts/bundle-editor.js",
+    "bundle:purl": "node ./scripts/bundle-purl.js",
     "test": "nodemon app",
     "start": "./scripts/start.sh",
     "stop": "forever stop app.js",
@@ -36,6 +37,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.4.17",
     "nodemon": "^3.1.14",
+    "packageurl-js": "^2.0.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "playwright": "^1.58.2",

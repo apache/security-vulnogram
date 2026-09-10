@@ -15,3 +15,5 @@ config/conf.js
 /cert.pem
 # IntelliJ
 /.idea/
+# Build stamps written by the Makefile bundle rules.
+/public/js/*.stamp
