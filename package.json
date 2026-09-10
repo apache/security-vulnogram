@@ -7,6 +7,7 @@
     "unittest": "node ./unittest/test.js && node ./unittest/validation.js",
     "bundle:editor": "node ./scripts/bundle-editor.js",
     "bundle:purl": "node ./scripts/bundle-purl.js",
+    "preview": "node ./scripts/preview-editor.js",
     "test": "nodemon app",
     "start": "./scripts/start.sh",
     "stop": "forever stop app.js",
