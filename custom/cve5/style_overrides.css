@@ -1,3 +1,12 @@
 .sidebar {
 	display: none !important;
 }
+
+/* Derived legacy package identifiers shown under the Package URL field. */
+.purl-hint:empty { display: none; }
+.purl-hint {
+	opacity: 0.75;
+	font-style: italic;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}

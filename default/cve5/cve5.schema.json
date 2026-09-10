@@ -749,8 +749,6 @@
         "vendor",
         "product",
         "platforms",
-        "collectionURL",
-        "packageName",
         "packageURL",
         "repo",
         "modules",

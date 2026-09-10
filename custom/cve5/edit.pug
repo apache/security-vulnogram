@@ -18,6 +18,11 @@ block topHeaderRight
     if security        
        button.fbn.sfe.vgi-put(id="post1") Post to CVE.org        
 
+block append scripts
+    //- purl parser, used by custom/cve5/script.js to derive the legacy
+    //- package identifiers from packageURL.
+    script(src=conf.basedir + "js/packageurl-js.js")
+
 block loadEditorloadJSON
 
 block append loadEditor
