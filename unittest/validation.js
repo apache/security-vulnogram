@@ -46,12 +46,11 @@ assert(badName[0].message.includes('org.apache.commons:commons-lang3'))
 // A stored collectionURL that disagrees with the purl.
 const badUrl = mismatches(Object.assign({}, maven, { collectionURL: 'https://pypi.python.org' }))
 assert(badUrl.length === 1)
-const expectedRepoUrlMatch = badUrl[0].message.match(/https?:\/\/[^\s)]+/)
-assert(expectedRepoUrlMatch, 'expected mismatch message to contain a URL')
-const expectedRepoUrl = new URL(expectedRepoUrlMatch[0])
-assert(expectedRepoUrl.protocol === 'https:')
-assert(expectedRepoUrl.host === 'repo.maven.apache.org')
-assert(expectedRepoUrl.pathname === '/maven2')
+// Compare the whole message rather than searching it for a URL: a substring
+// check trips CodeQL's incomplete-URL-sanitization rule, and pulling the URL
+// back out of a quoted message is easy to get wrong.
+assert.equal(badUrl[0].message,
+  'Does not match the Package URL: expected "' + maven.collectionURL + '"')
 assert(badUrl[0].path === 'root.containers.cna.affected.0.collectionURL')
 
 // Both wrong at once.
