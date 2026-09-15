@@ -4,7 +4,7 @@
 // that exposes a global `PackageURL`, for pages that load libraries with a
 // plain <script src> tag and have no bundler in the toolchain.
 //
-// Upstream ships CommonJS only (no UMD/ESM/browser build) and is not on cdnjs.
+// Upstream ships CommonJS only (no UMD/ESM/browser build)
 // Drop this script and the generated file once upstream publishes a browser
 // build: https://github.com/package-url/packageurl-js/issues
 
