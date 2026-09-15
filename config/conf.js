@@ -72,13 +72,14 @@ module.exports = {
     pmcswithsecurityemails: ["airflow","ambari","commons","couchdb","dolphinscheduler","dubbo","fineract","geronimo","guacamole","hadoop","hive","httpd","hugegraph","iceberg","ignite","jackrabbit","kafka","kyuubi","libcloud","logging","lucene","metron","milagro","nifi","nuttx","ofbiz","openmeetings","openoffice","ozone","sentry","shiro","singa","sling","solr","sourcelume","spamassassin","struts","subversion","superset","tomcat","trafficcontrol","trafficserver","trafodion","zeppelin","zookeeper"],
     // which PMC are allowed to live allocate a CNA name from CVE Project
     pmcstrustedascna: ["*","-zeppelin"],
+    oauth_redirect_uri: process.env.OAUTH_REDIRECT_URI,
     // from https://mfa.apache.org/application/o/cveprocess-apache-org/.well-known/openid-configuration
-    oauth_issuer: "https://mfa.apache.org/application/o/cveprocess-apache-org/",
-    oauth_authorization_endpoint: "https://mfa.apache.org/application/o/authorize/",
-    oauth_token_endpoint: "https://mfa.apache.org/application/o/token/",
-    oauth_userinfo_endpoint: "https://mfa.apache.org/application/o/userinfo/",
-    oauth_end_session_endpoint: "https://mfa.apache.org/application/o/cveprocess-apache-org/end-session/",
-    oauth_client_id: "cveprocess.apache.org",
+    oauth_issuer: process.env.OAUTH_ISSUER || "https://mfa.apache.org/application/o/cveprocess-apache-org/",
+    oauth_authorization_endpoint: process.env.OAUTH_URL_INIT || "https://mfa.apache.org/application/o/authorize/",
+    oauth_token_endpoint: process.env.OAUTH_TOKEN_ENDPOINT || "https://mfa.apache.org/application/o/token/",
+    oauth_userinfo_endpoint: process.env.OAUTH_USERINFO_ENDPOINT || "https://mfa.apache.org/application/o/userinfo/",
+    oauth_end_session_endpoint: process.env.OAUTH_LOGOUT_ENDPOINT || "https://mfa.apache.org/application/o/cveprocess-apache-org/end-session/",
+    oauth_client_id: process.env.OAUTH_CLIENT_ID || "cveprocess.apache.org",
     oauth_client_secret: process.env.OAUTH_SECRET || 'none',
 
     // The Mongodb URL where CVE entries and users are stored.
