@@ -6,6 +6,14 @@ var request = require('request');
 const email = require('./email.js');
 const doc = require('../routes/doc.js');
 const asf =  require('../custom/asf.js');
+const cve5set = require('../models/set')('cve5');
+
+// Default severity rating for a freshly reserved record.
+// Needs to be set here because otherwise cveFixForVulnogram()
+// in default/cve5/script.js would set containers.cna.metrics to []
+// before the editor is built, which takes precedence over a schema
+// default.
+const defaultMetrics = cve5set.schema.properties.containers.properties.cna.properties.metrics.default;
 
 var csrfProtection = csurf();
 
@@ -196,6 +204,7 @@ protected.post('/', async function(req,res) {
                                "containers": {
                                    "cna":{
                                        "title": req.body.cvetitle,
+                                       "metrics": JSON.parse(JSON.stringify(defaultMetrics)),
                                    }
                                }
                              };
