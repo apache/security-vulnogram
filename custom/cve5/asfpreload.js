@@ -178,9 +178,9 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
         this.purlHint = document.createElement('div');
         this.purlHint.className = 'lbl purl-hint';
         this.control.appendChild(this.purlHint);
-        // The legacy editors are hidden (custom/cve5/conf.js) but still hold
-        // whatever the record carries, and setValue on the parent fills them
-        // without notifying this editor, so watch them.
+        // The legacy editors (hideWhenEmpty, below) are shown once the record
+        // carries a value, and the user can edit them then. Neither setValue
+        // on the parent nor a user edit notifies this editor, so watch them.
         this.legacyWatchListener = () => this.refreshPurlHint();
         this.legacyWatchPaths = ['collectionURL', 'packageName']
             .map((key) => this.parent.path + '.' + key);
@@ -230,5 +230,58 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
 JSONEditor.defaults.resolvers.unshift(function (schema) {
     if (schema.type === "string" && schema.options && schema.options.purlAutofill) {
         return "purlString";
+    }
+});
+
+// A string field that is hidden while empty and shown once it holds a value.
+// The legacy package identifiers use it: a new record derives them from the
+// Package URL on publication, a record that already carries them keeps them
+// visible and editable. The object editor lays its grid out from each child's
+// options.hidden, so toggling the flag and asking for a relayout is enough.
+JSONEditor.defaults.editors.hideWhenEmpty = class hideWhenEmpty extends JSONEditor.defaults.editors.string {
+
+    build() {
+        super.build();
+        // The parent is still building its other children, so only set the
+        // flag: the parent lays everything out once it is done.
+        this.refreshHidden(false);
+    }
+
+    setValue(value, initial, fromTemplate) {
+        super.setValue(value, initial, fromTemplate);
+        this.refreshHidden(true);
+    }
+
+    onChange(bubble, fromTemplate) {
+        super.onChange(bubble, fromTemplate);
+        this.refreshHidden(true);
+    }
+
+    refreshHidden(relayout) {
+        const hidden = !String(this.getValue() || '').trim();
+        if (hidden === !!this.options.hidden) {
+            return;
+        }
+        this.options.hidden = hidden;
+        // The layout sets display none on a hidden editor but never clears it.
+        this.container.style.display = hidden ? 'none' : '';
+        if (relayout && this.parent && typeof this.parent.layoutEditors === 'function') {
+            // The theme appends a "col sN" class on every layout and never
+            // removes the previous one; the widest rule wins in the CSS, so
+            // strip the stale ones or the row keeps its widest layout.
+            Object.values(this.parent.editors || {}).forEach((editor) => {
+                if (editor && editor.container) {
+                    editor.container.className = editor.container.className
+                        .split(/\s+/).filter((c) => c && c !== 'col' && !/^s\d+$/.test(c)).join(' ');
+                }
+            });
+            this.parent.layoutEditors();
+        }
+    }
+};
+
+JSONEditor.defaults.resolvers.unshift(function (schema) {
+    if (schema.type === "string" && schema.options && schema.options.hideWhenEmpty) {
+        return "hideWhenEmpty";
     }
 });
