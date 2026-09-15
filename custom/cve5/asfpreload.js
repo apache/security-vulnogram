@@ -234,16 +234,16 @@ JSONEditor.defaults.resolvers.unshift(function (schema) {
 });
 
 // A string field that is hidden while empty and shown once it holds a value.
-// The legacy package identifiers use it: a new record derives them from the
-// Package URL on publication, a record that already carries them keeps them
-// visible and editable. The object editor lays its grid out from each child's
-// options.hidden, so toggling the flag and asking for a relayout is enough.
+// Fields whose hideWhenEmpty option has the same value form a group that is shown together.
+// A new record derives both from the Package URL on publication.
+// The object editor lays its grid out from each child's options.hidden,
+// so toggling the flag and asking for a relayout is enough.
 JSONEditor.defaults.editors.hideWhenEmpty = class hideWhenEmpty extends JSONEditor.defaults.editors.string {
 
     build() {
         super.build();
         // The parent is still building its other children, so only set the
-        // flag: the parent lays everything out once it is done.
+        // flags: the parent lays everything out once it is done.
         this.refreshHidden(false);
     }
 
@@ -257,26 +257,41 @@ JSONEditor.defaults.editors.hideWhenEmpty = class hideWhenEmpty extends JSONEdit
         this.refreshHidden(true);
     }
 
+    // This editor and the siblings that share its hideWhenEmpty value.
+    groupEditors() {
+        const group = this.options.hideWhenEmpty;
+        const siblings = this.parent && this.parent.editors
+            ? Object.values(this.parent.editors) : [this];
+        return siblings.filter((editor) =>
+            editor && editor.options && editor.options.hideWhenEmpty === group);
+    }
+
     refreshHidden(relayout) {
-        const hidden = !String(this.getValue() || '').trim();
-        if (hidden === !!this.options.hidden) {
+        const editors = this.groupEditors();
+        const hidden = editors.every((editor) => !String(editor.getValue() || '').trim());
+        let changed = false;
+        editors.forEach((editor) => {
+            changed = changed || hidden !== !!editor.options.hidden;
+            editor.options.hidden = hidden;
+            // The layout sets display none on a hidden editor but never
+            // clears it. A sibling still being built has no container yet.
+            if (editor.container) {
+                editor.container.style.display = hidden ? 'none' : '';
+            }
+        });
+        if (!changed || !relayout || !this.parent || typeof this.parent.layoutEditors !== 'function') {
             return;
         }
-        this.options.hidden = hidden;
-        // The layout sets display none on a hidden editor but never clears it.
-        this.container.style.display = hidden ? 'none' : '';
-        if (relayout && this.parent && typeof this.parent.layoutEditors === 'function') {
-            // The theme appends a "col sN" class on every layout and never
-            // removes the previous one; the widest rule wins in the CSS, so
-            // strip the stale ones or the row keeps its widest layout.
-            Object.values(this.parent.editors || {}).forEach((editor) => {
-                if (editor && editor.container) {
-                    editor.container.className = editor.container.className
-                        .split(/\s+/).filter((c) => c && c !== 'col' && !/^s\d+$/.test(c)).join(' ');
-                }
-            });
-            this.parent.layoutEditors();
-        }
+        // The theme appends a "col sN" class on every layout and never
+        // removes the previous one; the widest rule wins in the CSS, so
+        // strip the stale ones or the row keeps its widest layout.
+        Object.values(this.parent.editors || {}).forEach((editor) => {
+            if (editor && editor.container) {
+                editor.container.className = editor.container.className
+                    .split(/\s+/).filter((c) => c && c !== 'col' && !/^s\d+$/.test(c)).join(' ');
+            }
+        });
+        this.parent.layoutEditors();
     }
 };
 

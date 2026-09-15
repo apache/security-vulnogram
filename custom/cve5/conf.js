@@ -260,12 +260,13 @@ module.exports = {
                                             }
                                         },
                                         // The legacy identifiers are derived from the Package URL on publication,
-                                        // if they are empty, so they are hidden while empty and shown once the
-                                        // record carries them. hideWhenEmpty selects the editor in asfpreload.js.
+                                        // if they are empty, so they are hidden while empty and shown, as a
+                                        // pair, once the record carries either. hideWhenEmpty selects the
+                                        // editor in asfpreload.js; its value groups the fields.
                                         "collectionURL": {
                                             "title": "Package collection URL (if applicable)",
                                             "options": {
-                                                "hideWhenEmpty": true,
+                                                "hideWhenEmpty": "legacy",
                                                 "grid_columns": 4,
                                                 "inputAttributes": {
                                                     "placeholder": "ecosystem, e.g. Maven, PyPI, etc"
@@ -281,7 +282,7 @@ module.exports = {
                                         },
                                         "packageName": {
                                             "options": {
-                                                "hideWhenEmpty": true,
+                                                "hideWhenEmpty": "legacy",
                                                 "grid_columns": 4,
                                                 "inputAttributes": {
                                                     "placeholder": "e.g. org.apache.commons:commons-config"
