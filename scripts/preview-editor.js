@@ -18,10 +18,8 @@ const fs = require('fs');
 const path = require('path');
 
 // config/conf.js reads the production Let's Encrypt certificates unless told
-// otherwise, and this preview never serves TLS.
-if (!('VULNOGRAM_TLS_ENABLED' in process.env)) {
-    process.env.VULNOGRAM_TLS_ENABLED = 'false';
-}
+// otherwise, and this preview never serves TLS, whatever the shell says.
+process.env.VULNOGRAM_TLS_ENABLED = 'false';
 
 const repoRoot = path.resolve(__dirname, '..');
 process.chdir(repoRoot);
