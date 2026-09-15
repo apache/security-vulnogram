@@ -246,13 +246,9 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
-                                        // json-editor drops an optional
-                                        // property that is missing from a
-                                        // document set after load (realtime,
-                                        // drafts), and an empty string is
-                                        // missing. A boolean required keeps
-                                        // the editor without adding a
-                                        // validation rule.
+                                        // json-editor drops an optional property that is missing from a document set after load (realtime, drafts),
+                                        // and an empty string is missing.
+                                        // A boolean required keeps the editor without adding a validation rule.
                                         "product": {
                                             "required": true,
                                             "options": {
@@ -267,10 +263,9 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
-                                        // The legacy identifiers are derived from the Package URL on publication,
-                                        // if they are empty, so they are hidden while empty and shown, as a
-                                        // pair, once the record carries either. hideWhenEmpty selects the
-                                        // editor in asfpreload.js; its value groups the fields.
+                                        // The legacy identifiers are derived from the Package URL on publication, if they are empty,
+                                        // so they are hidden while empty and shown, as a pair, once the record carries either.
+                                        // hideWhenEmpty selects the editor in asfpreload.js; its value groups the fields.
                                         "collectionURL": {
                                             "title": "Package collection URL (if applicable)",
                                             "options": {
@@ -300,16 +295,11 @@ module.exports = {
                                         "packageURL": {
                                             "required": true,
                                             "options": {
-                                                // The legacy fields are hidden
-                                                // and derived, so say where
-                                                // they come from.
+                                                // The legacy fields are hidden and derived, so say where they come from.
                                                 "infoText": "Package collection URL and Package name are derived from this when the record is published.",
-                                                // 4 + 8 fills the 12-column
-                                                // grid row, so the purl sits
-                                                // beside the product name.
+                                                // 4 + 8 fills the 12-column grid row, so the purl sits beside the product name.
                                                 "grid_columns": 8,
-                                                // Selects the purlString editor
-                                                // in asfpreload.js.
+                                                // Selects the purlString editor in asfpreload.js.
                                                 "purlAutofill": true
                                             }
                                         },
