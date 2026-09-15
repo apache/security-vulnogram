@@ -246,7 +246,15 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
+                                        // json-editor drops an optional
+                                        // property that is missing from a
+                                        // document set after load (realtime,
+                                        // drafts), and an empty string is
+                                        // missing. A boolean required keeps
+                                        // the editor without adding a
+                                        // validation rule.
                                         "product": {
+                                            "required": true,
                                             "options": {
                                                 "grid_columns": 4,
                                                 "inputAttributes": {
@@ -290,6 +298,7 @@ module.exports = {
                                             }
                                         },
                                         "packageURL": {
+                                            "required": true,
                                             "options": {
                                                 // The legacy fields are hidden
                                                 // and derived, so say where
