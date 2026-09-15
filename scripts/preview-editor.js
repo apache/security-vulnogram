@@ -120,6 +120,18 @@ function sendFile(res, file) {
     res.end(fs.readFileSync(file));
 }
 
+// The regular file at <root>/<rel>, or null when rel escapes root or is not a
+// file. A plain prefix test is not enough: "../static-other" still starts
+// with ".../static".
+function fileUnder(root, rel) {
+    const file = path.resolve(root, '.' + path.sep + rel);
+    const relative = path.relative(root, file);
+    if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+        return null;
+    }
+    return fs.existsSync(file) && fs.statSync(file).isFile() ? file : null;
+}
+
 const server = http.createServer(function (req, res) {
     const url = req.url.split('?')[0];
 
@@ -165,17 +177,16 @@ const server = http.createServer(function (req, res) {
             const prefixes = ['/' + args.set + '/static/', '/static/'];
             for (let i = 0; i < prefixes.length; i++) {
                 if (url.indexOf(prefixes[i]) === 0) {
-                    const staticFile = path.join(staticRoot, url.slice(prefixes[i].length));
-                    if (staticFile.startsWith(staticRoot) && fs.existsSync(staticFile)) {
+                    const staticFile = fileUnder(staticRoot, url.slice(prefixes[i].length));
+                    if (staticFile) {
                         return sendFile(res, staticFile);
                     }
                 }
             }
         }
 
-        const publicFile = path.join(repoRoot, 'public', url);
-        if (publicFile.startsWith(path.join(repoRoot, 'public')) &&
-            fs.existsSync(publicFile) && fs.statSync(publicFile).isFile()) {
+        const publicFile = fileUnder(path.join(repoRoot, 'public'), url);
+        if (publicFile) {
             return sendFile(res, publicFile);
         }
 
