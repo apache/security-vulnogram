@@ -178,9 +178,9 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
         this.purlHint = document.createElement('div');
         this.purlHint.className = 'lbl purl-hint';
         this.control.appendChild(this.purlHint);
-        // The legacy editors are created after this one - they are not in
-        // defaultProperties, so setValue appends them - and the user can edit
-        // them once they exist. Neither notifies this editor, so watch them.
+        // The legacy editors are hidden (custom/cve5/conf.js) but still hold
+        // whatever the record carries, and setValue on the parent fills them
+        // without notifying this editor, so watch them.
         this.legacyWatchListener = () => this.refreshPurlHint();
         this.legacyWatchPaths = ['collectionURL', 'packageName']
             .map((key) => this.parent.path + '.' + key);

@@ -259,28 +259,21 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
+                                        // The legacy identifiers are derived
+                                        // from the Package URL on publication
+                                        // (textUtil.reduceJSON), so they are
+                                        // hidden rather than edited. A record
+                                        // that already carries them keeps
+                                        // them: the validator below reports a
+                                        // mismatch with the Package URL.
                                         "collectionURL": {
-                                            "title": "Package collection URL (if applicable)",
                                             "options": {
-                                                "grid_columns": 4,
-                                                "inputAttributes": {
-                                                    "placeholder": "ecosystem, e.g. Maven, PyPI, etc"
-                                                }
-                                            },
-                                            "examples": [
-                                                "https://repo.maven.apache.org/maven2",
-                                                "https://pypi.python.org",
-                                                "https://rubygems.org",
-                                                "https://crates.io",
-                                                "https://cpan.org/modules"
-                                            ]
+                                                "hidden": "true",
+                                            }
                                         },
                                         "packageName": {
                                             "options": {
-                                                "grid_columns": 4,
-                                                "inputAttributes": {
-                                                    "placeholder": "e.g. org.apache.commons:commons-config"
-                                                }
+                                                "hidden": "true",
                                             }
                                         },
                                         "packageURL": {
@@ -502,10 +495,10 @@ module.exports = {
                         message: 'The Package URL must not include a version'
                     });
                 }
-                // The legacy identifiers are normally derived on publication and
-                // not shown at all. They are only present, and therefore only
-                // visible, on a record that already carried them - report it
-                // rather than silently republishing something inconsistent.
+                // The legacy identifiers are derived on publication and hidden
+                // in the editor. They are only present on a record that already
+                // carried them - report a mismatch rather than silently
+                // republishing something inconsistent.
                 var derived = purlToLegacyIdentifiers(value.packageURL);
                 if (derived) {
                     ['collectionURL', 'packageName'].forEach(function (field) {
