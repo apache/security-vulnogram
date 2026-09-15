@@ -24,6 +24,7 @@ const purlLegacyTypes = {
     'docker': {collection: 'https://hub.docker.com', name: 'path'},
     'gem': {collection: 'https://rubygems.org', name: 'name'},
     'github': {collection: 'https://github.com', name: 'path'},
+    'gitlab': {collection: 'https://gitlab.com/explore', name: 'path'},
     'golang': {collection: 'https://golang.org/pkg', name: 'path'},
     'hackage': {collection: 'https://hackage.haskell.org', name: 'name'},
     'hex': {collection: 'https://repo.hex.pm', name: 'name'},
@@ -48,6 +49,14 @@ const purlLegacyTypes = {
     'vcpkg': {collection: 'https://github.com/microsoft/vcpkg', name: 'name'},
     'vscode-extension': {collection: 'https://marketplace.visualstudio.com', name: 'path'}
 };
+
+// The purl type and namespace come from the user. A type is letters, digits,
+// '.', '+' and '-', so "constructor" is a valid one, and a namespace may be
+// anything, "__proto__" included. Look the tables up by own key only, or
+// pkg:constructor/x finds Object.prototype.constructor.
+function ownEntry(table, key) {
+    return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+}
 
 // Returns a parsed PackageURL, or null when the string is not a purl (yet)
 function purlParserClass() {
@@ -78,15 +87,15 @@ function purlToLegacyIdentifiers(purlString) {
     if (!purl) {
         return null;
     }
-    const rule = purlLegacyTypes[purl.type];
+    const rule = ownEntry(purlLegacyTypes, purl.type);
     if (!rule) {
         return null;
     }
     // The collection URL is derived from the type and in some cases (deb, rpm) the PURL namespace.
     const collectionURL = typeof rule.collection === 'string'
         ? rule.collection
-        : (purl.namespace ? rule.collection[purl.namespace] : undefined);
-    if (!collectionURL) {
+        : (purl.namespace ? ownEntry(rule.collection, purl.namespace) : undefined);
+    if (typeof collectionURL !== 'string' || !collectionURL) {
         return null;
     }
     // Types whose namespace is optional (npm scopes, docker/conan/brew/luarocks

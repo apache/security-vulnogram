@@ -73,6 +73,18 @@ assert(legacy('pkg:deb/mydistro/curl') === null)   // unmapped distro
 assert(legacy('pkg:generic/openssl') === null)     // instance-specific
 assert(legacy('pkg:oci/debian') === null)          // registry-specific
 assert(legacy('pkg:notatype/foo/bar') === null)    // unregistered type
+// The forge types share the collection URLs the CVE schema lists for them.
+assert.deepEqual(legacy('pkg:gitlab/inkscape/inkscape'), {
+  collectionURL: 'https://gitlab.com/explore',
+  packageName: 'inkscape/inkscape'
+})
+// A type or namespace that names an inherited Object property is not a rule.
+// The purl spec keeps '_' out of a type, so pkg:__proto__ never parses, but
+// "constructor" is a valid type and a namespace may be anything.
+assert(legacy('pkg:constructor/foo/bar') === null)
+assert(legacy('pkg:hasOwnProperty/foo') === null)
+assert(legacy('pkg:deb/constructor/curl') === null)
+assert(legacy('pkg:deb/__proto__/curl') === null)
 
 // Invalid or incomplete input is silently ignored.
 assert(legacy('pkg:maven/commons-lang3') === null) // maven requires a groupId
