@@ -9,8 +9,11 @@ EDITOR_SOURCES := $(wildcard $(EDIT_JS_SRC)/*.js)
 EDITOR_VENDOR_SOURCES := ./public/js/tagify.min.js
 EDITOR_PUBLIC_FILE := ./public/js/vg-editor.js
 EDITOR_BUNDLE_STAMP := ./public/js/.vg-editor-bundle.stamp
+PURL_SOURCE := ./node_modules/packageurl-js/package.json
+PURL_PUBLIC_FILE := ./public/js/packageurl-js.js
+PURL_BUNDLE_STAMP := ./public/js/.packageurl-js-bundle.stamp
 
-TARGETS := $(OUT) $(OUT)/static $(OUT)/index.html $(CSS)/min.css $(CSS)/simplehtml.css $(CSS)/vg-icons.css $(CSS)/tagify.css $(CSS)/logo.png $(CSS)/logo.svg $(CSS)/Vulnogram-og.jpg $(JS)/vg-editor.js $(JS)/mode-json.js $(JS)/cvss.json $(JS)/cwe-all.json $(JS)/cwe-frequent.json $(JS)/capec.json $(JS)/tablesort.min.js $(JS)/json-patch-extended.min.js $(OUT)/static/CVE.svg $(OUT)/static/cve5sw.js $(OUT)/static/cvss40.js
+TARGETS := $(OUT) $(OUT)/static $(OUT)/index.html $(CSS)/min.css $(CSS)/simplehtml.css $(CSS)/vg-icons.css $(CSS)/tagify.css $(CSS)/logo.png $(CSS)/logo.svg $(CSS)/Vulnogram-og.jpg $(JS)/vg-editor.js $(JS)/mode-json.js $(JS)/cvss.json $(JS)/cwe-all.json $(JS)/cwe-frequent.json $(JS)/capec.json $(JS)/tablesort.min.js $(JS)/json-patch-extended.min.js $(JS)/packageurl-js.js $(OUT)/static/CVE.svg $(OUT)/static/cve5sw.js $(OUT)/static/cvss40.js
 
 $(OUT):
 	mkdir $(OUT)
@@ -50,6 +53,18 @@ $(EDITOR_BUNDLE_STAMP): ./scripts/bundle-editor.js $(EDITOR_SOURCES) $(EDITOR_VE
 	touch $@
 
 $(EDITOR_PUBLIC_FILE): $(EDITOR_BUNDLE_STAMP)
+
+$(PURL_BUNDLE_STAMP): ./scripts/bundle-purl.js $(PURL_SOURCE)
+	node ./scripts/bundle-purl.js
+	touch $@
+
+$(PURL_PUBLIC_FILE): $(PURL_BUNDLE_STAMP)
+
+# Copied rather than minified: packageurl-js uses optional catch binding, ?. and
+# ??, none of which uglify-es 3.3.10 can parse. An explicit rule for this target
+# takes precedence over the $(JS)/%.js pattern rule above.
+$(JS)/packageurl-js.js: $(PURL_PUBLIC_FILE)
+	cp -f $< $@
 
 $(JS)/%.json: ./public/js/%.json
 	node -e 'console.log(JSON.stringify(require("./" + process.argv[1])))' $< > $@

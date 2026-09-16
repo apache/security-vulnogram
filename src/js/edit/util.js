@@ -82,6 +82,25 @@ reduceJSON: function (cve) {
             c.containers.cna.title = getProductListNoVendor(c) + ": " + c.containers.cna.title
 	}
     }
+    // The legacy package identifiers are not stored: packageURL is the single
+    // source of truth, and the pair is derived here so that the published
+    // record still carries it.
+    if (typeof purlToLegacyIdentifiers === 'function' &&
+        c.containers && c.containers.cna && Array.isArray(c.containers.cna.affected)) {
+        c.containers.cna.affected.forEach(function (affected) {
+            if (!affected || !affected.packageURL) {
+                return;
+            }
+            if (affected.collectionURL || affected.packageName) {
+                return;
+            }
+            var derived = purlToLegacyIdentifiers(affected.packageURL);
+            if (derived) {
+                affected.collectionURL = derived.collectionURL;
+                affected.packageName = derived.packageName;
+            }
+        });
+    }
     // END ASF
     return(c);
 },

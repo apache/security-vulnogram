@@ -167,3 +167,136 @@ async function loadEmailLists(pmc) {
         return "";
     }
 }
+
+// The legacy package identifiers (collectionURL + packageName) are not stored:
+// packageURL is the single source of truth, and textUtil.reduceJSON derives the
+// pair when the record is serialized for publication.
+JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.defaults.editors.string {
+
+    build() {
+        super.build();
+        this.purlHint = document.createElement('div');
+        this.purlHint.className = 'lbl purl-hint';
+        this.control.appendChild(this.purlHint);
+        // The legacy editors (hideWhenEmpty, below) are shown once the record
+        // carries a value, and the user can edit them then. Neither setValue
+        // on the parent nor a user edit notifies this editor, so watch them.
+        this.legacyWatchListener = () => this.refreshPurlHint();
+        this.legacyWatchPaths = ['collectionURL', 'packageName']
+            .map((key) => this.parent.path + '.' + key);
+        this.legacyWatchPaths.forEach(
+            (path) => this.jsoneditor.watch(path, this.legacyWatchListener));
+        this.refreshPurlHint();
+    }
+
+    destroy() {
+        this.legacyWatchPaths.forEach(
+            (path) => this.jsoneditor.unwatch(path, this.legacyWatchListener));
+        super.destroy();
+    }
+
+    onChange(bubble, fromTemplate) {
+        super.onChange(bubble, fromTemplate);
+        // Covers the programmatic paths too - load, import, draft restore,
+        // realtime - so the hint always matches the committed value.
+        this.refreshPurlHint();
+    }
+
+    // True when the record already carries a legacy identifier.
+    hasLegacyIdentifiers() {
+        const editors = this.parent && this.parent.editors;
+        if (!editors) {
+            return false;
+        }
+        return ['collectionURL', 'packageName'].some((key) => {
+            const editor = editors[key];
+            return !!(editor && String(editor.getValue() || '').trim());
+        });
+    }
+
+    refreshPurlHint(rawValue) {
+        if (!this.purlHint) {
+            return;
+        }
+        const derived = this.hasLegacyIdentifiers() ? null : purlToLegacyIdentifiers(
+            rawValue === undefined ? this.getValue() : rawValue);
+        this.purlHint.textContent = derived
+            ? 'Package collection URL: ' + derived.collectionURL
+                + ' \u00b7 Package name: ' + derived.packageName
+            : '';
+    }
+};
+
+JSONEditor.defaults.resolvers.unshift(function (schema) {
+    if (schema.type === "string" && schema.options && schema.options.purlAutofill) {
+        return "purlString";
+    }
+});
+
+// A string field that is hidden while empty and shown once it holds a value.
+// Fields whose hideWhenEmpty option has the same value form a group that is shown together.
+// A new record derives both from the Package URL on publication.
+// The object editor lays its grid out from each child's options.hidden,
+// so toggling the flag and asking for a relayout is enough.
+JSONEditor.defaults.editors.hideWhenEmpty = class hideWhenEmpty extends JSONEditor.defaults.editors.string {
+
+    build() {
+        super.build();
+        // The parent is still building its other children, so only set the
+        // flags: the parent lays everything out once it is done.
+        this.refreshHidden(false);
+    }
+
+    setValue(value, initial, fromTemplate) {
+        super.setValue(value, initial, fromTemplate);
+        this.refreshHidden(true);
+    }
+
+    onChange(bubble, fromTemplate) {
+        super.onChange(bubble, fromTemplate);
+        this.refreshHidden(true);
+    }
+
+    // This editor and the siblings that share its hideWhenEmpty value.
+    groupEditors() {
+        const group = this.options.hideWhenEmpty;
+        const siblings = this.parent && this.parent.editors
+            ? Object.values(this.parent.editors) : [this];
+        return siblings.filter((editor) =>
+            editor && editor.options && editor.options.hideWhenEmpty === group);
+    }
+
+    refreshHidden(relayout) {
+        const editors = this.groupEditors();
+        const hidden = editors.every((editor) => !String(editor.getValue() || '').trim());
+        let changed = false;
+        editors.forEach((editor) => {
+            changed = changed || hidden !== !!editor.options.hidden;
+            editor.options.hidden = hidden;
+            // The layout sets display none on a hidden editor but never
+            // clears it. A sibling still being built has no container yet.
+            if (editor.container) {
+                editor.container.style.display = hidden ? 'none' : '';
+            }
+        });
+        if (!changed || !relayout || !this.parent || typeof this.parent.layoutEditors !== 'function') {
+            return;
+        }
+        // The theme appends a "col sN" class on every layout and never
+        // removes the previous one; the widest rule wins in the CSS, so
+        // strip the stale ones or the row keeps its widest layout.
+        Object.values(this.parent.editors || {}).forEach((editor) => {
+            if (editor && editor.container) {
+                editor.container.className = editor.container.className
+                    .split(/\s+/).filter((c) => c && c !== 'col' && !/^s\d+$/.test(c)).join(' ');
+            }
+        });
+        this.parent.layoutEditors();
+    }
+};
+
+JSONEditor.defaults.resolvers.unshift(function (schema) {
+    if (schema.type === "string" && schema.options && schema.options.hideWhenEmpty) {
+        return "hideWhenEmpty";
+    }
+});
