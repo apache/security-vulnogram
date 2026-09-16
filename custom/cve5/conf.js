@@ -248,7 +248,8 @@ module.exports = {
                                         },
                                         // json-editor drops an optional property that is missing from a document set after load (realtime, drafts),
                                         // and an empty string is missing.
-                                        // A boolean required keeps the editor without adding a validation rule.
+                                        // A boolean required keeps the editor and reports a missing product name,
+                                        // which is wanted: the vendor is hidden, so the product name alone identifies the entry.
                                         "product": {
                                             "required": true,
                                             "options": {
@@ -293,7 +294,6 @@ module.exports = {
                                             }
                                         },
                                         "packageURL": {
-                                            "required": true,
                                             "options": {
                                                 // The legacy fields are hidden and derived, so say where they come from.
                                                 "infoText": "Package collection URL and Package name are derived from this when the record is published.",
