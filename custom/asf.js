@@ -15,6 +15,7 @@ const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 const docModel = require('../models/doc');
+const tokenauthorize = require('./tokenauthorize.js');
 
 async function asfemaillists (req, res) {
     var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
@@ -168,14 +169,17 @@ function asflogin (req, res) {
 function token(req, res) {
     if (!req.session.token) {
         req.session.token = uuidv4();
-        req.session.tokens = new Map();
-      const ops = [ "allocate", "write" ];
-      for (const pmc in req.user.pmcs) {
-        req.session.tokens[req.user.pmcs[pmc]] = new Map();
-        for (const op in ops) {
-          req.session.tokens[req.user.pmcs[pmc]][ops[op]] = uuidv4();
+    }
+    // Fill in what is missing rather than starting over: a token issued
+    // through /users/token/authorize lives in the same map and must survive
+    // a later visit to this page.
+    req.session.tokens = req.session.tokens || {};
+    const ops = [ "allocate", "write", "read" ];
+    for (const pmc of req.user.pmcs) {
+        req.session.tokens[pmc] = req.session.tokens[pmc] || {};
+        for (const op of ops) {
+            req.session.tokens[pmc][op] = req.session.tokens[pmc][op] || uuidv4();
         }
-      }
     }
     res.render('token', {
       token: req.session.token,
@@ -284,6 +288,9 @@ var self = module.exports = {
         let semail = require('../customRoutes/sendemails');
         app.use('/sendemails', ensureAuthenticated, semail.protected);
         app.get('/users/token', ensureAuthenticated, token);
+        app.get('/users/token/authorize', ensureAuthenticated, tokenauthorize.authorizeForm);
+        app.post('/users/token/authorize', ensureAuthenticated, tokenauthorize.authorizeDecision);
+        app.post('/users/token/exchange', tokenauthorize.exchange); // authenticated by code + PKCE verifier
         app.get('/users/setpmc', ensureAuthenticated, setpmc);
         app.get('/users/me/json', ensureAuthenticated, usersmejson);
         app.get('/users/list/json', ensureAuthenticated, userslistjson); // replaces existing

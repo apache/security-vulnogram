@@ -8,6 +8,7 @@ such as:
 * selecting which fields to encourage
 * some ASF-specific autocompletes and validations
 * allocate CVEs server-side through the ASF CVE
+* short-lived, scoped API tokens for tools (see below)
 
 ## Setting up a development environment
 
@@ -56,3 +57,49 @@ Vulnogram app on the host.
    ```
 
 The app listens on `http://0.0.0.0:3555` by default and uses `oauth.apache.org` for authentication.
+
+## API tokens for tools
+
+Tools authenticate with an `Authorization: Bearer <token>` header.
+Tokens are bound to the login session that issued them, so they expire when it does (hours) and logging out revokes them.
+A Bearer token is accepted only on `/cve5/CVE-*`, `/cve5/json/CVE-*` and `/allocatecve`, and Bearer requests are exempt from the CSRF check.
+
+`/users/token` lists an unrestricted token, plus a token per PMC for each of these scopes:
+
+| Scope | Allowed |
+|---|---|
+| `read` | `GET` / `HEAD` on `/cve5/CVE-*` and `/cve5/json/CVE-*` |
+| `write` | any method on `/cve5/CVE-*` and `/cve5/json/CVE-*` |
+| `allocate` | `/allocatecve`, for that PMC only |
+
+A PMC token acts as its owner limited to that PMC, so it only reaches that PMC's records, even for security-team members.
+
+### Getting a token from a tool
+
+Instead of having the user copy a token from `/users/token`, a tool can ask for one through the browser.
+The flow is the OAuth 2.0 loopback flow for native apps ([RFC 8252](https://www.rfc-editor.org/rfc/rfc8252)) with PKCE ([RFC 7636](https://www.rfc-editor.org/rfc/rfc7636)), so the token never appears in a URL or in the browser history.
+
+1. The tool listens on `http://127.0.0.1:<port>/` (or `http://[::1]:<port>/`), creates a random `state` and a PKCE `code_verifier`, and opens this URL in the browser:
+
+   ```text
+   /users/token/authorize?pmc=<pmc>&scope=read|write
+       &redirect_uri=http://127.0.0.1:<port>/<path>&state=<state>
+       &code_challenge=<base64url(sha256(code_verifier))>&code_challenge_method=S256
+   ```
+
+2. The user logs in if needed (ASF OAuth, MFA included), sees which PMC and scope the tool asks for, and approves or denies.
+
+3. The browser is redirected to the tool with `?code=<code>&state=<state>`, or `?error=access_denied&state=<state>`.
+   The tool must check that `state` matches.
+
+4. The tool exchanges the code, which is single-use and valid for 60 seconds:
+
+   ```shell
+   curl -X POST https://cveprocess.apache.org/users/token/exchange \
+     -H 'Content-Type: application/json' \
+     -d '{"code": "<code>", "code_verifier": "<code_verifier>"}'
+   ```
+
+   The response is `{"access_token": "...", "token_type": "Bearer", "pmc": "...", "scope": "..."}`, or HTTP 400 `{"error": "invalid_grant"}`.
+
+The server accepts only loopback IP literals as `redirect_uri` (not `localhost`), only the PMCs the user belongs to (any PMC for the security team), and only `read` and `write` scopes.
