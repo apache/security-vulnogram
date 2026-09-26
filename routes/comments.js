@@ -117,6 +117,13 @@ module.exports = function (Document, opts) {
         var q = {};
         q[opts.idpath] = req.body.id;
         var ret = await Document.findOne(q);
+        if (!asf.asfdocacl(opts.schemaName, ret, req.user.pmcs)) {
+            res.status(403);
+            res.json({
+                msg: 'Access Denied'
+            });
+            return;
+        }
         asf.asfhookaddcomment(ret,req);
         // END ASF
         if (req.body.slug) {
