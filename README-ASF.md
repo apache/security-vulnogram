@@ -103,3 +103,5 @@ The flow is the OAuth 2.0 loopback flow for native apps ([RFC 8252](https://www.
    The response is `{"access_token": "...", "token_type": "Bearer", "pmc": "...", "scope": "..."}`, or HTTP 400 `{"error": "invalid_grant"}`.
 
 The server accepts only loopback IP literals as `redirect_uri` (not `localhost`), only the PMCs the user belongs to (any PMC for the security team), and only `read` and `write` scopes.
+
+The design, its assumptions and the invariants the implementation must keep are in [docs/design/browser-token-authorize.md](docs/design/browser-token-authorize.md).
