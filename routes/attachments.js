@@ -4,6 +4,8 @@ const os = require('os');
 const Busboy = require('busboy');
 const fs = require('fs');
 var sanitizeFile = require("sanitize-filename");
+const conf = require('../config/conf');
+const asf = require('../custom/asf.js');
 // input doc, opts
 
 module.exports = function (Document, opts) {
@@ -32,7 +34,24 @@ module.exports = function (Document, opts) {
             return next();
         }
     }
-    router.post('/:id/file', checkPattern, checkDir, async function (req, res) {
+    // ASF
+    async function checkOwner(req, res, next) {
+        var fq = {};
+        fq[opts.idpath] = req.params.id;
+        var doc = await Document.findOne(fq, { projection: { 'body.CNA_private.owner': 1 } });
+        if (!asf.asfdocacl(opts.schemaName, doc, req.user.pmcs)) {
+            res.status(403);
+            res.json({
+                type: 'err',
+                msg: 'Access Denied'
+            });
+            return;
+        }
+        return next();
+    }
+    // END ASF
+
+    router.post('/:id/file', checkPattern, checkDir, checkOwner, async function (req, res) {
         var fq = {};
         fq[opts.idpath] = req.params.id;
         var doc = await Document.findOne(fq);
@@ -145,7 +164,7 @@ module.exports = function (Document, opts) {
     });
 
     //GET file contents
-    router.get('/:id/file/:filename', checkPattern, checkDir,
+    router.get('/:id/file/:filename', checkPattern, checkDir, checkOwner,
         async function (req, res, next) {
             res.setHeader("Content-Security-Policy", "default-src 'none'; connect-src 'none'");
             return next();
@@ -154,7 +173,7 @@ module.exports = function (Document, opts) {
     );
 
     // delete file
-    router.delete('/:id/file/:filename', checkPattern, checkDir, async function (req, res) {
+    router.delete('/:id/file/:filename', checkPattern, checkDir, checkOwner, async function (req, res) {
         var fq = {};
         fq[opts.idpath] = req.params.id;
         // ASF
@@ -172,7 +191,7 @@ module.exports = function (Document, opts) {
     });
 
     // file listing in JSON format
-    router.get('/files/:id', checkPattern, checkDir,
+    router.get('/files/:id', checkPattern, checkDir, checkOwner,
         async function (req, res, next) {
             res.setHeader("Content-Security-Policy", "default-src 'none'; connect-src 'none'");
             return next();
@@ -186,7 +205,7 @@ module.exports = function (Document, opts) {
         });
 
     // Directory listing
-    router.get('/:id/file/', checkPattern, checkDir, function (req, res) {
+    router.get('/:id/file/', checkPattern, checkDir, checkOwner, function (req, res) {
         fs.readdir(path.join(opts.conf.files, req.params.id, '/file/'), function (err, items) {
             res.render(opts.list, {
                 title: req.params.id + ' files',
