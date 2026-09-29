@@ -210,6 +210,16 @@ module.exports = function (Document, opts) {
             });
             return;
         }
+        // ASF
+        if (!asf.asfdocacl(opts.schemaName, { body: req.body }, req.user.pmcs)) {
+            res.status(403);
+            res.json({
+                type: 'err',
+                msg: 'Not saved. The record must belong to one of your PMCs.'
+            });
+            return;
+        }
+        // END ASF
 
         let now = new Date();
         let entry = {
@@ -274,6 +284,18 @@ module.exports = function (Document, opts) {
                 }
             }
             // ASF
+            // Both the record being replaced and the one being saved must
+            // belong to one of the user's PMCs.
+            var oldDocACL = renaming ? await Document.findOne(queryOldID) : existingDoc;
+            if ((oldDocACL && !asf.asfdocacl(opts.schemaName, oldDocACL, req.user.pmcs))
+                || !asf.asfdocacl(opts.schemaName, { body: req.body }, req.user.pmcs)) {
+                res.status(403);
+                res.json({
+                    type: 'err',
+                    msg: 'Not saved. The record must belong to one of your PMCs.'
+                });
+                return;
+            }
             asf.asfhookupsertdoc(req,dorefresh);
             // END ASF
             var d = new Date();

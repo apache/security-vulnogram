@@ -315,6 +315,27 @@ var self = module.exports = {
 	return false;
     },
 
+    // Sections whose records belong to a PMC (body.CNA_private.owner).
+    asfownedsections: ['cve', 'cve5'],
+
+    // Whether yourpmcs may see or change doc, a record of section.
+    // A record without an owner is for the security team only.
+    asfdocacl: function (section, doc, yourpmcs) {
+        if (!self.asfownedsections.includes(section)) {
+            return true;
+        }
+        const owner = doc && doc.body && doc.body.CNA_private && doc.body.CNA_private.owner;
+        return self.asfgroupacls(owner || conf.admingroupname, yourpmcs);
+    },
+
+    // Mongo filter that limits a query on section to the records yourpmcs may see.
+    asfownerquery: function (section, yourpmcs) {
+        if (!self.asfownedsections.includes(section) || yourpmcs.includes(conf.admingroupname)) {
+            return {};
+        }
+        return { 'body.CNA_private.owner': { '$in': yourpmcs } };
+    },
+
     // When a CVE record is changed this hook is called
     
     asfhookupsertdoc: function(req,dorefresh) {

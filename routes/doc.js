@@ -224,15 +224,21 @@ module.exports = function (name, opts) {
         next();
     });
 
-
-
-
-
+    // ASF
+    // Limit query q to the records of the user's PMCs.
+    function ownerQuery(req, q) {
+        const acl = asf.asfownerquery(name, req.user.pmcs);
+        if (Object.keys(acl).length > 0) {
+            q['$and'] = (q['$and'] || []).concat([acl]);
+        }
+        return q;
+    }
+    // END ASF
 
     router.get('/json/:id', async function (req, res) {
         var ids = req.params.id.match(RegExp(idpattern, 'img'));
         if (ids) {
-            var q = {};
+            var q = ownerQuery(req, {});
             q[idpath] = {
                 "$in": ids
             };
@@ -257,7 +263,7 @@ module.exports = function (name, opts) {
     router.post('/json/', async function (req, res) {
         if (req.body.ids && req.body.ids.length > 0) {
             //console.log('REQ: ' + JSON.stringify(req.body.ids));
-            var q = {};
+            var q = ownerQuery(req, {});
             q[idpath] = {
                 "$in": req.body.ids
             };
@@ -321,7 +327,7 @@ module.exports = function (name, opts) {
         queryMW,
         async function (req, res) {
             var r = await Document.aggregate([
-                { $match: req.querymen.query },
+                { $match: ownerQuery(req, req.querymen.query) },
                 { $project: project }
             ]).toArray();
             res.json(r);
@@ -336,7 +342,7 @@ module.exports = function (name, opts) {
             });
             return;
         }
-        var r = await Document.distinct(req.query.field, req.querymen.query);
+        var r = await Document.distinct(req.query.field, ownerQuery(req, req.querymen.query));
         var ret = {};
         ret[t] = r;
         res.json(ret);
@@ -362,7 +368,7 @@ module.exports = function (name, opts) {
                     f = [f];
                 }
 
-                var pipeLine = normalizeQuery(req.querymen.query);
+                var pipeLine = normalizeQuery(ownerQuery(req, req.querymen.query));
                 var prj = {};
                 for (var k of f) {
                     var options = opts.facet[k];
@@ -513,6 +519,7 @@ module.exports = function (name, opts) {
         try {
             // ASF
             var mychartCount = chartCount;
+            ownerQuery(req, req.querymen.query);
             // END ASF
             var pipeLine = normalizeQuery(req.querymen.query);
             // to get the documents
@@ -684,7 +691,18 @@ module.exports = function (name, opts) {
                         var d = new Date();
                         q.author = req.user.username;
                         q.updatedAt = d;
-                        var fq = {};
+                        // ASF
+                        var newOwner = q['body.CNA_private.owner'];
+                        if (newOwner !== undefined && asf.asfownedsections.includes(name) && !asf.asfgroupacls(newOwner, req.user.pmcs)) {
+                            res.status(403);
+                            res.render('blank', {
+                                title: 'Error',
+                                message: 'Error: records can only be assigned to your own PMCs.'
+                            });
+                            return;
+                        }
+                        var fq = ownerQuery(req, {});
+                        // END ASF
                         fq[idpath] = f;
                         var docs = await Document.find(fq).toArray();
                         var results = [];
