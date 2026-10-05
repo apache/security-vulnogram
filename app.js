@@ -137,9 +137,10 @@ function ensureAuthenticated(req, res, next) {
         req.sessionStore.all((err, sessions)=>{
             for (const s in sessions || {}) {
                 if (sessions[s].token == token) {
-                    // asfinit() populates req.user from the session, but it
-                    // already ran for this request, so set it here as well.
-                    req.user = req.session.user = sessions[s].user;
+                    // A bearer token authenticates this request only: set
+                    // req.user, but keep it out of req.session, which
+                    // asfinit() reads to authenticate later requests.
+                    req.user = sessions[s].user;
                     return next();
                 }
                 for (const pmc in sessions[s].tokens || {}) {
@@ -154,7 +155,7 @@ function ensureAuthenticated(req, res, next) {
                             }
                             // Act as the token owner limited to the token's PMC,
                             // so the record ACLs keep it to that PMC's records.
-                            req.user = req.session.user = tokenauthorize.narrowUser(sessions[s].user, pmc);
+                            req.user = tokenauthorize.narrowUser(sessions[s].user, pmc);
                             req.token_pmc = pmc;
                             return next();
                         }
