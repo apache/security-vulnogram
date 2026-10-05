@@ -118,7 +118,25 @@ function purlToLegacyIdentifiers(purlString) {
     };
 }
 
+// Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
+// The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
+function isGitboxRepo(repo) {
+    let url;
+    try {
+        url = new URL(String(repo).trim());
+    } catch (e) {
+        return false;
+    }
+    return url.protocol === 'https:' &&
+        url.hostname === 'gitbox.apache.org' &&
+        url.port === '' &&
+        url.search === '' &&
+        url.hash === '' &&
+        /^\/repos\/asf\/[^\/]+\.git$/.test(url.pathname);
+}
+
 if (typeof exports !== 'undefined') {
+    exports.isGitboxRepo = isGitboxRepo;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }

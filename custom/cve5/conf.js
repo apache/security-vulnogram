@@ -326,9 +326,13 @@ module.exports = {
                                                 "hidden": "true",
                                             }
                                         },
+                                        // Shown only on a record that carries it; it must point to GitBox.
                                         "repo": {
                                             "options": {
-                                                "hidden": "true",
+                                                "hideWhenEmpty": "repo",
+                                                "inputAttributes": {
+                                                    "placeholder": "https://gitbox.apache.org/repos/asf/<repository>.git"
+                                                }
                                             }
                                         },
                                         "modules": {
@@ -524,6 +528,16 @@ module.exports = {
                         }
                     });
                 }
+            }
+            // A product entry: the source code repository must be an ASF GitBox URL.
+            // isGitboxRepo is a global from custom/cve5/script.js.
+            if (schema && schema.id == 'pE' && value.repo &&
+                typeof isGitboxRepo === 'function' && !isGitboxRepo(value.repo)) {
+                errors.push({
+                    path: path + '.repo',
+                    property: 'format',
+                    message: 'The repository must be a https://gitbox.apache.org/repos/asf/<repository>.git URL'
+                });
             }
             if (path == 'root') {
                 if (value && value.CNA_private && value.CNA_private.state && value.containers.cna.references) {
