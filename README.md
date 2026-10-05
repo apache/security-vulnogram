@@ -69,7 +69,8 @@ Copy the `example.env` file to `.env` and configure the environment variables to
 $ node app.js
 ```
 
-(set `NODE_ENV=development` for local testing without HTTPS)
+Vulnogram runs in development mode (no email, no real CVE allocation) unless
+`NODE_ENV=production` is set; set it for the live service.
 
 ### Step 8. Run the application as a daemon server
 

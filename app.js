@@ -5,9 +5,6 @@ const dotenv = require('dotenv').config()
 if (dotenv.error) {
     console.log(".env was not loaded.");
 }
-if(!process.env.NODE_ENV) {
-    process.env.NODE_ENV = "production";
-}
 
 const conf = require('./config/conf');
 
