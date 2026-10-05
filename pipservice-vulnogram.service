@@ -4,6 +4,7 @@ Description=ASF Vulnogram instance for the CVE process
 [Service]
 Type=simple
 Environment=HOME=/opt/vulnogram
+Environment=NODE_ENV=production
 WorkingDirectory=/opt/vulnogram
 ExecStart=/usr/bin/node app.js
 Restart=always
