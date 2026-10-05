@@ -13,6 +13,13 @@ if (prod) {
     console.log("Running in 'production' mode, this will send email");
     console.log("and allocate real CVEs. For testing, use NODE_ENV=development");
     console.log("");
+} else {
+    console.log("");
+    console.log("DEVELOPMENT MODE");
+    console.log("");
+    console.log("NODE_ENV is not 'production': no email is sent and no real");
+    console.log("CVEs are allocated. For the live service, use NODE_ENV=production");
+    console.log("");
 }
 
 const cveapiurl = prod
