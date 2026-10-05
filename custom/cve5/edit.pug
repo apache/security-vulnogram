@@ -72,11 +72,7 @@ block prepend loadEditor
         |         if (projectannounce) {
         |             replyto = projectannounce.split(',')[0]
         |         }
-        |         var subject = j.containers.cna.source.advisory || ""
-        |         if (subject) {
-        |            subject = subject + ": "
-        |         }
-        |         subject = subject + j.cveMetadata.cveId+": "
+        |         var subject = j.cveMetadata.cveId+": "
         |         if (j.containers.cna.title) {
         |            if (!(j.containers.cna.title.substring(0,40).includes("Apache"))) {
         |               subject = subject + getProductListNoVendor(j) + ": "
