@@ -58,6 +58,27 @@ Vulnogram app on the host.
 
 The app listens on `http://0.0.0.0:3555` by default and uses `oauth.apache.org` for authentication.
 
+## Development and production mode
+
+`NODE_ENV` selects the mode. Only `NODE_ENV=production` turns on the parts
+that reach outside the instance; anything else, including leaving it unset,
+runs in development mode:
+
+| | `NODE_ENV=production` | Unset or anything else |
+|---|---|---|
+| CVE allocation | Real IDs from CVE Services (`CVE_API_URL`, `CVE_API_USER`, `CVE_API_KEY`) | Fake `CVE-2000-…` IDs; CVE Services is not contacted |
+| Publishing to cve.org | Pushed | Skipped |
+| Notification email | Sent | Logged, not sent |
+| `Strict-Transport-Security` header | Sent | Not sent |
+
+The startup log shows which mode is active with a **PRODUCTION MODE** or
+**DEVELOPMENT MODE** banner.
+
+The live instance must set `NODE_ENV=production`;
+[`pipservice-vulnogram.service`](pipservice-vulnogram.service) does.
+[`pipservice-vulnogram-test.service`](pipservice-vulnogram-test.service)
+does not, so the test instance runs in development mode.
+
 ## API tokens for tools
 
 Tools authenticate with an `Authorization: Bearer <token>` header.
