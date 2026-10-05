@@ -76,8 +76,9 @@ The startup log shows which mode is active with a **PRODUCTION MODE** or
 
 The live instance must set `NODE_ENV=production`;
 [`pipservice-vulnogram.service`](pipservice-vulnogram.service) does.
+The test instance runs in development mode:
 [`pipservice-vulnogram-test.service`](pipservice-vulnogram-test.service)
-does not, so the test instance runs in development mode.
+sets `NODE_ENV=development`.
 
 ## API tokens for tools
 
