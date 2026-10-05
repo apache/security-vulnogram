@@ -74,6 +74,16 @@ A Bearer token is accepted only on `/cve5/CVE-*`, `/cve5/json/CVE-*` and `/alloc
 
 A PMC token acts as its owner limited to that PMC, so it only reaches that PMC's records, even for security-team members.
 
+`POST /allocatecve` with a Bearer token and a form or JSON body (`pmc`, `cvetitle`, optionally `messageid` and `listid`) answers with JSON:
+
+| Status | Body |
+|---|---|
+| 200 | `{"cve_ids": ["CVE-2026-12345"]}`: the ID is reserved and its record created |
+| 202 | `{"cve_ids": [], "message": "..."}`: the PMC can not allocate directly, so the request was mailed to security@apache.org |
+| 400 | `{"message": "..."}`: missing `cvetitle` |
+| 500 | `{"cve_ids": [...], "message": "..."}`: the ID is reserved but saving its record failed |
+| 502 | `{"message": "..."}`: CVE Services returned an error |
+
 ### Getting a token from a tool
 
 Instead of having the user copy a token from `/users/token`, a tool can ask for one through the browser.
