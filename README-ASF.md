@@ -82,7 +82,7 @@ The flow is the OAuth 2.0 loopback flow for native apps ([RFC 8252](https://www.
 1. The tool listens on `http://127.0.0.1:<port>/` (or `http://[::1]:<port>/`), creates a random `state` and a PKCE `code_verifier`, and opens this URL in the browser:
 
    ```text
-   /users/token/authorize?pmc=<pmc>&scope=read|write
+   /users/token/authorize?pmc=<pmc>&scope=read|write|allocate
        &redirect_uri=http://127.0.0.1:<port>/<path>&state=<state>
        &code_challenge=<base64url(sha256(code_verifier))>&code_challenge_method=S256
    ```
@@ -102,6 +102,6 @@ The flow is the OAuth 2.0 loopback flow for native apps ([RFC 8252](https://www.
 
    The response is `{"access_token": "...", "token_type": "Bearer", "pmc": "...", "scope": "..."}`, or HTTP 400 `{"error": "invalid_grant"}`.
 
-The server accepts only loopback IP literals as `redirect_uri` (not `localhost`), only the PMCs the user belongs to (any PMC for the security team), and only `read` and `write` scopes.
+The server accepts only loopback IP literals as `redirect_uri` (not `localhost`), only the PMCs the user belongs to (any PMC for the security team), and only the `read`, `write` and `allocate` scopes.
 
 The design, its assumptions and the invariants the implementation must keep are in [docs/design/browser-token-authorize.md](docs/design/browser-token-authorize.md).

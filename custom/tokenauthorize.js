@@ -2,7 +2,7 @@
 //
 // A tool on the user's machine opens
 //
-//   /users/token/authorize?pmc=<pmc>&scope=read|write
+//   /users/token/authorize?pmc=<pmc>&scope=read|write|allocate
 //       &redirect_uri=http://127.0.0.1:<port>/<path>&state=<opaque>
 //       &code_challenge=<challenge>&code_challenge_method=S256
 //
@@ -21,7 +21,7 @@
 const crypto = require('crypto');
 const conf = require('../config/conf');
 
-const SCOPES = ['read', 'write'];
+const SCOPES = ['read', 'write', 'allocate'];
 const CODE_TTL_MS = 60 * 1000;
 const PMC_RE = /^[a-z0-9-]{1,64}$/;
 const STATE_RE = /^[\x21-\x7e]{1,512}$/;

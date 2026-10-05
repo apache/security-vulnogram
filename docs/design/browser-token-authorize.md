@@ -35,7 +35,6 @@ That is error-prone, encourages copying the most powerful token on the page, and
 - Long-lived or refreshable tokens. Tokens stay session-bound.
 - Tokens for anything other than records and CVE allocation.
 - Third-party (non-loopback) clients. Only tools on the user's own machine are supported.
-- Allocating CVEs through this flow. `allocate` tokens stay on `/users/token` only.
 
 ## Design
 
@@ -85,7 +84,7 @@ These are the claims the design rests on. Each is a good place to push back.
 - **A5. Session-bound lifetime is the right lifetime.**
   Tools that run for longer than a login session have to repeat the flow. This is a deliberate trade-off against refresh tokens.
 - **A6. Bearer requests are safe to exempt from CSRF.**
-  Browsers do not attach an `Authorization` header on their own and CORS is locked down, so a third-party site cannot forge a Bearer request.
+  Browsers do not attach an `Authorization` header on their own, so a third-party site cannot forge a Bearer request.
 - **A7. `localhost` is not trustworthy as a redirect host.**
   It can resolve somewhere other than loopback (RFC 8252 §8.3), so only `127.0.0.1` and `[::1]` are accepted.
 
@@ -98,7 +97,7 @@ Each invariant is a claim about the code on this branch.
 |---|---|---|---|
 | I1 | `redirect_uri` is accepted only if it is `http:`, host `127.0.0.1` or `[::1]`, has an explicit port, and has no userinfo and no fragment. | `validateRedirectUri` | redirect URI block |
 | I2 | The authorize request is refused unless the user is a member of `pmc` or of the security team (`conf.admingroupname`). | `validateAuthorizeRequest` | "not a member" cases |
-| I3 | Only `read` and `write` can be requested through the browser flow; `allocate` cannot. | `SCOPES`, `validateAuthorizeRequest` | scope cases |
+| I3 | Only `read`, `write` and `allocate` can be requested through the browser flow. | `SCOPES`, `validateAuthorizeRequest` | scope cases |
 | I4 | `code_challenge_method` must be `S256`; `plain` is refused. | `validateAuthorizeRequest` | S256 case |
 | I5 | The approve/deny decision is a POST with a CSRF token, and is re-validated on the server (the form's hidden fields are not trusted). | `authorizeDecision`, `tokenauthorize.pug` | not covered |
 | I6 | A token is issued only on `decision=approve`; any other value redirects with `error=access_denied`. | `authorizeDecision` | not covered |
@@ -139,5 +138,4 @@ They are good candidates for an agent (or a human) to check by reading the code,
 ## Open questions
 
 - Should the consent page show the tool's name? It is self-declared by the tool, so it could mislead, which is why the page shows only the port.
-- Is there appetite for a shared code/session store, which A3 would need if Vulnogram is ever scaled out?
-- End-to-end verification against a dev instance (Mongo + oauth.apache.org) with the magpie reference client is still pending.
+- End-to-end verification with the magpie reference client has run against a local instance with a mock OIDC provider; the real `oauth.apache.org` login and MFA are still untested.

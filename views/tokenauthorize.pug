@@ -10,15 +10,17 @@ block content
       p
         | A tool running on this computer (
         code= redirectHost
-        | ) asks for a
+        | ) asks for the
         b  #{request.scope}
-        |  token for the CVE records of
+        |  scope on the CVE records of
         b  #{request.pmc}
         | , acting as
         b  #{username}
         | .
       if request.scope == 'write'
         p It will be able to read and change those records, and nothing else.
+      else if request.scope == 'allocate'
+        p It will be able to allocate new CVE IDs for #{request.pmc}, and nothing else.
       else
         p It will be able to read those records, but not change them.
       p The token lasts as long as this login. Log out to revoke it.

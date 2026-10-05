@@ -47,7 +47,7 @@ assert.match(ta.validateAuthorizeRequest(withParam('pmc', 'kafka'), user).error,
 assert.equal(ta.validateAuthorizeRequest(withParam('pmc', 'kafka'), admin).request.pmc, 'kafka')
 assert.match(ta.validateAuthorizeRequest(withParam('pmc', 'Air flow'), user).error, /pmc/)
 assert.match(ta.validateAuthorizeRequest(withParam('pmc', undefined), user).error, /pmc/)
-assert.match(ta.validateAuthorizeRequest(withParam('scope', 'allocate'), user).error, /scope/)
+assert.equal(ta.validateAuthorizeRequest(withParam('scope', 'allocate'), user).request.scope, 'allocate')
 assert.match(ta.validateAuthorizeRequest(withParam('scope', 'admin'), user).error, /scope/)
 assert.match(ta.validateAuthorizeRequest(withParam('redirect_uri', 'https://evil.example/'), user).error, /redirect_uri/)
 assert.match(ta.validateAuthorizeRequest(withParam('state', ''), user).error, /state/)
