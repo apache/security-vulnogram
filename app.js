@@ -20,6 +20,7 @@ const pug = require('pug');
 
 // ASF
 const asf = require('./custom/asf.js')
+const tokenauthorize = require('./custom/tokenauthorize.js')
 // END ASF
 
 // TODO: don't use express-session for large-scale production use
@@ -144,19 +145,16 @@ function ensureAuthenticated(req, res, next) {
                 for (const pmc in sessions[s].tokens || {}) {
                     for (const op in sessions[s].tokens[pmc]) {
                         if (sessions[s].tokens[pmc][op] == token) {
-                            req.user = req.session.user = sessions[s].user;
-                            if (op == "allocate" && req.originalUrl != "/allocatecve") {
+                            const denied = tokenauthorize.checkScopedToken(op, req.method, req.originalUrl);
+                            if (denied) {
                                 res.statusCode = 403;
-                                res.json({"message":"allocate token not valid for this endpoint"})
+                                res.json({"message": denied})
                                 res.end()
                                 return true
                             }
-                            if (op == "write" && !req.originalUrl.startsWith("/cve5/CVE-") && !req.originalUrl.startsWith("/cve5/json/CVE-")) {
-                                res.statusCode = 403;
-                                res.json({"message":"write token not valid for this endpoint"})
-                                res.end()
-                                return true
-                            }
+                            // Act as the token owner limited to the token's PMC,
+                            // so the record ACLs keep it to that PMC's records.
+                            req.user = req.session.user = tokenauthorize.narrowUser(sessions[s].user, pmc);
                             req.token_pmc = pmc;
                             return next();
                         }

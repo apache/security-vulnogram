@@ -56,6 +56,12 @@ function makeFakeCveResponse() {
     };
 }
 
+// Tools calling with a Bearer token get JSON back instead of the HTML pages
+// the form gets, so they can read the allocated CVE ID from the response.
+function isApiRequest(req) {
+    return !!req.headers['authorization'];
+}
+
 // use 'number: 1' below if you want to allow more than one CVE to get alocated at once. probably not
 // very useful/likely even though we do support it
 
@@ -103,6 +109,7 @@ protected.post('/', async function(req,res) {
         return;
     }
     var testmode =!conf.cveapiliveservice;
+    var api = isApiRequest(req);
     var pmc = req.body.pmc.toLowerCase();
     if (req.token_pmc && req.token_pmc != pmc) {
         res.statusCode = 403;
@@ -126,6 +133,10 @@ protected.post('/', async function(req,res) {
         req.body.year = new Date().getFullYear();
     }
     if (!req.body.cvetitle || req.body.cvetitle == "") {
+        if (api) {
+            res.status(400).json({"message": "cvetitle can not be blank"});
+            return;
+        }
         req.flash('error',"description can not be blank");
         res.render('blank');
         return;
@@ -143,7 +154,12 @@ protected.post('/', async function(req,res) {
                                       + (req.body.listid ? "report list: "+req.body.listid+"\n" : "")
                                       + "\n"+req.body.cvetitle,
                                  }).then( (x) => {  console.log("sent CVE request mail "+x);});
-        
+
+        if (api) {
+            // No CVE ID yet: the security team allocates it by hand.
+            res.status(202).json({"cve_ids": [], "message": "This PMC can not allocate CVEs directly; an email has been sent to security@apache.org requesting the CVE name"});
+            return;
+        }
         req.flash('success', testmode
             ? 'Dev mode: CVE request email NOT sent (logged to console).'
             : 'An email has been sent to security@apache.org requesting the CVE name');
@@ -157,14 +173,23 @@ protected.post('/', async function(req,res) {
 
     const handleCveResponse = async function (error, response, body) {
         if (error) {
+            if (api) {
+                res.status(502).json({"message": "CVE service request failed: " + error});
+                return;
+            }
             req.flash('error',error);
             res.render('blank');
         } else {
             if (body.error) {
+                if (api) {
+                    res.status(502).json({"message": "CVE service error '"+body.error+"': "+body.message});
+                    return;
+                }
                 req.flash('error',"CVE service error '"+body.error+"': "+body.message);
                 res.render('blank');
             } else {
                 console.log("ok");
+                var saveErrors = [];
                 for (cveid in body.cve_ids) {
 		    cve = body.cve_ids[cveid].cve_id
                     // MJC TEST
@@ -227,8 +252,20 @@ protected.post('/', async function(req,res) {
                         //res.redirect('/cve/' + cve.slice());
                         //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
                     } catch (err) {
+                        saveErrors.push(cve + ": " + JSON.stringify(err));
                         req.flash('error',JSON.stringify(err));
                     }
+                }
+                if (api) {
+                    // The IDs are reserved at CVE Services even if saving the
+                    // record failed, so return them either way.
+                    const cveIds = body.cve_ids.map((c) => c.cve_id);
+                    if (saveErrors.length) {
+                        res.status(500).json({"cve_ids": cveIds, "message": "CVE IDs reserved but saving the record failed: " + saveErrors.join("; ")});
+                    } else {
+                        res.json({"cve_ids": cveIds});
+                    }
+                    return;
                 }
                 console.log("Now display links");
                 for (cveid in body.cve_ids) {

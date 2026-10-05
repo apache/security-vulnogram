@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  div.pad2
+    if error
+      h2 Token request refused
+      p= error
+    else
+      h2 Approve API access
+      p
+        | A tool running on this computer (
+        code= redirectHost
+        | ) asks for the
+        b  #{request.scope}
+        |  scope on the CVE records of
+        b  #{request.pmc}
+        | , acting as
+        b  #{username}
+        | .
+      if request.scope == 'write'
+        p It will be able to read and change those records, and nothing else.
+      else if request.scope == 'allocate'
+        p It will be able to allocate new CVE IDs for #{request.pmc}, and nothing else.
+      else
+        p It will be able to read those records, but not change them.
+      p The token lasts as long as this login. Log out to revoke it.
+      p Approve only if you started this request yourself, just now.
+      form(method='POST', action='/users/token/authorize')
+        input(type='hidden', name='_csrf', value=csrfToken)
+        input(type='hidden', name='pmc', value=request.pmc)
+        input(type='hidden', name='scope', value=request.scope)
+        input(type='hidden', name='redirect_uri', value=request.redirectUri)
+        input(type='hidden', name='state', value=request.state)
+        input(type='hidden', name='code_challenge', value=request.codeChallenge)
+        input(type='hidden', name='code_challenge_method', value='S256')
+        button.btn.sfe(type='submit', name='decision', value='approve') Approve
+        |
+        |
+        button.btn(type='submit', name='decision', value='deny') Deny
