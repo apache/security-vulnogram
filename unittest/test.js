@@ -101,7 +101,7 @@ assert(purl.parsePurl('pkg:maven/g/a') !== null,
 // reduceJSON derives the legacy identifiers when the record is serialised.
 // It is the only place they are produced: the CVE-JSON tab and
 // customRoutes/publishcve.js both go through it.
-global.getProductListNoVendor = (c) => c.containers.cna.affected.map(a => a.product).join(', ')
+global.getProductListNoVendor = require('../custom/cve5/script.js').getProductListNoVendor
 
 const serialise = (affected) => textUtil.reduceJSON({
   cveMetadata: { cveId: 'CVE-2024-0001' },
@@ -145,3 +145,9 @@ const published = textUtil.reduceJSON({
 })
 assert(published.CNA_private === undefined)
 assert(published.containers.cna.title === 'Alpha: Something')
+
+// A product listed more than once is named once in the title.
+const multi = textUtil.reduceJSON({
+  containers: { cna: { title: 'Something', affected: [{ product: 'Alpha' }, { product: 'Beta' }, { product: 'Alpha' }] } }
+})
+assert(multi.containers.cna.title === 'Alpha, Beta: Something')
