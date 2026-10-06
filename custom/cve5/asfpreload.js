@@ -1,13 +1,3 @@
-function getProductListNoVendor(cve) {
-    var lines = [];
-    for (var affected of cve.containers.cna.affected) {
-        if (!lines.includes(affected.product)) {
-            lines.push(affected.product);
-        }
-    }
-    return lines.join(", ");
-}
-
 async function loadProductNames() {
     var projects = []
     var pmcs = userPMCS.split(',');

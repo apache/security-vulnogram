@@ -118,6 +118,17 @@ function purlToLegacyIdentifiers(purlString) {
     };
 }
 
+// The distinct product names, prepended to the title when the record is published.
+function getProductListNoVendor(cve) {
+    var lines = [];
+    for (var affected of cve.containers.cna.affected) {
+        if (!lines.includes(affected.product)) {
+            lines.push(affected.product);
+        }
+    }
+    return lines.join(", ");
+}
+
 // Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
 // The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
 function isGitboxRepo(repo) {
@@ -136,6 +147,7 @@ function isGitboxRepo(repo) {
 }
 
 if (typeof exports !== 'undefined') {
+    exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
