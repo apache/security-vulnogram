@@ -17,6 +17,7 @@ window = {}
 // custom/cve5/script.js, inlined into opts.script.
 global.parsePurl = require('../custom/cve5/script.js').parsePurl
 global.purlToLegacyIdentifiers = require('../custom/cve5/script.js').purlToLegacyIdentifiers
+global.isGitboxRepo = require('../custom/cve5/script.js').isGitboxRepo
 
 // The purl checks now live in the ASF validator, not the default one.
 const productValidator = require('../custom/cve5/conf.js').validators[1]
@@ -102,3 +103,23 @@ assert.deepEqual(versionErrors({
 
 // Not a purl at all: no version complaint.
 assert.deepEqual(versionErrors(Object.assign({}, maven, { packageURL: 'not-a-purl' })), [])
+
+// The source code repository, when given, must be an ASF GitBox URL.
+const repoErrors = (repo) => productValidator({ id: 'pE' }, Object.assign({}, maven, { repo: repo }), 'root.containers.cna.affected.0')
+    .filter(e => e.path === 'root.containers.cna.affected.0.repo')
+
+assert.deepEqual(repoErrors(undefined), [])
+assert.deepEqual(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang.git'), [])
+// Forms that git cannot clone: the gitweb query, a deeper path, a fragment.
+assert(repoErrors('https://gitbox.apache.org/repos/asf?p=commons-lang.git').length === 1)
+assert(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang.git?p=x').length === 1)
+assert(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang.git/tree').length === 1)
+assert(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang.git#main').length === 1)
+assert(repoErrors('https://github.com/apache/commons-lang').length === 1)
+assert(repoErrors('http://gitbox.apache.org/repos/asf/commons-lang.git').length === 1)
+assert(repoErrors('https://gitbox.apache.org.example.com/repos/asf/commons-lang.git').length === 1)
+assert(repoErrors('https://gitbox.apache.org/repos/asf/').length === 1)
+// The .git suffix is required, and needs a name before it.
+assert(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang').length === 1)
+assert(repoErrors('https://gitbox.apache.org/repos/asf/.git').length === 1)
+assert(repoErrors('not a url').length === 1)
