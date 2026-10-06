@@ -118,7 +118,19 @@ function purlToLegacyIdentifiers(purlString) {
     };
 }
 
+// The distinct product names, prepended to the title when the record is published.
+function getProductListNoVendor(cve) {
+    var lines = [];
+    for (var affected of cve.containers.cna.affected) {
+        if (!lines.includes(affected.product)) {
+            lines.push(affected.product);
+        }
+    }
+    return lines.join(", ");
+}
+
 if (typeof exports !== 'undefined') {
+    exports.getProductListNoVendor = getProductListNoVendor;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }
