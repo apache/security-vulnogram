@@ -1,11 +1,11 @@
 [Unit]
-Description=Job to run manually to update vulnogram deps inside the sandbox
+Description=Install the vulnogram dependencies inside the sandbox
 
 [Service]
-Type=simple
+Type=oneshot
 Environment=HOME=/opt/vulnogram
 WorkingDirectory=/opt/vulnogram
-ExecStart=/usr/bin/npm install
+ExecStart=/usr/bin/npm install --ignore-scripts
 Restart=no
 PrivateTmp=yes
 NoNewPrivileges=true
