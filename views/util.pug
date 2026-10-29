@@ -215,7 +215,11 @@ mixin table(docs, columns, showCheckboxes, id)
                                 label.rowCheckLabel
                                     input.rowCheck(type='checkbox', name=columns[0],value=doc[columns[0]])
                         each column in columns
-                            td(class=column)
+                            - var cellValue = (doc !== Object(doc) || Array.isArray(doc)) ? doc : doc[column];
+                            - var cellIsDate = cellValue instanceof Date || column == 'date' || column == 'updatedAt' || column == 'createdAt' || (fields && fields[column] && fields[column].type === Date);
+                            - var cellSort = null;
+                            - if (cellIsDate && cellValue) { var cellDate = cellValue instanceof Date ? cellValue : new Date(cellValue); if (!isNaN(cellDate.getTime())) { cellSort = cellDate.toISOString(); } }
+                            td(class=column data-sort=cellSort)
                                 +hyperVal(doc, column)
 
 
