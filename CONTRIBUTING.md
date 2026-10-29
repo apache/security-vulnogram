@@ -7,9 +7,32 @@ changes first discussing it in a [GitHub issue](https://github.com/apache/securi
 or on the [security-discuss@community.apache.org mailinglist](https://www.apache.org/foundation/mailinglists.html)
 might be good to avoid disappointment.
 
+# Contributing upstream
+
+We plan to periodically pick up improvements from
+https://github.com/Vulnogram/Vulnogram/ here, so if an
+improvement is not urgent and would be relevant there as well
+it would be good to contribute it there first and let it flow
+into our instance via a merge.
+
+# Avoiding merge conflicts
+
+Since we plan to merge updates from upstream periodically,
+it'd be good to avoid merge conflicts. For that reason we try
+to:
+
+* keep ASF-specific code in `custom` and `customRoutes`
+* not copy-paste too much from the default implementations
+* clearly mark 'inline' improvements with `// ASF`
+
 # Testing
 
-Try to test your changes locally before submitting your changes.
+Try to test your changes locally before submitting your changes,
+or add unit tests:
+
+    VULNOGRAM_TLS_CERT=unittest/cert.pem VULNOGRAM_TLS_KEY=unittest/key.pem npm run unittest
+
+
 
 # Submitting changes
 
