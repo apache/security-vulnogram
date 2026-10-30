@@ -22,6 +22,14 @@ assert.deepEqual(asf.asfownerquery('cve5', ['airflow', 'tomcat']),
 assert.deepEqual(asf.asfownerquery('cve5', ['airflow', admin]), {})
 assert.deepEqual(asf.asfownerquery('nvd', ['airflow']), {})
 
+const body = (owner) => rec(owner).body
+assert.equal(asf.ownerCleared(body('airflow'), body('airflow')), false)
+assert.equal(asf.ownerCleared(body('airflow'), body('tomcat')), false)
+assert.equal(asf.ownerCleared(body('airflow'), body()), true)
+assert.equal(asf.ownerCleared(body('airflow'), {}), true)
+assert.equal(asf.ownerCleared(body(), body()), false)
+assert.equal(asf.ownerCleared(null, body()), false)
+
 // asfdocacl and asfownerquery encode the same rule and must agree.
 const matches = (query, doc) => {
     const cond = query['body.CNA_private.owner']

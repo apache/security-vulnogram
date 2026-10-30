@@ -287,6 +287,14 @@ module.exports = function (Document, opts) {
             // Both the record being replaced and the one being saved must
             // belong to one of the user's PMCs.
             var oldDocACL = renaming ? await Document.findOne(queryOldID) : existingDoc;
+            if (asf.ownerCleared(oldDocACL && oldDocACL.body, req.body)) {
+                res.status(403);
+                res.json({
+                    type: 'err',
+                    msg: 'Not saved. The record owner cannot be cleared.'
+                });
+                return;
+            }
             if ((oldDocACL && !asf.asfdocacl(opts.schemaName, oldDocACL, req.user.pmcs))
                 || !asf.asfdocacl(opts.schemaName, { body: req.body }, req.user.pmcs)) {
                 res.status(403);
