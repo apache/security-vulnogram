@@ -247,11 +247,11 @@ mixin listIds
         table#cveListTable.vtbl.sortable
             thead
                 tr
-                    th
+                    th(data-sort-method='none')
                         input#selectAllCves(type="checkbox" title="Select all" onchange="cveSelectionSelectAll(this)")
-                    th ID
+                    th(data-sort-method='cveid' data-sort-default='desc') ID
                     th Requester
-                    th(aria-sort="ascending") Created
+                    th Created
                     th Modified
                     th Actions
             tbody
