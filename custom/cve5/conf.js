@@ -69,6 +69,9 @@ module.exports = {
             },
             "cnaPublishedContainer": {
                 "properties": {
+                    "problemTypes": {
+                        "minItems": 1
+                    },
                     "descriptions": {
                         "default": {
                             "value": "[PROBLEMTYPE] in [COMPONENT] in [VENDOR] [PRODUCT] [VERSION] on [PLATFORMS] allows [ATTACKER] to [IMPACT] via [VECTOR].\nUsers are recommended to upgrade to version [FIXED_VERSION], which fixes this issue.",
@@ -181,6 +184,7 @@ module.exports = {
                                 }                                
                             },
                             "problemTypes": {
+                                "minItems": 1,
                                 "items": {
                                     "properties": {
                                         "descriptions": {

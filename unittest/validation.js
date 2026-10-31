@@ -123,3 +123,9 @@ assert(repoErrors('https://gitbox.apache.org/repos/asf/').length === 1)
 assert(repoErrors('https://gitbox.apache.org/repos/asf/commons-lang').length === 1)
 assert(repoErrors('https://gitbox.apache.org/repos/asf/.git').length === 1)
 assert(repoErrors('not a url').length === 1)
+
+const cve5Schema = require('../models/set')('cve5').schema
+assert.equal(cve5Schema.properties.containers.properties.cna.properties.problemTypes.minItems, 1,
+    'editor problemTypes must keep one row')
+assert.equal(cve5Schema.definitions.cnaPublishedContainer.properties.problemTypes.minItems, 1,
+    'published container problemTypes must keep one row')
