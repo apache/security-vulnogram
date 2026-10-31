@@ -768,6 +768,19 @@ async function cveAddUser(f) {
     }
 }
 
+var cveIdSortValue = function (id) {
+    var match = /^CVE-(\d{4})-(\d+)$/.exec(String(id || ''));
+    return match ? Number(match[1]) * 1e7 + Number(match[2]) : 0;
+};
+
+if (typeof Tablesort !== 'undefined') {
+    Tablesort.extend('cveid', function (item) {
+        return /^CVE-\d{4}-\d+$/.test(item);
+    }, function (a, b) {
+        return cveIdSortValue(a) - cveIdSortValue(b);
+    });
+}
+
 async function cveRenderList(l, refreshEditor) {
     if (l && document.getElementById('cveList')) {
         var canInlineLoad = !!(document.getElementById('docEditor') && typeof loadJSON === 'function' && typeof mainTabGroup !== 'undefined');
