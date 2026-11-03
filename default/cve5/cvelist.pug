@@ -247,11 +247,11 @@ mixin listIds
         table#cveListTable.vtbl.sortable
             thead
                 tr
-                    th
+                    th(data-sort-method='none')
                         input#selectAllCves(type="checkbox" title="Select all" onchange="cveSelectionSelectAll(this)")
                     th ID
                     th Requester
-                    th(aria-sort="ascending") Created
+                    th(aria-sort='descending' data-sort-default='desc') Created
                     th Modified
                     th Actions
             tbody
@@ -273,9 +273,9 @@ mixin listIds
                             if c.state != 'RESERVED'
                                 a.vgi-ext(href="https://vulnogram.org/seaview/?"+c.cve_id, target="_blank")
                         td=c.requested_by.user
-                        td
+                        td(data-sort=c.time.created)
                             +date(c.time.created)
-                        td
+                        td(data-sort=c.time.modified)
                             if c.time.modified != c.time.created
                                 +date(c.time.modified)
                         td
