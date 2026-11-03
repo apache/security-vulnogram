@@ -336,6 +336,12 @@ var self = module.exports = {
         return { 'body.CNA_private.owner': { '$in': yourpmcs } };
     },
 
+    ownerCleared: function (oldBody, newBody) {
+        const before = oldBody && oldBody.CNA_private && oldBody.CNA_private.owner;
+        const after = newBody && newBody.CNA_private && newBody.CNA_private.owner;
+        return Boolean(String(before || '').trim()) && !String(after || '').trim();
+    },
+
     // When a CVE record is changed this hook is called
     
     asfhookupsertdoc: function(req,dorefresh) {
