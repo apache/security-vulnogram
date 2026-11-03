@@ -1,3 +1,8 @@
 extends ../../default/cve5/list
 
 block sidebarSections
+
+block append messageBar
+    if bulkInput && Object.keys(bulkInput).length !== 0
+        .left
+            button#teamMailSelected.btn.sfe.vgi-export(type="button") Send Selected Emails
