@@ -12,6 +12,7 @@ assert.equal(asf.asfdocacl('cve5', rec('tomcat'), [admin]), true)
 assert.equal(asf.asfdocacl('cve', rec('tomcat'), ['airflow']), false)
 // No owner, or no record: security team only.
 assert.equal(asf.asfdocacl('cve5', rec(), ['airflow']), false)
+assert.equal(asf.asfdocacl('cve5', rec(), [admin]), true)
 assert.equal(asf.asfdocacl('cve5', null, ['airflow']), false)
 assert.equal(asf.asfdocacl('cve5', null, [admin]), true)
 // Sections without PMC ownership are not restricted.
