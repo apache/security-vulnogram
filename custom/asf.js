@@ -110,7 +110,11 @@ function asflogin (req, res) {
              'json': true
         }, (err, cbres, body) => {
             if (err) {res.send("Failed to exchange token:" + err);return;}
-            if (cbres.statusCode != 200) {res.send(`Response code ${cbres.statusCode} while exchanging token, response body: ${body}`);return;}
+            if (cbres.statusCode != 200) {
+                res.send(`Response code ${cbres.statusCode} while exchanging token, see logging`)
+                console.log(`Response code ${cbres.statusCode} while exchanging token, response body: ${JSON.stringify(body)}`);
+                return;
+            }
             const id_token = body.id_token
             const id = JSON.parse(Buffer.from(id_token.split(".")[1], 'base64url'))
             // We trust the TLS connection to the auth server for now,
