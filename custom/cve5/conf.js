@@ -212,8 +212,12 @@ module.exports = {
                             },
                             "source": {
                                 title: "ASF-specific details",
+                                "options": {
+                                    "infoText": "Optional ASF project details. Defects takes project bug or issue IDs (for example TOMCAT-522). Advisory takes a project advisory ID (for example TOMCAT-2019-12). Neither is sent to CVE.org."
+                                },
                                 "properties": {
 		                    "defect": {
+                                        "description": "Project bug or issue IDs, for example TOMCAT-522. Optional, and not included in the CVE record or sent to CVE.org.",
                                         "options": {
                                             "grid_columns": 8,
                                             "inputAttributes": {
@@ -222,6 +226,7 @@ module.exports = {
                                         }
                                     },
                                     "advisory": {
+                                        "description": "Project advisory ID, for example TOMCAT-2019-12. Optional, and not included in the CVE record or sent to CVE.org.",
                                         "options": {
                                             "inputAttributes": {
 			                        "placeholder": "Project specific advisory id e.g. TOMCAT-2019-12 (optional, this is not used for the Mitre entry)",
