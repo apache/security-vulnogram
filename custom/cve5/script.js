@@ -146,9 +146,15 @@ function isGitboxRepo(repo) {
         /^\/repos\/asf\/[^\/]+\.git$/.test(url.pathname);
 }
 
+const pmcsWithAdvisory = ['struts'];
+function showAdvisoryField(owner) {
+    return pmcsWithAdvisory.includes(owner);
+}
+
 if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
+    exports.showAdvisoryField = showAdvisoryField;
 }
