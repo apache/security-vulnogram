@@ -129,3 +129,8 @@ assert.equal(cve5Schema.properties.containers.properties.cna.properties.problemT
     'editor problemTypes must keep one row')
 assert.equal(cve5Schema.definitions.cnaPublishedContainer.properties.problemTypes.minItems, 1,
     'published container problemTypes must keep one row')
+
+const cve5Script = require('../custom/cve5/script.js')
+assert.equal(cve5Script.showAdvisoryField('struts'), true)
+assert.equal(cve5Script.showAdvisoryField('tomcat'), false)
+assert.equal(cve5Script.showAdvisoryField(undefined), false)
