@@ -5092,9 +5092,10 @@ function downloadHtml(title, element, link) {
     link.download = file.name;
 }
 
-function showAlert(msg, smallmsg, timer, showCancel) {
+function showAlert(msg, smallmsg, timer, showCancel, kind) {
     errMsg.textContent="";
     infoMsg.textContent="";
+    document.getElementById("alertMessage").className = kind == "success" ? "vgi-ok" : "vgi-alert";
     if (showCancel) {
         document.getElementById("alertCancel").style.display = "inline-block";
     } else {
