@@ -198,6 +198,7 @@ module.exports = function (name, opts) {
 
     var module = {};
     var Document = module.Document = docModel(opts.collectionName);
+    var History = module.History = docModel(opts.historyCollectionName);
 
     //console.log(toIndex);
     for (var x in toIndex) {
@@ -663,7 +664,6 @@ module.exports = function (name, opts) {
     });
 
     var onedoc = require('./onedoc')(Document, opts);
-    var History = docModel(opts.historyCollectionName);
     //UPDATE many
     router.post('/update',
         queryMWBody,
