@@ -429,7 +429,8 @@ module.exports = {
                                                             "examples": ["low","moderate","important","critical"],
                                                             "options": {
                                                                 "inputAttributes": {
-                                                                    "placeholder": "Use pulldown or free text"
+                                                                    "list": "asf-severity-levels",
+                                                                    "placeholder": "Pick low, moderate, important or critical, or type a value"
                                                                 }
                                                             }
                                                         }

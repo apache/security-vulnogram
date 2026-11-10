@@ -32,6 +32,18 @@ block append loadEditor
         |   document.getElementById(selected).checked = true;
         |   //mainTabGroup.focus(4);
         | }
+    script
+        | (function() {
+        |   var levels = ["low", "moderate", "important", "critical"];
+        |   var list = document.createElement("datalist");
+        |   list.id = "asf-severity-levels";
+        |   levels.forEach(function(level) {
+        |     var option = document.createElement("option");
+        |     option.value = level;
+        |     list.appendChild(option);
+        |   });
+        |   document.body.appendChild(list);
+        | })();
 
 block prepend loadEditor
     script
