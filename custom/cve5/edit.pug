@@ -16,7 +16,7 @@ block topHeaderRight
     - var pmcs = user.pmcs
     - var security = pmcs.includes("security")
     if security        
-       button.fbn.sfe.vgi-put(id="post1") Post to CVE.org        
+       button.fbn.sfe.vgi-put(id="post1" disabled) Post to CVE.org        
 
 block append scripts
     //- purl parser, used by custom/cve5/script.js to derive the legacy
@@ -38,6 +38,16 @@ block prepend loadEditor
         include asfpreload.js        
 
     script 
+        | var updatePostButton = function() {
+        |   var button = document.getElementById('post1');
+        |   if (!button) return;
+        |   var j = (typeof docEditor !== 'undefined' && docEditor && typeof docEditor.getValue === 'function') ? docEditor.getValue() : null;
+        |   var isPublic = !!(j && j.CNA_private && j.CNA_private.state == 'PUBLIC');
+        |   button.disabled = !isPublic;
+        |   button.title = isPublic ? 'Post this CVE to CVE.org' : 'Set the state to PUBLIC before posting to CVE.org';
+        | };
+        | document.addEventListener('change', updatePostButton);
+        | document.addEventListener('input', updatePostButton);
         | var loadEditorWithProducts = async function() {
         |   docSchema.definitions.product.properties.product.examples = await loadProductNames();
         |   loadJSON(initJSON)
@@ -48,6 +58,7 @@ block prepend loadEditor
         | var tabs = document.getElementsByName("tabs");
         | for (var i = 0; i < tabs.length; i++) {
         |   var t = tabs[i];
+        |   t.addEventListener('change', updatePostButton);
         |   if (t.id == "emailTab") {
         |     t.addEventListener('change',async function() {
         |         var j = docEditor.getValue();
