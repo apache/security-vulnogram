@@ -187,11 +187,13 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }        
-        |         var jmt = "To: "+emailto+"\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
+        |         var reporterBcc = (j.CNA_private.reporter || "").split(",").map(function(a) { return a.trim(); }).filter(function(a) { return a; }).join(",")
+        |         var jmt = "To: "+emailto+"\n"+(reporterBcc ? "Bcc: "+reporterBcc+"\n" : "")+"Reply-To: "+replyto+"\nSubject: "+subject+"\n\n"
         |         document.getElementById("outemail").innerHTML = "<pre>"+jmt+mt.replace(/</g, '&lt;').replace(/>/g,'&gt;')+"</pre>\n"
         |         document.getElementById("emailtext").value = mt
         |         document.getElementById("emailsubject").value = subject
         |         document.getElementById("emailreplyto").value = replyto
+        |         document.getElementById("emailbcc").value = reporterBcc
         |         document.getElementById("emailto1").value = emailto
         |         emailto = "announce@apache.org, "+projectannounce
         |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
@@ -257,6 +259,7 @@ block customtabs
                input(type='hidden',name='emailreplyto',id='emailreplyto')
                input(type='hidden',name='emailto1',id='emailto1')
                input(type='hidden',name='emailto2',id='emailto2')               
+               input(type='hidden',name='emailbcc',id='emailbcc')
                button.btn.sfe(disabled='true', type='button', value='Email', id='emailbutton', onclick='var j=mainTabGroup.getValue(); j.CNA_private.emailed="yes";save(undefined, function(){form.submit();});') Send these Emails
                div#emailbuttonnote               
 

@@ -4,6 +4,26 @@ const conf = require('../config/conf');
 // set from: (default security@) to: subject: text 
 
 module.exports = {
+    parseBcc: function (value) {
+        if (typeof value !== 'string') {
+            return [];
+        }
+        var seen = new Set();
+        var out = [];
+        for (var address of value.split(',')) {
+            address = address.trim();
+            if (!/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(address)) {
+                continue;
+            }
+            var key = address.toLowerCase();
+            if (seen.has(key)) {
+                continue;
+            }
+            seen.add(key);
+            out.push(address);
+        }
+        return out;
+    },
     sendemail: async function (mailinfo)  {
 	let transporter = nodemailer.createTransport({
 	    sendmail: true,
