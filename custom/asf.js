@@ -439,7 +439,7 @@ var self = module.exports = {
             if (newDoc.body.CVE_data_meta) { // CVE 4.0
 	        if (newDoc.body.CVE_data_meta.STATE != oldDoc.body.CVE_data_meta.STATE) {
 		    console.log("asf4 changed state "+newDoc.body.CVE_data_meta.STATE);
-		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CVE_data_meta.STATE) ||
+		    if (["REVIEW","READY","PUBLIC","REJECTED"].includes(newDoc.body.CVE_data_meta.STATE) ||
                         (newDoc.body.CVE_data_meta.STATE == "DRAFT" && oldDoc.body.CVE_data_meta.SATE == "REVIEW" )) {
 		        url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
@@ -452,7 +452,7 @@ var self = module.exports = {
             if (newDoc.body.CNA_private && newDoc.body.CNA_private.state) { // CVE 5.0
 	        if (newDoc.body.CNA_private.state != oldDoc.body.CNA_private.state) {
 		    console.log("asf4 changed state "+newDoc.body.CNA_private.state);
-		    if (["REVIEW","READY","PUBLIC"].includes(newDoc.body.CNA_private.state) ||
+		    if (["REVIEW","READY","PUBLIC","REJECTED"].includes(newDoc.body.CNA_private.state) ||
                         (newDoc.body.CNA_private.state == "DRAFT" && oldDoc.body.CNA_private.state == "REVIEW" )) {
 		        url = "https://cveprocess.apache.org/cve5/"+newDoc.body.cveMetadata.cveId;  // hacky
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
