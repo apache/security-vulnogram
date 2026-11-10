@@ -129,3 +129,5 @@ assert.equal(cve5Schema.properties.containers.properties.cna.properties.problemT
     'editor problemTypes must keep one row')
 assert.equal(cve5Schema.definitions.cnaPublishedContainer.properties.problemTypes.minItems, 1,
     'published container problemTypes must keep one row')
+assert.deepEqual(cve5Schema.properties.containers.properties.cna.properties.metrics.items.oneOf[0].required, ['other'],
+    'the add metric button should offer the ASF severity rating first')
