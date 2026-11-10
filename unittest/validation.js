@@ -129,3 +129,5 @@ assert.equal(cve5Schema.properties.containers.properties.cna.properties.problemT
     'editor problemTypes must keep one row')
 assert.equal(cve5Schema.definitions.cnaPublishedContainer.properties.problemTypes.minItems, 1,
     'published container problemTypes must keep one row')
+assert(cve5Schema.properties.CNA_private.properties.reporter,
+    'the editor should show the reporter field')

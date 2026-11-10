@@ -127,6 +127,15 @@ module.exports = {
                             "format": "uri"
                         }
                     },
+                    "reporter": {
+                        "title": "Reporter email address(es) to bcc on the notification email, if known. Separate multiple addresses with commas.",
+                        "type": "string",
+                        "options": {
+                            "inputAttributes": {
+                                "placeholder": "e.g. reporter@example.org, security-team@example.org"
+                            }
+                        }
+                    },
                     "state": {
                         "title": "State. Use DRAFT when you are working on the advisory. Move to READY when you want this published live and it will notify ASF Security. Set to REVIEW if you would like any help from ASF Security reviewing this entry.",
                         "enum": [

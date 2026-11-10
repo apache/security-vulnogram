@@ -98,6 +98,7 @@ protected.get('/', csrfProtection, function (req, res) {
         pmc: pmc,
         messageid: req.query.messageid || "",
         listid: req.query.listid || "",
+        reporter: req.query.reporter || "",
         csrfToken: req.csrfToken()
     });
 });
@@ -240,6 +241,9 @@ protected.post('/', async function(req,res) {
                         newdoc.CNA_private.internal_references = [
                             "https://lists.apache.org/thread/" + req.body.messageid + "?<" + req.body.listid + ">"
                         ];
+                    }
+                    if (req.body.reporter && req.body.reporter.trim()) {
+                        newdoc.CNA_private.reporter = req.body.reporter.trim();
                     }
 
                     try {

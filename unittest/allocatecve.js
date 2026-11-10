@@ -17,7 +17,8 @@ const handler = layer.route.stack[layer.route.stack.length - 1].handle
 
 function post(body, { bearer = true, insertFails = false, pmcs = ['airflow'] } = {}) {
   return new Promise((resolve) => {
-    const out = { status: 200, json: undefined, html: '' }
+    const inserted = []
+    const out = { status: 200, json: undefined, html: '', inserted: inserted }
     const req = {
       body,
       headers: bearer ? { authorization: 'Bearer token' } : {},
@@ -26,7 +27,11 @@ function post(body, { bearer = true, insertFails = false, pmcs = ['airflow'] } =
       flash () {}
     }
     const res = {
-      locals: { docs: { cve5: { Document: { insertOne: async () => { if (insertFails) throw new Error('db down') } } } } },
+      locals: { docs: { cve5: { Document: { insertOne: async (entry) => {
+        if (insertFails) throw new Error('db down')
+        inserted.push(entry)
+        return { insertedId: 'doc-id' }
+      } } } } },
       status (code) { out.status = code; return this },
       json (j) { out.json = j; resolve(out); return this },
       write (h) { out.html += h },
@@ -45,6 +50,12 @@ const CVE_RE = /^CVE-\d{4}-\d{4,}$/
   assert.equal(r.status, 200)
   assert.equal(r.json.cve_ids.length, 1)
   assert.match(r.json.cve_ids[0], CVE_RE)
+
+  // Reporter addresses are stored for the notification email Bcc.
+  r = await post({ pmc: 'airflow', cvetitle: 'title', reporter: ' reporter@example.org, security-team@example.org ' })
+  assert.equal(r.inserted[0].body.CNA_private.reporter, 'reporter@example.org, security-team@example.org')
+  r = await post({ pmc: 'airflow', cvetitle: 'title', reporter: '   ' })
+  assert.equal(r.inserted[0].body.CNA_private.reporter, undefined)
 
   // Blank title: 400, not an HTML page.
   r = await post({ pmc: 'airflow', cvetitle: '' })
