@@ -110,6 +110,24 @@ reduceJSON: function (cve) {
             }
         });
     }
+    // Project defect ids become issue-tracking references in the published record.
+    var source = c.containers && c.containers.cna && c.containers.cna.source;
+    if (source && Array.isArray(source.defect)) {
+        var references = c.containers.cna.references = c.containers.cna.references || [];
+        source.defect.forEach(function (defect) {
+            var id = typeof defect === 'string' ? defect.trim() : "";
+            if (!id) {
+                return;
+            }
+            var url = "https://issues.apache.org/jira/browse/" + id;
+            var exists = references.some(function (reference) {
+                return reference && reference.url === url;
+            });
+            if (!exists) {
+                references.push({ url: url, tags: ["issue-tracking"] });
+            }
+        });
+    }
     // END ASF
     return(c);
 },
