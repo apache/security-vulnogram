@@ -565,6 +565,9 @@ module.exports = {
                 if (value && value.containers && value.containers.cna && value.containers.cna.affected) {
                     for (let i = 0; i < value.containers.cna.affected.length; i++) {
                         const affected = value.containers.cna.affected[i]
+                        if (affected.product && /incubat(or|ion|ing)/i.test(affected.product)) {
+                            errors.push({path: "root.containers.cna.affected." + i + ".product", property: 'format', message: 'Do not include incubator status in the product name: use the name the project will keep after graduation'})
+                        }
                         if (affected.collectionURL && affected.collectionURL.includes("maven")) {
                             if (!affected.packageName || !affected.packageName.includes(":")) {
                                 errors.push({path: "root.containers.cna.affected." + i + ".packageName", property: 'format', message: "Specify the package name in the format 'groupId:artifactId'"})
