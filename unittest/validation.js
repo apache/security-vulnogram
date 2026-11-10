@@ -7,6 +7,18 @@ assert.deepEqual(customValidators(undefined, "user@pulsar.apache.org", "root.CNA
 assert(customValidators(undefined, "security@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 assert(customValidators(undefined, "private@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 
+// Product names should not carry incubator status.
+const productNameErrors = (product) => customValidators(undefined, {
+    containers: { cna: { affected: [{ product: product }] } }
+}, 'root').filter(e => e.path === 'root.containers.cna.affected.0.product')
+
+assert.deepEqual(productNameErrors('Apache Commons Lang'), [])
+assert.deepEqual(productNameErrors('Apache Foo Service'), [])
+assert(productNameErrors('Apache Foo (incubating)')[0].message.includes('incubator status'))
+assert(productNameErrors('Apache Incubator Foo')[0].message.includes('incubator status'))
+assert(productNameErrors('Apache Foo incubation')[0].message.includes('incubator status'))
+assert(productNameErrors('apache foo INCUBATOR')[0].message.includes('incubator status'))
+
 // The 'pE' (product entry) validator reports a stored record whose legacy
 // identifiers disagree with its Package URL. In the browser the derivation
 // helper is a global from default/cve5/script.js; mock its dependencies the
