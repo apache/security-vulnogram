@@ -10,7 +10,6 @@
 //
 
 const { v4: uuidv4 } = require('uuid');
-const request = require('request');
 const express = require('express');
 const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
@@ -96,21 +95,21 @@ function asflogin (req, res) {
             return;
         }
         console.log(conf.oauth_token_endpoint)
-        request.post(conf.oauth_token_endpoint, {
-            'auth': {
-                'user': conf.oauth_client_id,
-                'pass': conf.oauth_client_secret,
-                'sendImmediately': true
-             },
-             'form': {
-                 'grant_type': "authorization_code",
-                 'redirect_uri': our_endpoint,
-                 'code': req.query.code
-             },
-             'json': true
-        }, (err, cbres, body) => {
-            if (err) {res.send("Failed to exchange token:" + err);return;}
-            if (cbres.statusCode != 200) {res.send(`Response code ${cbres.statusCode} while exchanging token, response body: ${body}`);return;}
+        fetch(conf.oauth_token_endpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(conf.oauth_client_id + ':' + conf.oauth_client_secret).toString('base64'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/json'
+            },
+            body: new URLSearchParams({
+                'grant_type': "authorization_code",
+                'redirect_uri': our_endpoint,
+                'code': req.query.code
+            })
+        }).then(async (tokenResponse) => {
+            const body = await tokenResponse.json().catch(() => ({}));
+            if (!tokenResponse.ok) {res.send(`Response code ${tokenResponse.status} while exchanging token, response body: ${JSON.stringify(body)}`);return;}
             const id_token = body.id_token
             const id = JSON.parse(Buffer.from(id_token.split(".")[1], 'base64url'))
             // We trust the TLS connection to the auth server for now,
@@ -157,6 +156,8 @@ function asflogin (req, res) {
                 res.redirect("/");
             }
             console.log(id);
+        }).catch((err) => {
+            res.send("Failed to exchange token:" + err);
         })
     } else {
         delete sess.user;
@@ -484,34 +485,33 @@ var self = module.exports = {
     getemaillistforpmc: function(pmc, cb) {
         var pmcfull = pmc+".apache.org"
         var listname = "dev@"+pmcfull;
-        try {
-	    request('https://lists.apache.org/api/preferences.lua', {json:true},(err,cbres,body) => {
-	        if (err) {console.log(err);}
-	        else if (cbres.statusCode != 200) {console.log(cbres); }
-                else {
-                    if (body.lists && body.lists[pmcfull]) {
-                        if (body.lists[pmcfull]["announce"]) {
-                            listname = "announce@"+pmcfull;
-                        } else if (body.lists[pmcfull]["announcements"]) {
-                            listname = "announcements@"+pmcfull;
-                        } else if (body.lists[pmcfull]["general"]) {
-                            listname = "general@"+pmcfull;
-                        } else if (body.lists[pmcfull]["users"]) {
-                            listname = "users@"+pmcfull;
-                        } else if (body.lists[pmcfull]["user"]) {
-                            listname = "user@"+pmcfull;
-                        } else if (body.lists[pmcfull]["discuss"]) {
-                            listname = "discuss@"+pmcfull;
-                        } else if (body.lists[pmcfull]["dev"]) {
-                            listname = "dev@"+pmcfull;
-                        }
+        fetch("https://lists.apache.org/api/preferences.lua", { headers: { "Accept": "application/json" } })
+            .then(async (response) => {
+                if (response.status != 200) { console.log(response); return; }
+                const body = await response.json();
+                if (body.lists && body.lists[pmcfull]) {
+                    if (body.lists[pmcfull]["announce"]) {
+                        listname = "announce@"+pmcfull;
+                    } else if (body.lists[pmcfull]["announcements"]) {
+                        listname = "announcements@"+pmcfull;
+                    } else if (body.lists[pmcfull]["general"]) {
+                        listname = "general@"+pmcfull;
+                    } else if (body.lists[pmcfull]["users"]) {
+                        listname = "users@"+pmcfull;
+                    } else if (body.lists[pmcfull]["user"]) {
+                        listname = "user@"+pmcfull;
+                    } else if (body.lists[pmcfull]["discuss"]) {
+                        listname = "discuss@"+pmcfull;
+                    } else if (body.lists[pmcfull]["dev"]) {
+                        listname = "dev@"+pmcfull;
                     }
                 }
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => {
                 cb(listname);
-            });           
-        } catch (error) {
-            console.log(error);
-            cb(listname);
-        }    
+            });
     }
 }

@@ -2,7 +2,6 @@ const express = require('express');
 const protected = express.Router();
 const conf = require('../config/conf');
 const csurf = require('csurf');
-var request = require('request');
 const email = require('./email.js');
 const asf =  require('../custom/asf.js');
 var csrfProtection = csurf();
@@ -47,25 +46,14 @@ function getCveIdState(cveid, cb) {
         cb("RESERVED");
         return;
     }
-    var opt = {
-        'method' : 'GET',
-        'url': conf.cveapiurl+'/cve-id/'+ cveid,
-        'json': true,
-        'headers': conf.cveapiheaders,
-    };
-    try {
-        request(opt, (error, response, body) => {
-            if (error) {
-                console.warn(error);
-                cb("");
-            } else {
-                cb(body.state);
-            }
+    var url = conf.cveapiurl+'/cve-id/'+ cveid;
+    fetch(url, { headers: conf.cveapiheaders })
+        .then((response) => response.json())
+        .then((body) => cb(body.state))
+        .catch((error) => {
+            console.warn(error);
+            cb("");
         });
-    } catch (error) {
-        console.warn(error);
-        cb("");
-    }
 }
 
 function publishCve(cveid, isupdate, container, cb) {
@@ -76,21 +64,19 @@ function publishCve(cveid, isupdate, container, cb) {
         cb();
         return;
     }
-    var opt = {
-        'method' : 'POST',
-        'url': conf.cveapiurl+'/cve/'+ cveid +"/cna",
-        'json': {"cnaContainer": container},
-        'headers': conf.cveapiheaders,
-    };
-    if (isupdate) {
-        opt['method'] = "PUT";
-    }
-    try {
-        request(opt, (error, response, body) => {
-            if (error) {
-                console.warn(error);
-                cb(error);
-            } else if (body.error) {
+    var url = conf.cveapiurl+'/cve/'+ cveid +"/cna";
+    var headers = Object.assign({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }, conf.cveapiheaders);
+    fetch(url, {
+        method: isupdate ? "PUT" : "POST",
+        headers: headers,
+        body: JSON.stringify({"cnaContainer": container})
+    })
+        .then((response) => response.json())
+        .then((body) => {
+            if (body.error) {
                 console.warn(body.error);
                 console.warn(body.message);
                 console.warn(body.details);
@@ -99,11 +85,11 @@ function publishCve(cveid, isupdate, container, cb) {
                 console.log(body.message);
                 cb();
             }
+        })
+        .catch((error) => {
+            console.warn(error);
+            cb(error);
         });
-    } catch (error) {
-        console.warn(error);
-        cb(error);
-    }
 }
 
 protected.post('/', csrfProtection, async function(req,res) {
