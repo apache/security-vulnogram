@@ -27,6 +27,18 @@ block loadEditorloadJSON
 
 block append loadEditor
     script
+        | var attachTimelineDefault = function() {
+        |   docEditor.on('addRow', setDefaultTimelineTime);
+        | };
+        | var loadJSONWithTimelineDefault = loadJSON;
+        | loadJSON = function() {
+        |   var result = loadJSONWithTimelineDefault.apply(this, arguments);
+        |   if (typeof docEditor !== 'undefined' && docEditor) {
+        |     docEditor.on('ready', attachTimelineDefault);
+        |   }
+        |   return result;
+        | };
+    script
         | if (!userPMCS.split(',').includes('security')) {
         |   selected = "aboutTab";
         |   document.getElementById(selected).checked = true;
