@@ -133,26 +133,13 @@ module.exports = {
     publicDefectURL: '',
 
     // ACE editor
-    ace: 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.js',
-    aceHash: "sha512-OMjy8oWtPbx9rJmoprdaQdS2rRovgTetHjiBf7RL7LvRSouoMLks5aIcgqHb6vGEAduuPdBTDCoztxLR+nv45g==",
-    // if you want this served locally, download ace editor to /public/js/ directory and point to that:
-    //ace: '/js/ace.js',
-    //aceHash: "sha512-GoORoNnxst42zE3rYPj4bNBm0Q6ZRXKNH2D9nEmNvVF/z24ywVnijAWVi/09iBiVDQVf3UlZHpzhAJIdd9BXqw==",
+    ace: '/js/ace.js',
+    aceHash: "sha512-GZ1RIgZaSc8rnco/8CXfRdCpDxRCphenIiZ2ztLy3XQfCbQUSCuk8IudvNHxkRA3oUg6q0qejgN/qqyG1duv5Q==",
 
 
     // JSON Editor
-    //jsoneditor: 'https://cdnjs.cloudflare.com/ajax/libs/json-editor/2.15.2/jsoneditor.js',
-    jsoneditorHash: 'sha512-Odi69X/i28s3GR3ZQyE+g4ieU30AMOovH50wJbehVMWxVChGa1KCUzyvOXkHfYr/2AQizFRNWI1R6oifT16ouQ==',
-    // if you want this served locally, download above jsoneditor editor to /public/js/ directory and point to that:
     jsoneditor: '/js/jsoneditor.min.js',
-
-    // ajv - JSON schema draft-07 validation
-    // NOTE -- including ajv is experimental and can be excluded if desired by commenting out the next two lines
-    ajv: 'https://cdnjs.cloudflare.com/ajax/libs/ajv/8.12.0/ajv7.min.js',
-    ajvHash: 'sha512-U2SW9Ihh3GF6F8gP8QgLS+I244xnM5pFCh3cigpw7bAzUDnKDlxdlFL4kjyXTle8SJl/tJ0gdnwd44Eb3hLG/Q==',
-    // if you want this served locally, download above ajv to /public/js/ directory and point to that:
-    //ajv: '/js/ajv7.min.js',
-    //ajvHash: 'sha512-U2SW9Ihh3GF6F8gP8QgLS+I244xnM5pFCh3cigpw7bAzUDnKDlxdlFL4kjyXTle8SJl/tJ0gdnwd44Eb3hLG/Q==',
+    jsoneditorHash: 'sha512-Odi69X/i28s3GR3ZQyE+g4ieU30AMOovH50wJbehVMWxVChGa1KCUzyvOXkHfYr/2AQizFRNWI1R6oifT16ouQ==',
 
     usernameRegex: '[a-zA-Z0-9]{3,}',
     sections: [
