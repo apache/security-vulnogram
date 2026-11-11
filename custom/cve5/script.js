@@ -146,9 +146,22 @@ function isGitboxRepo(repo) {
         /^\/repos\/asf\/[^\/]+\.git$/.test(url.pathname);
 }
 
+function setDefaultTimelineTime(row, now) {
+    if (!row || !row.parent || row.parent.path !== 'root.containers.cna.timeline') {
+        return false;
+    }
+    var time = row.getEditor(row.path + '.time');
+    if (!time || time.getValue()) {
+        return false;
+    }
+    time.setValue((now || new Date()).toISOString());
+    return true;
+}
+
 if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
+    exports.setDefaultTimelineTime = setDefaultTimelineTime;
 }
