@@ -4,7 +4,6 @@ npm-debug.log
 .env
 .vscode
 .jshintrc
-package-lock.json
 *.swp
 ignore
 tmp

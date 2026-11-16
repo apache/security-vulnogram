@@ -20,7 +20,7 @@ Vulnogram app on the host.
 1. Install Node dependencies:
 
    ```shell
-   npm install
+   npm ci
    ```
 
 2. Copy `example-asf.env` to `.env`, then open `.env` and uncomment the

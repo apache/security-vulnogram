@@ -22,9 +22,7 @@ jobs:
       uses: actions/setup-node@v7
 
     - name: Install dependencies
-      # we don't pin dependencies yet,
-      # https://github.com/apache/security-vulnogram/issues/184
-      run: npm install
+      run: npm ci
 
     - name: Set dummy secrets
       run: |-
