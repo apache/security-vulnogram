@@ -18,6 +18,18 @@ window = {}
 global.parsePurl = require('../custom/cve5/script.js').parsePurl
 global.purlToLegacyIdentifiers = require('../custom/cve5/script.js').purlToLegacyIdentifiers
 global.isGitboxRepo = require('../custom/cve5/script.js').isGitboxRepo
+global.titleNamesProduct = require('../custom/cve5/script.js').titleNamesProduct
+
+// The root validator warns about a title that names the product,
+// which is prepended on publication.
+const titleWarnings = (title) => customValidators(undefined, {
+  containers: { cna: { title: title, affected: [{ product: 'Apache Example' }] } }
+}, 'root').filter(e => e.path === 'root.containers.cna.title')
+assert.equal(titleWarnings('Apache Example: Something').length, 1)
+assert.equal(titleWarnings('Something in Apache Other').length, 1, 'any Apache word counts')
+assert.equal(titleWarnings('A very long title that only mentions late the Apache word').length, 1, 'the whole title counts')
+assert.equal(titleWarnings('Something in Example').length, 0, 'only the Apache word counts')
+assert.equal(titleWarnings('Connection leak in ApacheHttpClient.execute()').length, 0, 'an identifier is not the product')
 
 // The purl checks now live in the ASF validator, not the default one.
 const productValidator = require('../custom/cve5/conf.js').validators[1]

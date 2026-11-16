@@ -74,7 +74,7 @@ block prepend loadEditor
         |         }
         |         var subject = j.cveMetadata.cveId+": "
         |         if (j.containers.cna.title) {
-        |            if (!(j.containers.cna.title.substring(0,40).includes("Apache"))) {
+        |            if (!titleNamesProduct(j.containers.cna.title)) {
         |               subject = subject + getProductListNoVendor(j) + ": "
         |            }
         |            subject = subject + j.containers.cna.title + " "

@@ -9,10 +9,11 @@ var csrfProtection = csurf();
 var textUtil = require('../src/js/edit/util.js');
 
 // textUtil.reduceJSON derives the legacy package identifiers from packageURL and
-// prefixes the title with the product names; both helpers are browser globals.
+// prefixes the title with the product names; these helpers are browser globals.
 const cve5Script = require('../custom/cve5/script.js');
 global.purlToLegacyIdentifiers = cve5Script.purlToLegacyIdentifiers;
 global.getProductListNoVendor = cve5Script.getProductListNoVendor;
+global.titleNamesProduct = cve5Script.titleNamesProduct;
 
 // Is the PMC allowed to do a live CVE.org push?
 // Currently only if you are in security group or if you're listed in the config,

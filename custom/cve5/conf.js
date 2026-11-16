@@ -555,12 +555,11 @@ module.exports = {
                         errors.push({path: path, property: 'format', message: 'In state PUBLIC you must include a vendor-advisory reference pointing to your advisory or mailing list post at an apache.org URL'});
                     }
                 }
-                if (value && value.containers && value.containers.cna && value.containers.cna.title && value.containers.cna.affected && value.containers.cna.affected.length > 0 && value.containers.cna.affected[0].product) {
-                    const product = value.containers.cna.affected[0].product.toLowerCase()
-                    const title = value.containers.cna.title.toLowerCase()
-                    if (title.includes(product)) {
-                        errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
-                    }
+                // The product names are prepended to the title on publication,
+                // unless titleNamesProduct (a global from custom/cve5/script.js) finds them already there.
+                if (value && value.containers && value.containers.cna && value.containers.cna.title &&
+                    titleNamesProduct(value.containers.cna.title)) {
+                    errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
                 }
                 if (value && value.containers && value.containers.cna && value.containers.cna.affected) {
                     for (let i = 0; i < value.containers.cna.affected.length; i++) {

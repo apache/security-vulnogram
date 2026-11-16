@@ -129,6 +129,13 @@ function getProductListNoVendor(cve) {
     return lines.join(", ");
 }
 
+// Whether the title already names the product, judged by the word "Apache" anywhere in it.
+// A whole word is required,
+// so that identifiers such as ApacheHttpClient do not count as the product name.
+function titleNamesProduct(title) {
+    return /\bApache\b/.test(title);
+}
+
 // Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
 // The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
 function isGitboxRepo(repo) {
@@ -149,6 +156,7 @@ function isGitboxRepo(repo) {
 if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
+    exports.titleNamesProduct = titleNamesProduct;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }
