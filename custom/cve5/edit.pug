@@ -1,5 +1,10 @@
 extends ../../default/cve5/edit
 
+block append head
+    if !user || !user.pmcs || !user.pmcs.includes("security")
+        style.
+            #remove { display: none; }
+
 block sidebarSections
 
 block topHeaderLeftLoad
