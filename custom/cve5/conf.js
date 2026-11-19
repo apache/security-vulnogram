@@ -214,10 +214,11 @@ module.exports = {
                                 title: "ASF-specific details",
                                 "properties": {
 		                    "defect": {
+                                        "title": "Defects: project tracking issue IDs. Recommended, and added to the CVE record as issue-tracking references.",
                                         "options": {
                                             "grid_columns": 8,
                                             "inputAttributes": {
-			                        "placeholder": "Project specific bug ids e.g. TOMCAT-522 (optional, this is not used for the Mitre entry)"
+			                        "placeholder": "Project specific bug ids e.g. TOMCAT-522 (recommended, added as issue-tracking references)"
                                             }
                                         }
                                     },
