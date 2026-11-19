@@ -86,6 +86,19 @@ block prepend loadEditor
         |                }
         |            }
         |         }
+        |         var tidyEmailText = function(value) {
+        |             return String(value)
+        |                 .replace(/\r\n?/g, "\n")
+        |                 .replace(/[ \t]+/g, " ")
+        |                 .replace(/ *\n */g, "\n")
+        |                 .replace(/\n{3,}/g, "\n\n")
+        |                 .trim()
+        |                 .split("\n\n")
+        |                 .map(function(paragraph) {
+        |                     return paragraph.replace(/\n(?![ \t]*(?:[*+-]|\d+[.)])[ \t])/g, " ")
+        |                 })
+        |                 .join("\n\n")
+        |         }
         |         mt = ""
         |         if (j.containers.cna.metrics) {
         |             var severity = ""
@@ -129,7 +142,7 @@ block prepend loadEditor
         |         }
         |         mt = mt + "\nDescription:\n\n"
         |         for (d of j.containers.cna.descriptions) {
-        |             mt = mt + d.value.trim() + "\n\n"
+        |             mt = mt + tidyEmailText(d.value) + "\n\n"
         |         }
         |         if (j.containers.cna.AKA ) {
         |             mt = mt + "This issue is also known as "+j.CVE_data_meta.AKA +"\n\n"
@@ -143,25 +156,25 @@ block prepend loadEditor
         |         if (j.containers.cna.configurations && j.containers.cna.configurations[0]) {
         |             mt = mt + "Required Configurations:\n\n"
         |             for (d of j.containers.cna.configurations) {
-        |                mt = mt + d.value + "\n\n"
+        |                mt = mt + tidyEmailText(d.value) + "\n\n"
         |             }
         |         }        
         |         if (j.containers.cna.solutions && j.containers.cna.solutions[0] ) {
         |             mt = mt + "Solution:\n\n"
         |             for (d of j.containers.cna.solutions) {
-        |                mt = mt + d.value.trim() + "\n\n"
+        |                mt = mt + tidyEmailText(d.value) + "\n\n"
         |             }
         |         }
         |         if (j.containers.cna.workarounds && j.containers.cna.workarounds[0]) {
         |             mt = mt + "Work Arounds:\n\n"
         |             for (d of j.containers.cna.workarounds) {
-        |                mt = mt + d.value.trim() + "\n\n"
+        |                mt = mt + tidyEmailText(d.value) + "\n\n"
         |             }
         |         }
         |         if (j.containers.cna.credits) {
         |             mt = mt + "Credit:\n\n"
         |             for (d of j.containers.cna.credits) {
-        |                mt = mt + d.value + " ("+d.type+")\n"
+        |                mt = mt + tidyEmailText(d.value) + " ("+d.type+")\n"
         |             }
         |             mt = mt + "\n"
         |         }
@@ -183,7 +196,7 @@ block prepend loadEditor
         |         if (j.containers.cna.timeline && j.containers.cna.timeline[0]) {
         |             mt = mt + "Timeline:\n\n"
         |             for (d of j.containers.cna.timeline) {
-        |                mt = mt + d.time.substring(0,10) + ": " + d.value + "\n"
+        |                mt = mt + d.time.substring(0,10) + ": " + tidyEmailText(d.value) + "\n"
         |             }
         |             mt = mt + "\n"
         |         }        
