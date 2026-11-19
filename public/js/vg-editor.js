@@ -3457,6 +3457,9 @@ JSONEditor.defaults.editors.object = class mystring extends JSONEditor.defaults.
             if(this.options.class) {
                 this.title.className = this.title.className + ' ' + this.options.class;
             }
+            if(this.schema.options && this.schema.options.infoText) {
+                this.title.setAttribute('title', this.schema.options.infoText);
+            }
             if(this.showStar()){
                 this.title.className = this.title.className + ' req'; 
             }    
