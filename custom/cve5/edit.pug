@@ -165,18 +165,46 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }
+        |         var referenceTypeLabel = function(tags) {
+        |             var labels = {
+        |                 "vendor-advisory": "Vendor advisory",
+        |                 "third-party-advisory": "Third-party advisory",
+        |                 "issue-tracking": "Issue tracking",
+        |                 "mailing-list": "Mailing list",
+        |                 "patch": "Patch",
+        |                 "mitigation": "Mitigation",
+        |                 "release-notes": "Release notes",
+        |                 "technical-description": "Technical description",
+        |                 "exploit": "Exploit",
+        |                 "vdb-entry": "VDB entry",
+        |                 "media-coverage": "Media coverage",
+        |                 "government-resource": "Government resource",
+        |                 "permissions-required": "Permissions required",
+        |                 "customer-entitlement": "Customer entitlement",
+        |                 "broken-link": "Broken link",
+        |                 "not-applicable": "Not applicable",
+        |                 "product": "Product",
+        |                 "related": "Related",
+        |                 "signature": "Signature"
+        |             }
+        |             if (!tags || !tags.length) return ""
+        |             for (var t = 0; t < tags.length; t++) {
+        |                 if (labels[tags[t]]) return labels[tags[t]] + ": "
+        |             }
+        |             return ""
+        |         }
         |         if ((j.containers.cna.references && j.containers.cna.references[0]) || projecturl != "" || 1) {
         |             mt = mt + "References:\n\n"
         |             for (d of j.containers.cna.references) {
-        |                mt = mt + d.url + "\n"
+        |                mt = mt + referenceTypeLabel(d.tags) + d.url + "\n"
         |             }
         |             if (projecturl) {
-        |                 mt = mt + projecturl + "\n"
+        |                 mt = mt + "Project homepage: " + projecturl + "\n"
         |             }
-        |             mt = mt + "https://www.cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
+        |             mt = mt + "CVE record: https://www.cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
         |             if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
         |               for (d of j.containers.cna.source.defect)
-        |                 mt = mt + "https://issues.apache.org/jira/browse/"+ d + "\n"
+        |                 mt = mt + "Issue tracking: https://issues.apache.org/jira/browse/"+ d + "\n"
         |             }        
         |             mt = mt + "\n"
         |         }
