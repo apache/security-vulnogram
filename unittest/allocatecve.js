@@ -17,7 +17,9 @@ const handler = layer.route.stack[layer.route.stack.length - 1].handle
 
 function post(body, { bearer = true, insertFails = false, pmcs = ['airflow'] } = {}) {
   return new Promise((resolve) => {
-    const out = { status: 200, json: undefined, html: '' }
+    const history = []
+    const inserted = []
+    const out = { status: 200, json: undefined, html: '', history: history, inserted: inserted }
     const req = {
       body,
       headers: bearer ? { authorization: 'Bearer token' } : {},
@@ -26,7 +28,17 @@ function post(body, { bearer = true, insertFails = false, pmcs = ['airflow'] } =
       flash () {}
     }
     const res = {
-      locals: { docs: { cve5: { Document: { insertOne: async () => { if (insertFails) throw new Error('db down') } } } } },
+      locals: { docs: { cve5: {
+        Document: { insertOne: async (entry) => {
+          if (insertFails) throw new Error('db down')
+          inserted.push(entry)
+          return { insertedId: 'doc-id' }
+        } },
+        History: { insertOne: async (entry) => {
+          history.push(entry)
+          return { insertedId: 'history-id' }
+        } }
+      } } },
       status (code) { out.status = code; return this },
       json (j) { out.json = j; resolve(out); return this },
       write (h) { out.html += h },
@@ -46,6 +58,16 @@ const CVE_RE = /^CVE-\d{4}-\d{4,}$/
   assert.equal(r.json.cve_ids.length, 1)
   assert.match(r.json.cve_ids[0], CVE_RE)
 
+  // The allocation is recorded in the history, with the allocator and title.
+  assert.equal(r.history.length, 1)
+  assert.equal(r.history[0].author, 'alice')
+  assert.equal(r.history[0].__v, 0)
+  assert.equal(r.history[0].body.old_version, -1)
+  const containersPatch = r.history[0].body.patch.find((p) => p.path === '/containers')
+  assert.equal(containersPatch.value.cna.title, 'title')
+  assert.equal(r.inserted[0].__v, 0)
+  assert(r.inserted[0].createdAt instanceof Date)
+
   // Blank title: 400, not an HTML page.
   r = await post({ pmc: 'airflow', cvetitle: '' })
   assert.equal(r.status, 400)
@@ -61,6 +83,7 @@ const CVE_RE = /^CVE-\d{4}-\d{4,}$/
   assert.equal(r.status, 500)
   assert.match(r.json.cve_ids[0], CVE_RE)
   assert.match(r.json.message, /saving the record failed/)
+  assert.equal(r.history.length, 0)
 
   // The browser form still gets HTML links.
   r = await post({ pmc: 'airflow', cvetitle: 'title' }, { bearer: false })

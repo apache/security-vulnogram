@@ -7,6 +7,7 @@ const email = require('./email.js');
 const doc = require('../routes/doc.js');
 const asf =  require('../custom/asf.js');
 const cve5set = require('../models/set')('cve5');
+const jsonpatch = require('json-patch-extended');
 
 // Default severity rating for a freshly reserved record.
 // Needs to be set here because otherwise cveFixForVulnogram()
@@ -244,11 +245,35 @@ protected.post('/', async function(req,res) {
 
                     try {
                         console.log("Saving new doc");
-                        let entry = await Document.insertOne({
+                        const now = new Date();
+                        let entry = {
                             "body": newdoc,
-                            "author": req.user.username
-                        });
-                        console.log("saved",doc);
+                            "author": req.user.username,
+                            "__v": 0,
+                            "createdAt": now,
+                            "updatedAt": now
+                        };
+                        let inserted = await Document.insertOne(entry);
+                        console.log("saved", inserted.insertedId);
+                        const History = res.locals.docs && res.locals.docs.cve5 && res.locals.docs.cve5.History;
+                        if (History) {
+                            try {
+                                await History.insertOne({
+                                    parent_id: inserted.insertedId,
+                                    updatedAt: now,
+                                    author: req.user.username,
+                                    __v: 0,
+                                    body: {
+                                        old_version: -1,
+                                        old_author: req.user.username,
+                                        old_date: now,
+                                        patch: jsonpatch.compare({}, entry.body),
+                                    },
+                                });
+                            } catch (historyErr) {
+                                console.log("Error: saving history " + historyErr);
+                            }
+                        }
                         //res.redirect('/cve/' + cve.slice());
                         //res.write( "<p><a href=\"/cve/"+cve.slice()+"\">"+cve.slice()+"</a>");
                     } catch (err) {
