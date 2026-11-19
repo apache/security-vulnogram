@@ -54,7 +54,7 @@ async function loadProductNames() {
 		    if (pmcs.includes(committee) || pmcs.includes('security')) {
                         if (resp.podling[committee].status && resp.podling[committee].status == "current") {
 			    if (resp.podling[committee].name && !res.committees[committee])
-			        projects.push('Apache ' + resp.podling[committee].name + " (incubating)");
+			        projects.push('Apache ' + resp.podling[committee].name);
                         }
 		    }
                 }
