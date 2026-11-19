@@ -102,6 +102,7 @@ assert(purl.parsePurl('pkg:maven/g/a') !== null,
 // It is the only place they are produced: the CVE-JSON tab and
 // customRoutes/publishcve.js both go through it.
 global.getProductListNoVendor = require('../custom/cve5/script.js').getProductListNoVendor
+global.titleNamesProduct = require('../custom/cve5/script.js').titleNamesProduct
 
 const serialise = (affected) => textUtil.reduceJSON({
   cveMetadata: { cveId: 'CVE-2024-0001' },
@@ -151,3 +152,21 @@ const multi = textUtil.reduceJSON({
   containers: { cna: { title: 'Something', affected: [{ product: 'Alpha' }, { product: 'Beta' }, { product: 'Alpha' }] } }
 })
 assert(multi.containers.cna.title === 'Alpha, Beta: Something')
+
+// A title that starts with the product name is left alone.
+const named = textUtil.reduceJSON({
+  containers: { cna: { title: 'Apache Alpha: Something', affected: [{ product: 'Apache Alpha' }] } }
+})
+assert(named.containers.cna.title === 'Apache Alpha: Something')
+
+// The word "Apache" counts anywhere in the title.
+const late = textUtil.reduceJSON({
+  containers: { cna: { title: 'A very long title that only mentions late the Apache word', affected: [{ product: 'Apache Alpha' }] } }
+})
+assert(late.containers.cna.title === 'A very long title that only mentions late the Apache word')
+
+// "Apache" inside an identifier is not the product name.
+const identifier = textUtil.reduceJSON({
+  containers: { cna: { title: 'Connection leak in ApacheHttpClient.execute()', affected: [{ product: 'Apache Example' }] } }
+})
+assert(identifier.containers.cna.title === 'Apache Example: Connection leak in ApacheHttpClient.execute()')
