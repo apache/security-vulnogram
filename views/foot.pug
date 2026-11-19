@@ -23,4 +23,8 @@ center.pad
         = conf.orgName
         |  
         = conf.groupName
-        block logolink
+    if conf.sourceURL
+        br
+        small
+            a.tgrey(href=conf.sourceURL, target='_blank') Source code
+    block logolink
