@@ -1446,9 +1446,9 @@ function cvePublishErrorMessage(e) {
     }
 }
 
-function cveAlert(title, message, timer) {
+function cveAlert(title, message, timer, kind) {
     if (typeof showAlert === 'function') {
-        showAlert(title, message, timer);
+        showAlert(title, message, timer, undefined, kind);
         return;
     }
     var text = message ? (title + ': ' + message) : title;
@@ -2437,7 +2437,7 @@ async function cvePost() {
                 var countdownSecs = 5;
                 // ASF
                 //cveAlert("CVE Record is Published", publishMessage + "\nOpening CVE record in " + countdownSecs + " seconds...", 10000);
-                cveAlert("CVE Record is Published", publishMessage);
+                cveAlert("CVE Record is Published", publishMessage, undefined, "success");
                 /*
                 var smallAlertEl = document.getElementById('smallAlert');
                 var countdownInterval = setInterval(function () {
