@@ -2,7 +2,6 @@ const express = require('express');
 const protected = express.Router();
 const conf = require('../config/conf');
 const csurf = require('csurf');
-var request = require('request');
 const email = require('./email.js');
 const doc = require('../routes/doc.js');
 const asf =  require('../custom/asf.js');
@@ -281,13 +280,16 @@ protected.post('/', async function(req,res) {
         // Skip the HTTP round trip; fabricate a CVE Services response locally.
         await handleCveResponse(null, undefined, makeFakeCveResponse());
     } else {
-        const opt = {
-            'method': 'POST',
-            'url': conf.cveapiurl+'/cve-id?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential',
-            'json': true,
-            'headers': conf.cveapiheaders,
-        };
-        await request(opt, handleCveResponse);
+        try {
+            const response = await fetch(conf.cveapiurl+'/cve-id?amount='+req.body.number+'&cve_year='+req.body.year+'&short_name='+conf.cveapishortname+'&batch_type=sequential', {
+                method: 'POST',
+                headers: Object.assign({'Accept': 'application/json'}, conf.cveapiheaders)
+            });
+            const body = await response.json();
+            await handleCveResponse(null, response, body);
+        } catch (error) {
+            await handleCveResponse(error);
+        }
     }
 });
 

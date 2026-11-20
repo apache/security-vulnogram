@@ -43,4 +43,28 @@ for (const section of ['cve', 'cve5', 'cvss4', 'nvd']) {
     }
 }
 
-console.log('asfacl: all tests passed')
+const emailList = (pmc) => new Promise((resolve) => asf.getemaillistforpmc(pmc, resolve))
+const withFetch = async (impl, fn) => {
+    const original = global.fetch
+    global.fetch = impl
+    try { return await fn() } finally { global.fetch = original }
+}
+
+;(async () => {
+    // The PMC mailing list lookup falls back to dev@ unless the API names a
+    // better list, and it always calls back exactly once.
+    assert.equal(await withFetch(
+        async () => ({ status: 200, json: async () => ({ lists: { 'airflow.apache.org': { announce: true } } }) }),
+        () => emailList('airflow')), 'announce@airflow.apache.org')
+    assert.equal(await withFetch(
+        async () => ({ status: 200, json: async () => ({ lists: {} }) }),
+        () => emailList('airflow')), 'dev@airflow.apache.org')
+    assert.equal(await withFetch(
+        async () => ({ status: 500, json: async () => ({}) }),
+        () => emailList('airflow')), 'dev@airflow.apache.org')
+    assert.equal(await withFetch(
+        async () => { throw new Error('offline') },
+        () => emailList('airflow')), 'dev@airflow.apache.org')
+
+    console.log('asfacl: all tests passed')
+})().catch((err) => { console.error(err); process.exit(1) })
