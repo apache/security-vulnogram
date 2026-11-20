@@ -39,6 +39,12 @@ block prepend loadEditor
 
     script 
         | var loadEditorWithProducts = async function() {
+        |   var advisory = docSchema.properties.containers.properties.cna.properties.source.properties.advisory;
+        |   var owner = (initJSON && initJSON.CNA_private && initJSON.CNA_private.owner) || (typeof csCache !== 'undefined' && csCache.org);
+        |   if (!showAdvisoryField(owner)) {
+        |     advisory.options = advisory.options || {};
+        |     advisory.options.hidden = true;
+        |   }
         |   docSchema.definitions.product.properties.product.examples = await loadProductNames();
         |   loadJSON(initJSON)
         | };
