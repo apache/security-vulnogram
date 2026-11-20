@@ -16,6 +16,13 @@ const conf = require('../config/conf');
 const email = require('../customRoutes/email.js');
 const docModel = require('../models/doc');
 const tokenauthorize = require('./tokenauthorize.js');
+var textUtil = require('../src/js/edit/util.js');
+
+// textUtil.reduceJSON derives the legacy package identifiers from packageURL and
+// prefixes the title with the product names; both helpers are browser globals.
+const cve5Script = require('./cve5/script.js');
+global.purlToLegacyIdentifiers = cve5Script.purlToLegacyIdentifiers;
+global.getProductListNoVendor = cve5Script.getProductListNoVendor;
 
 async function asfemaillists (req, res) {
     var emaillist = await new Promise( xres => { self.getemaillistforpmc(req.query.pmc, xres)});    
@@ -63,7 +70,7 @@ async function asfpublicjson(req, res) {
         "body.cveMetadata.cveId": ids[0]
     });
     if (cve5doc?.body?.CNA_private?.state === "PUBLIC") {
-        return res.json(cve5doc.body);
+        return res.json(textUtil.reduceJSON(cve5doc.body));
     }
 
     let Document4 = docModel('cves');
@@ -71,7 +78,7 @@ async function asfpublicjson(req, res) {
         "body.CVE_data_meta.ID": ids[0]
     });
     if (cve4doc?.body?.CVE_data_meta?.STATE === "PUBLIC") {
-        return res.json(cve4doc.body);
+        return res.json(textUtil.reduceJSON(cve4doc.body));
     }
 
     return res.json(nodoc)
@@ -274,6 +281,8 @@ var self = module.exports = {
             next();
         });
     },
+
+    asfpublicjson: asfpublicjson,
 
     asfroutes: function (ensureAuthenticated, app) {
         app.get("/users/login", asflogin); // replaces existing
