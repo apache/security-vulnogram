@@ -136,6 +136,190 @@ function titleNamesProduct(title) {
     return /\bApache\b/.test(title);
 }
 
+function releaseCatalogProject(affected) {
+    if (!affected || typeof affected.packageURL !== 'string') {
+        return '';
+    }
+    var match = /^pkg:software-id\/apache\.org\/([a-z0-9][a-z0-9-]*)(?:@[^/]*)?$/.exec(affected.packageURL.trim());
+    return match ? match[1] : '';
+}
+
+function getReleaseCatalogProjects(cve) {
+    var projects = [];
+    var affected = cve && cve.containers && cve.containers.cna && cve.containers.cna.affected;
+    if (!Array.isArray(affected)) {
+        return projects;
+    }
+    for (var product of affected) {
+        var project = releaseCatalogProject(product);
+        if (project && !projects.includes(project)) {
+            projects.push(project);
+        }
+    }
+    return projects;
+}
+
+function parseComparableVersion(version) {
+    version = String(version);
+    if (version === '*') {
+        return { parts: [Infinity, Infinity, Infinity], prerelease: [] };
+    }
+    if (version === '0') {
+        return { parts: [0, 0, 0], prerelease: [] };
+    }
+    var match = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(version);
+    if (!match) {
+        return null;
+    }
+    return {
+        parts: [Number(match[1]), Number(match[2]), Number(match[3])],
+        prerelease: match[4] ? match[4].split('.') : []
+    };
+}
+
+function comparePrerelease(left, right) {
+    if (left.length === 0 && right.length === 0) {
+        return 0;
+    }
+    if (left.length === 0) {
+        return 1;
+    }
+    if (right.length === 0) {
+        return -1;
+    }
+    var length = Math.min(left.length, right.length);
+    for (var i = 0; i < length; i++) {
+        var leftNumber = /^\d+$/.test(left[i]) ? Number(left[i]) : null;
+        var rightNumber = /^\d+$/.test(right[i]) ? Number(right[i]) : null;
+        if (leftNumber !== null && rightNumber !== null) {
+            if (leftNumber !== rightNumber) {
+                return leftNumber < rightNumber ? -1 : 1;
+            }
+        } else if (leftNumber !== null) {
+            return -1;
+        } else if (rightNumber !== null) {
+            return 1;
+        } else if (left[i] !== right[i]) {
+            return left[i] < right[i] ? -1 : 1;
+        }
+    }
+    if (left.length === right.length) {
+        return 0;
+    }
+    return left.length < right.length ? -1 : 1;
+}
+
+function compareVersions(left, right) {
+    var a = parseComparableVersion(left);
+    var b = parseComparableVersion(right);
+    if (!a || !b) {
+        return null;
+    }
+    for (var i = 0; i < 3; i++) {
+        if (a.parts[i] !== b.parts[i]) {
+            return a.parts[i] < b.parts[i] ? -1 : 1;
+        }
+    }
+    return comparePrerelease(a.prerelease, b.prerelease);
+}
+
+function versionEntryStatus(entry, latest) {
+    if (!entry || typeof entry.version !== 'string') {
+        return null;
+    }
+    var isRange = entry.lessThan !== undefined || entry.lessThanOrEqual !== undefined;
+    if (isRange && entry.versionType !== 'semver') {
+        return null;
+    }
+    var matches;
+    if (!isRange) {
+        matches = entry.versionType === 'semver'
+            ? compareVersions(entry.version, latest) === 0
+            : entry.version === latest;
+    } else {
+        var start = compareVersions(entry.version, latest);
+        if (start === null) {
+            return null;
+        }
+        if (entry.lessThan !== undefined) {
+            var end = compareVersions(latest, entry.lessThan);
+            matches = end !== null && start <= 0 && end < 0;
+        } else {
+            var endInclusive = compareVersions(latest, entry.lessThanOrEqual);
+            matches = endInclusive !== null && start <= 0 && endInclusive <= 0;
+        }
+    }
+    if (!matches) {
+        return null;
+    }
+    var status = entry.status;
+    if (Array.isArray(entry.changes)) {
+        for (var change of entry.changes) {
+            if (change && typeof change.at === 'string' && change.status) {
+                var at = compareVersions(latest, change.at);
+                if (at !== null && at >= 0) {
+                    status = change.status;
+                }
+            }
+        }
+    }
+    return status || 'unknown';
+}
+
+function isLatestReleaseAffected(cve, project, latest) {
+    var affected = cve && cve.containers && cve.containers.cna && cve.containers.cna.affected;
+    if (!Array.isArray(affected)) {
+        return false;
+    }
+    for (var product of affected) {
+        if (releaseCatalogProject(product) !== project) {
+            continue;
+        }
+        var versions = Array.isArray(product.versions) ? product.versions : [];
+        var status = null;
+        for (var entry of versions) {
+            status = versionEntryStatus(entry, latest);
+            if (status !== null) {
+                break;
+            }
+        }
+        if (status === null) {
+            status = product.defaultStatus || 'unaffected';
+        }
+        if (status === 'affected') {
+            return true;
+        }
+    }
+    return false;
+}
+
+async function showReleaseWarning(cve) {
+    var element = document.getElementById('emailwarning');
+    if (!element) {
+        return;
+    }
+    element.classList.add('hid');
+    element.textContent = '';
+    var projects = getReleaseCatalogProjects(cve);
+    for (var project of projects) {
+        try {
+            var response = await fetch('/releasecatalog/latest?project=' + encodeURIComponent(project), {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) {
+                continue;
+            }
+            var release = await response.json();
+            if (release && typeof release.version === 'string' && isLatestReleaseAffected(cve, project, release.version)) {
+                element.textContent = 'Warning: the latest release ' + release.version + ' is still listed as affected. Add the fixed version before sending these emails.';
+                element.classList.remove('hid');
+                return;
+            }
+        } catch (error) {
+        }
+    }
+}
+
 // Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
 // The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
 function isGitboxRepo(repo) {
@@ -157,6 +341,9 @@ if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.titleNamesProduct = titleNamesProduct;
+    exports.getReleaseCatalogProjects = getReleaseCatalogProjects;
+    exports.compareVersions = compareVersions;
+    exports.isLatestReleaseAffected = isLatestReleaseAffected;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }

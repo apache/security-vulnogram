@@ -170,3 +170,74 @@ const identifier = textUtil.reduceJSON({
   containers: { cna: { title: 'Connection leak in ApacheHttpClient.execute()', affected: [{ product: 'Apache Example' }] } }
 })
 assert(identifier.containers.cna.title === 'Apache Example: Connection leak in ApacheHttpClient.execute()')
+
+const releaseProjects = purl.getReleaseCatalogProjects
+const releaseAffected = purl.isLatestReleaseAffected
+const compareVersion = purl.compareVersions
+
+assert.deepEqual(releaseProjects({ containers: { cna: { affected: [
+  { packageURL: 'pkg:software-id/apache.org/tomcat' },
+  { packageURL: 'pkg:software-id/apache.org/tomcat' },
+  { packageURL: 'pkg:maven/org.apache.tomcat/tomcat-catalina' },
+  { packageURL: 'pkg:software-id/apache.org/kafka@4.0.0' }
+] } } }), ['tomcat', 'kafka'])
+assert.deepEqual(releaseProjects({}), [])
+assert.deepEqual(releaseProjects({ containers: { cna: { affected: [{ packageURL: 'https://example.org' }] } } }), [])
+
+assert.equal(compareVersion('1.2.3', '1.2.4'), -1)
+assert.equal(compareVersion('1.10.0', '1.9.9'), 1)
+assert.equal(compareVersion('1.2.3', '1.2.3'), 0)
+assert.equal(compareVersion('1.2.3-rc.1', '1.2.3'), -1)
+assert.equal(compareVersion('1.2.3-alpha', '1.2.3-beta'), -1)
+assert.equal(compareVersion('1.2.3+build', '1.2.3'), 0)
+assert.equal(compareVersion('0', '1.0.0'), -1)
+assert.equal(compareVersion('*', '99.0.0'), 1)
+assert.equal(compareVersion('1.2', '1.2.0'), null)
+
+const tomcat = (versions, extra) => ({ containers: { cna: { affected: [
+  Object.assign({
+    product: 'Tomcat',
+    packageURL: 'pkg:software-id/apache.org/tomcat',
+    versions: versions,
+    defaultStatus: 'unaffected'
+  }, extra || {})
+] } } })
+
+const range = tomcat([{ version: '10.1.0', lessThan: '10.1.62', status: 'affected', versionType: 'semver' }])
+assert.equal(releaseAffected(range, 'tomcat', '10.1.0'), true)
+assert.equal(releaseAffected(range, 'tomcat', '10.1.61'), true)
+assert.equal(releaseAffected(range, 'tomcat', '10.1.62'), false)
+assert.equal(releaseAffected(range, 'tomcat', '10.0.9'), false)
+assert.equal(releaseAffected(range, 'kafka', '10.1.50'), false)
+
+const inclusive = tomcat([{ version: '10.0.0', lessThanOrEqual: '10.1.61', status: 'affected', versionType: 'semver' }])
+assert.equal(releaseAffected(inclusive, 'tomcat', '10.1.61'), true)
+assert.equal(releaseAffected(inclusive, 'tomcat', '10.1.62'), false)
+
+const single = tomcat([{ version: '10.1.62', status: 'unaffected', versionType: 'semver' }])
+assert.equal(releaseAffected(single, 'tomcat', '10.1.62'), false)
+
+const changes = tomcat([{ version: '10.1.0', lessThan: '10.1.62', status: 'affected', versionType: 'semver',
+  changes: [{ at: '10.1.50', status: 'unaffected' }] }])
+assert.equal(releaseAffected(changes, 'tomcat', '10.1.40'), true)
+assert.equal(releaseAffected(changes, 'tomcat', '10.1.50'), false)
+assert.equal(releaseAffected(changes, 'tomcat', '10.1.55'), false)
+
+const open = tomcat([{ version: '10.1.0', lessThan: '*', status: 'affected', versionType: 'semver' }])
+assert.equal(releaseAffected(open, 'tomcat', '99.0.0'), true)
+
+const fromZero = tomcat([{ version: '0', lessThan: '10.1.62', status: 'affected', versionType: 'semver' }])
+assert.equal(releaseAffected(fromZero, 'tomcat', '1.0.0'), true)
+assert.equal(releaseAffected(fromZero, 'tomcat', '10.1.62'), false)
+
+const custom = tomcat([{ version: '1.0', lessThan: '2.0', status: 'affected', versionType: 'custom' }])
+assert.equal(releaseAffected(custom, 'tomcat', '1.5'), false)
+
+assert.equal(releaseAffected(tomcat([], { defaultStatus: 'affected' }), 'tomcat', '10.1.62'), true)
+
+const ordered = tomcat([
+  { version: '10.1.62', status: 'unaffected', versionType: 'semver' },
+  { version: '10.0.0', lessThan: '10.1.62', status: 'affected', versionType: 'semver' }
+])
+assert.equal(releaseAffected(ordered, 'tomcat', '10.1.62'), false)
+assert.equal(releaseAffected(ordered, 'tomcat', '10.1.61'), true)

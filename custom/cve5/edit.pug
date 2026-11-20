@@ -212,6 +212,7 @@ block prepend loadEditor
         |             document.getElementById("emailbutton").disabled= true
         |             document.getElementById("emailbuttonnote").innerHTML = "State must be READY to send emails"
         |         }
+        |         showReleaseWarning(j);
         |     });
         |   }
         | }        
@@ -235,6 +236,7 @@ block customtabs
         input.tab(name='tabs', type='radio', id='emailTab', value="7")
         label.lbl(for='emailTab') OSS/ASF Emails
         .wht.fil.bor.pad
+            #emailwarning.hid.redtxt
             h1!= "OSS Email"
             p!= "Use the button below to send these mails, or copy, paste, and send the email yourself. Subscription not required. Use a separate email for this, don't cc or bcc."
             div(style='float:right')
