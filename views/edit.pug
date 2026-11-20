@@ -114,6 +114,7 @@ block content
             | var soloMode = #{min === true};
             | var schemaName = "#{schemaName}";
             | var draftsEnabled = #{!(opts && opts.conf && opts.conf.disableDrafts)};
+            | var hidePortalLoginHint = #{!!(opts && opts.conf && opts.conf.hidePortalLoginHint)};
             | var postUrl = "#{postUrl?postUrl:''}";
             | var csrfToken = "#{csrfToken}";
             | var ajaxBase  = "#{conf.basedir}";

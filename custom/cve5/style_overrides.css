@@ -2,6 +2,8 @@
 	display: none !important;
 }
 
+#unSavedChanges:empty { display: none; }
+
 /* Derived legacy package identifiers shown under the Package URL field. */
 .purl-hint:empty { display: none; }
 .purl-hint {

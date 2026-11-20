@@ -2185,7 +2185,11 @@ async function cveRenderPublishChanges(doc) {
         return;
     }
     if (!hasSession) {
-        cveSetPublishChangesMessage(container, 'Login to CVE Services to compare against the current record.', false);
+        if (typeof hidePortalLoginHint !== 'undefined' && hidePortalLoginHint) {
+            container.innerHTML = '';
+        } else {
+            cveSetPublishChangesMessage(container, 'Login to CVE Services to compare against the current record.', false);
+        }
         return;
     }
     try {
