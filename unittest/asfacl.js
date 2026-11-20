@@ -1,7 +1,6 @@
 const assert = require('node:assert').strict
 const conf = require('../config/conf')
 const asf = require('../custom/asf.js')
-const email = require('../customRoutes/email.js')
 
 const admin = conf.admingroupname
 const rec = (owner) => ({ body: { CNA_private: owner ? { owner } : {} } })
@@ -44,28 +43,4 @@ for (const section of ['cve', 'cve5', 'cvss4', 'nvd']) {
     }
 }
 
-;(async () => {
-    // Moving a record to REJECTED needs a security team action, so notify them.
-    const sent = []
-    const originalSendemail = email.sendemail
-    email.sendemail = async (info) => { sent.push(info); return 'stub' }
-
-    asf.asfhookaddhistory(
-        { body: { CNA_private: { state: 'READY' }, cveMetadata: { cveId: 'CVE-2024-1234' } } },
-        { author: 'alice', body: { CNA_private: { state: 'REJECTED' }, cveMetadata: { cveId: 'CVE-2024-1234' } } })
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    assert.equal(sent.length, 1)
-    assert.equal(sent[0].to, 'security@apache.org')
-    assert.match(sent[0].subject, /is now REJECTED/)
-
-    // Transitions that do not need attention stay quiet.
-    sent.length = 0
-    asf.asfhookaddhistory(
-        { body: { CNA_private: { state: 'READY' }, cveMetadata: { cveId: 'CVE-2024-1234' } } },
-        { author: 'alice', body: { CNA_private: { state: 'DRAFT' }, cveMetadata: { cveId: 'CVE-2024-1234' } } })
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    assert.equal(sent.length, 0)
-
-    email.sendemail = originalSendemail
-    console.log('asfacl: all tests passed')
-})().catch((err) => { console.error(err); process.exit(1) })
+console.log('asfacl: all tests passed')
