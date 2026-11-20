@@ -68,10 +68,8 @@ block prepend loadEditor
         |         if (projectannounce) {
         |             replyto = projectannounce.split(',')[0]
         |         }
-        |         var replyto = "";
-        |         if (projectannounce) {
-        |             replyto = projectannounce.split(',')[0]
-        |         }
+        |         var threadreference = getThreadReference(j);
+        |         var threadmessageid = getThreadMessageId(threadreference);
         |         var subject = j.cveMetadata.cveId+": "
         |         if (j.containers.cna.title) {
         |            if (!titleNamesProduct(j.containers.cna.title)) {
@@ -173,6 +171,9 @@ block prepend loadEditor
         |             if (projecturl) {
         |                 mt = mt + projecturl + "\n"
         |             }
+        |             if (threadreference) {
+        |                 mt = mt + threadreference + "\n"
+        |             }
         |             mt = mt + "https://www.cve.org/CVERecord?id=" + j.cveMetadata.cveId + "\n"
         |             if (j.containers.cna.source.defect && j.containers.cna.source.defect[0]) {
         |               for (d of j.containers.cna.source.defect)
@@ -187,14 +188,16 @@ block prepend loadEditor
         |             }
         |             mt = mt + "\n"
         |         }        
-        |         var jmt = "To: "+emailto+"\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
+        |         var threadheader = threadmessageid ? "In-Reply-To: "+threadmessageid+"\n" : ""
+        |         var jmt = "To: "+emailto+"\nReply-To: "+replyto+"\n"+threadheader+"Subject: "+subject+"\n\n"
         |         document.getElementById("outemail").innerHTML = "<pre>"+jmt+mt.replace(/</g, '&lt;').replace(/>/g,'&gt;')+"</pre>\n"
         |         document.getElementById("emailtext").value = mt
         |         document.getElementById("emailsubject").value = subject
         |         document.getElementById("emailreplyto").value = replyto
+        |         document.getElementById("emailinreplyto").value = threadmessageid
         |         document.getElementById("emailto1").value = emailto
         |         emailto = "announce@apache.org, "+projectannounce
-        |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\nSubject: "+subject+"\n\n"
+        |         jmt = "To: "+emailto+"\nBcc: security@apache.org\nReply-To: "+replyto+"\n"+threadheader+"Subject: "+subject+"\n\n"
         |         document.getElementById("asfemail").innerHTML = "<pre>"+jmt+mt.replace(/</g, '&lt;').replace(/>/g,'&gt;')+"</pre>\n"        
         |         document.getElementById("emailto2").value = emailto
         |         if (j.CNA_private.emailed) {
@@ -255,6 +258,7 @@ block customtabs
                input(type='hidden',name='emailtext',id='emailtext')
                input(type='hidden',name='emailsubject',id='emailsubject')
                input(type='hidden',name='emailreplyto',id='emailreplyto')
+               input(type='hidden',name='emailinreplyto',id='emailinreplyto')
                input(type='hidden',name='emailto1',id='emailto1')
                input(type='hidden',name='emailto2',id='emailto2')               
                button.btn.sfe(disabled='true', type='button', value='Email', id='emailbutton', onclick='var j=mainTabGroup.getValue(); j.CNA_private.emailed="yes";save(undefined, function(){form.submit();});') Send these Emails

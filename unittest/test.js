@@ -170,3 +170,16 @@ const identifier = textUtil.reduceJSON({
   containers: { cna: { title: 'Connection leak in ApacheHttpClient.execute()', affected: [{ product: 'Apache Example' }] } }
 })
 assert(identifier.containers.cna.title === 'Apache Example: Connection leak in ApacheHttpClient.execute()')
+
+const threadReference = purl.getThreadReference
+const threadMessageId = purl.getThreadMessageId
+
+const threadUrl = 'https://lists.apache.org/thread/<abc@cassandra.apache.org>?<security.cassandra.apache.org>'
+assert(threadReference({ CNA_private: { internal_references: ['https://example.org/a', threadUrl] } }) === threadUrl)
+assert(threadMessageId(threadUrl) === '<abc@cassandra.apache.org>')
+assert(threadMessageId('https://lists.apache.org/thread/%3Cabc%40cassandra.apache.org%3E?%3Csecurity.cassandra.apache.org%3E') === '<abc@cassandra.apache.org>')
+assert(threadReference({}) === '')
+assert(threadReference({ CNA_private: { internal_references: ['https://example.org/a'] } }) === '')
+assert(threadMessageId('') === '')
+assert(threadMessageId('https://lists.apache.org/thread/not-a-message-id') === '')
+assert(threadMessageId('https://lists.apache.org/thread/<a@b>\r\nBcc: x@y') === '')
