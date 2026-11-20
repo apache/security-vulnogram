@@ -136,6 +136,33 @@ function titleNamesProduct(title) {
     return /\bApache\b/.test(title);
 }
 
+function getThreadReference(cve) {
+    var refs = cve && cve.CNA_private && cve.CNA_private.internal_references;
+    if (!Array.isArray(refs)) {
+        return '';
+    }
+    for (var ref of refs) {
+        if (typeof ref === 'string' && ref.indexOf('https://lists.apache.org/thread/') === 0) {
+            return ref;
+        }
+    }
+    return '';
+}
+
+function getThreadMessageId(reference) {
+    var match = /^https:\/\/lists\.apache\.org\/thread\/([^?]+)/.exec(reference || '');
+    if (!match) {
+        return '';
+    }
+    var messageid;
+    try {
+        messageid = decodeURIComponent(match[1]);
+    } catch (e) {
+        return '';
+    }
+    return /^<[^<>\s]+@[^<>\s]+>$/.test(messageid) ? messageid : '';
+}
+
 // Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
 // The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
 function isGitboxRepo(repo) {
@@ -157,6 +184,8 @@ if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.titleNamesProduct = titleNamesProduct;
+    exports.getThreadReference = getThreadReference;
+    exports.getThreadMessageId = getThreadMessageId;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }
