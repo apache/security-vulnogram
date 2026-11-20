@@ -1,6 +1,7 @@
 const assert = require('node:assert').strict
 const conf = require('../config/conf')
 const asf = require('../custom/asf.js')
+const email = require('../customRoutes/email.js')
 
 const admin = conf.admingroupname
 const rec = (owner) => ({ body: { CNA_private: owner ? { owner } : {} } })
@@ -43,4 +44,34 @@ for (const section of ['cve', 'cve5', 'cvss4', 'nvd']) {
     }
 }
 
-console.log('asfacl: all tests passed')
+;(async () => {
+    // State change notifications name the record in the subject.
+    const sent = []
+    const originalSendemail = email.sendemail
+    email.sendemail = async (info) => { sent.push(info); return 'stub' }
+
+    const stateChange = (oldState, newState, title) => [
+        { body: { CNA_private: { state: oldState }, cveMetadata: { cveId: 'CVE-2024-1234' }, containers: { cna: { title: title } } } },
+        { author: 'alice', body: { CNA_private: { state: newState }, cveMetadata: { cveId: 'CVE-2024-1234' }, containers: { cna: { title: title } } } }
+    ]
+
+    asf.asfhookaddhistory(...stateChange('DRAFT', 'READY', 'Example\nvulnerability'))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    assert.equal(sent.length, 1)
+    assert.equal(sent[0].subject, 'CVE-2024-1234 is now READY: Example vulnerability')
+
+    sent.length = 0
+    asf.asfhookaddhistory(...stateChange('DRAFT', 'READY', ''))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    assert.equal(sent[0].subject, 'CVE-2024-1234 is now READY')
+
+    sent.length = 0
+    asf.asfhookaddhistory(
+        { body: { CVE_data_meta: { ID: 'CVE-2024-1', STATE: 'DRAFT' } } },
+        { author: 'alice', body: { CVE_data_meta: { ID: 'CVE-2024-1', STATE: 'READY', TITLE: 'Legacy title' } } })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    assert.equal(sent[0].subject, 'CVE-2024-1 is now READY: Legacy title')
+
+    email.sendemail = originalSendemail
+    console.log('asfacl: all tests passed')
+})().catch((err) => { console.error(err); process.exit(1) })

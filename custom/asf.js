@@ -264,6 +264,11 @@ function userslistjson (req, res) {
     }
 }
 
+function stateChangeSubject(id, state, title) {
+    var clean = typeof title === 'string' ? title.replace(/\s+/g, " ").trim() : "";
+    return id + " is now " + state + (clean ? ": " + clean : "");
+}
+
 var self = module.exports = {
     asfinit: function (app) {
         app.use(function (req, res, next) {
@@ -444,7 +449,7 @@ var self = module.exports = {
 		        url = "https://cveprocess.apache.org/cve/"+newDoc.body.CVE_data_meta.ID;  // hacky
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
 					      "cc":newDoc.author+"@apache.org",
-					      "subject":newDoc.body.CVE_data_meta.ID+" is now "+newDoc.body.CVE_data_meta.STATE,
+					      "subject":stateChangeSubject(newDoc.body.CVE_data_meta.ID, newDoc.body.CVE_data_meta.STATE, newDoc.body.CVE_data_meta.TITLE),
 					      "text":newDoc.author+" changed state from "+oldDoc.body.CVE_data_meta.STATE+" to "+newDoc.body.CVE_data_meta.STATE+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
 		    }
 	        }
@@ -458,7 +463,7 @@ var self = module.exports = {
 		        se = email.sendemail({"from": newDoc.author+"@apache.org",
                                               "to":"security@apache.org",
 					      "cc":newDoc.author+"@apache.org",
-					      "subject":newDoc.body.cveMetadata.cveId+" is now "+newDoc.body.CNA_private.state,
+					      "subject":stateChangeSubject(newDoc.body.cveMetadata.cveId, newDoc.body.CNA_private.state, newDoc.body.containers && newDoc.body.containers.cna && newDoc.body.containers.cna.title),
 					      "text":newDoc.author+" changed state from "+oldDoc.body.CNA_private.state+" to "+newDoc.body.CNA_private.state+"\n\n"+url}).then( (x) => {  console.log("sent notification mail "+x);});
 		    }
 	        }
