@@ -32,7 +32,7 @@ Vulnogram can be set up in two modes:
 
 ```console
 $ cd vulnogram
-$ npm install
+$ npm ci
 ... this should install required dependencies, (except process monitors) ...
 ```
 

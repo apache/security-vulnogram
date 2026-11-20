@@ -9,7 +9,7 @@ COPY ./package*.json /home/vulnogram/
 RUN chown vulnogram:vulnogram --recursive /home/vulnogram/
 
 USER vulnogram
-RUN npm install
+RUN npm ci
 
 USER root
 COPY . /home/vulnogram/
