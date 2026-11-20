@@ -2,6 +2,11 @@
 	display: none !important;
 }
 
+.redtxt {
+	color: var(--txt-red);
+	font-weight: bold;
+}
+
 /* Derived legacy package identifiers shown under the Package URL field. */
 .purl-hint:empty { display: none; }
 .purl-hint {

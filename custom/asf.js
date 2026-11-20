@@ -287,6 +287,8 @@ var self = module.exports = {
         app.use('/publishcve', ensureAuthenticated, publishcve.protected);        
         let semail = require('../customRoutes/sendemails');
         app.use('/sendemails', ensureAuthenticated, semail.protected);
+        let releasecatalog = require('../customRoutes/releasecatalog');
+        app.use('/releasecatalog', ensureAuthenticated, releasecatalog);
         app.get('/users/token', ensureAuthenticated, token);
         app.get('/users/token/authorize', ensureAuthenticated, tokenauthorize.authorizeForm);
         app.post('/users/token/authorize', ensureAuthenticated, tokenauthorize.authorizeDecision);
