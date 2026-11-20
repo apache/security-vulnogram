@@ -64,14 +64,7 @@ block prepend loadEditor
         |            j.CNA_private.projecturl = projecturl;
         |            save();
         |         }        
-        |         var replyto = "";
-        |         if (projectannounce) {
-        |             replyto = projectannounce.split(',')[0]
-        |         }
-        |         var replyto = "";
-        |         if (projectannounce) {
-        |             replyto = projectannounce.split(',')[0]
-        |         }
+        |         var replyto = getEmailReplyTo(j, projectannounce);
         |         var subject = j.cveMetadata.cveId+": "
         |         if (j.containers.cna.title) {
         |            if (!titleNamesProduct(j.containers.cna.title)) {
