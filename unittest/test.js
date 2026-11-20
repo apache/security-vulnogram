@@ -170,3 +170,11 @@ const identifier = textUtil.reduceJSON({
   containers: { cna: { title: 'Connection leak in ApacheHttpClient.execute()', affected: [{ product: 'Apache Example' }] } }
 })
 assert(identifier.containers.cna.title === 'Apache Example: Connection leak in ApacheHttpClient.execute()')
+
+const replyTo = purl.getEmailReplyTo
+assert(replyTo({ containers: { cna: { tags: ['unsupported-when-assigned'] } } },
+  'users@example.apache.org, dev@example.apache.org') === 'security@apache.org')
+assert(replyTo({ containers: { cna: { tags: [] } } },
+  'users@example.apache.org, dev@example.apache.org') === 'users@example.apache.org')
+assert(replyTo({}, '') === '')
+assert(replyTo({ containers: { cna: {} } }, undefined) === '')

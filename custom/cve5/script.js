@@ -136,6 +136,14 @@ function titleNamesProduct(title) {
     return /\bApache\b/.test(title);
 }
 
+function getEmailReplyTo(cve, projectannounce) {
+    var cna = cve && cve.containers && cve.containers.cna;
+    if (cna && Array.isArray(cna.tags) && cna.tags.includes('unsupported-when-assigned')) {
+        return 'security@apache.org';
+    }
+    return projectannounce ? projectannounce.split(',')[0] : '';
+}
+
 // Whether the URL is a cloneable repository on the ASF GitBox: https://gitbox.apache.org/repos/asf/<name>.git.
 // The .git suffix is required, as in the git.kernel.org URLs the Linux CNA publishes.
 function isGitboxRepo(repo) {
@@ -157,6 +165,7 @@ if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.titleNamesProduct = titleNamesProduct;
+    exports.getEmailReplyTo = getEmailReplyTo;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
 }
