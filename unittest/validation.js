@@ -7,6 +7,13 @@ assert.deepEqual(customValidators(undefined, "user@pulsar.apache.org", "root.CNA
 assert(customValidators(undefined, "security@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 assert(customValidators(undefined, "private@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 
+// A reference value that is not a URL is skipped, not thrown on.
+const referenceWarnings = (ref) => customValidators(
+    undefined, ref, 'root.containers.cna.references.0')
+assert.deepEqual(referenceWarnings({ url: 'not a URL at all' }), [])
+assert.deepEqual(referenceWarnings({ url: 'https://dlcdn.apache.org/x' }), [])
+assert.equal(referenceWarnings({ url: 'https://dist.apache.org/repos/dist/x' }).length, 1)
+
 // Product names should not carry incubator status.
 const productNameErrors = (product) => customValidators(undefined, {
     containers: { cna: { affected: [{ product: product }] } }
