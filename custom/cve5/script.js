@@ -153,10 +153,25 @@ function isGitboxRepo(repo) {
         /^\/repos\/asf\/[^\/]+\.git$/.test(url.pathname);
 }
 
+function unwrapEmailText(text) {
+    if (typeof text !== 'string') {
+        return '';
+    }
+    return text
+        .replace(/\r\n?/g, '\n')
+        .replace(/\n(?:[ \t]*\n)+/g, '\u0000')
+        .replace(/\n(?=[ \t]*(?:[*+-]|\d+[.)])\s)/g, '\u0001')
+        .replace(/\n[ \t]*/g, ' ')
+        .replace(/\u0000/g, '\n\n')
+        .replace(/\u0001/g, '\n')
+        .trim();
+}
+
 if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.titleNamesProduct = titleNamesProduct;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
+    exports.unwrapEmailText = unwrapEmailText;
 }
