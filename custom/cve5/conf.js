@@ -300,7 +300,7 @@ module.exports = {
                                         "packageURL": {
                                             "options": {
                                                 // The legacy fields are hidden and derived, so say where they come from.
-                                                "infoText": "Package collection URL and Package name are derived from this when the record is published.",
+                                                "infoText": "Package collection URL and Package name are derived from this when the record is published. Prefer the ecosystem-specific purl (pkg:maven/..., pkg:pypi/..., and so on) when the project publishes there; otherwise use pkg:software-id/apache.org/&lt;project&gt;.",
                                                 // 4 + 8 fills the 12-column grid row, so the purl sits beside the product name.
                                                 "grid_columns": 8,
                                                 // Selects the purlString editor in asfpreload.js.
