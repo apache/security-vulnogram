@@ -7,6 +7,17 @@ assert.deepEqual(customValidators(undefined, "user@pulsar.apache.org", "root.CNA
 assert(customValidators(undefined, "security@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 assert(customValidators(undefined, "private@pulsar.apache.org", "root.CNA_private.userslist")[0].message.endsWith("Mixing public and private lists is discouraged."))
 
+const publicStateErrors = (references) => customValidators(undefined, {
+    CNA_private: { state: 'PUBLIC' },
+    containers: { cna: { references: references } }
+}, 'root').filter(e => e.message.includes('vendor-advisory'))
+
+assert.equal(publicStateErrors([]).length, 1)
+assert.deepEqual(publicStateErrors([{
+    url: 'https://lists.apache.org/thread/example',
+    tags: ['vendor-advisory']
+}]), [])
+
 // Product names should not carry incubator status.
 const productNameErrors = (product) => customValidators(undefined, {
     containers: { cna: { affected: [{ product: product }] } }

@@ -146,6 +146,9 @@ module.exports = {
                             REJECTED: 'no'
                         }        ,                
                         "default": "RESERVED",
+                        "options": {
+                            "requireValidFor": ["PUBLIC"]
+                        },
                     },
                     "todo": {
                         "options": {

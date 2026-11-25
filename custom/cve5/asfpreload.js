@@ -158,6 +158,52 @@ async function loadEmailLists(pmc) {
     }
 }
 
+JSONEditor.defaults.editors.validatedRadio = class validatedRadio extends JSONEditor.defaults.editors.radio {
+    build() {
+        super.build();
+        this.validationChangeListener = (event) => {
+            const next = event.target.value;
+            const required = this.schema.options && this.schema.options.requireValidFor;
+            if (!required || !required.includes(next)) {
+                return;
+            }
+            const previous = this.getValue();
+            if (next === previous) {
+                return;
+            }
+            const candidate = this.jsoneditor.getValue();
+            const candidateWithState = Object.assign({}, candidate, {
+                CNA_private: Object.assign({}, candidate && candidate.CNA_private, {state: next})
+            });
+            const errors = this.jsoneditor.validate(candidateWithState);
+            if (errors.length > 0) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                this.inputs[next].checked = false;
+                this.inputs[previous].checked = true;
+                this.jsoneditor.showValidationErrors(errors);
+                if (typeof errMsg !== 'undefined' && errMsg) {
+                    errMsg.textContent = "Fix all validation errors before moving to " + next + ".";
+                }
+            }
+        };
+        this.control.addEventListener('change', this.validationChangeListener, true);
+    }
+
+    destroy() {
+        if (this.control && this.validationChangeListener) {
+            this.control.removeEventListener('change', this.validationChangeListener, true);
+        }
+        super.destroy();
+    }
+};
+
+JSONEditor.defaults.resolvers.unshift(function (schema) {
+    if (schema.options && schema.options.requireValidFor) {
+        return "validatedRadio";
+    }
+});
+
 // The legacy package identifiers (collectionURL + packageName) are not stored:
 // packageURL is the single source of truth, and textUtil.reduceJSON derives the
 // pair when the record is serialized for publication.
