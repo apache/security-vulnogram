@@ -153,10 +153,97 @@ function isGitboxRepo(repo) {
         /^\/repos\/asf\/[^\/]+\.git$/.test(url.pathname);
 }
 
+function purlProjectSlug(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/^apache[\s-]+/, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+function purlFromLegacyIdentifiers(collectionURL, packageName) {
+    if (typeof collectionURL !== 'string' || typeof packageName !== 'string') {
+        return null;
+    }
+    const collection = collectionURL.trim().replace(/\/+$/, '');
+    const name = packageName.trim();
+    if (!collection || !name) {
+        return null;
+    }
+    for (const type of Object.keys(purlLegacyTypes)) {
+        const rule = ownEntry(purlLegacyTypes, type);
+        let namespace = null;
+        if (typeof rule.collection === 'string') {
+            if (rule.collection.replace(/\/+$/, '') === collection) {
+                namespace = '';
+            }
+        } else {
+            for (const key of Object.keys(rule.collection)) {
+                if (rule.collection[key].replace(/\/+$/, '') === collection) {
+                    namespace = key;
+                    break;
+                }
+            }
+        }
+        if (namespace === null) {
+            continue;
+        }
+        if (rule.name === 'group') {
+            const parts = name.split(':');
+            if (parts.length !== 2 || !parts[0] || !parts[1]) {
+                continue;
+            }
+            return 'pkg:' + type + '/' + parts[0] + '/' + parts[1];
+        }
+        if (namespace) {
+            return 'pkg:' + type + '/' + namespace + '/' + name;
+        }
+        return 'pkg:' + type + '/' + name;
+    }
+    return null;
+}
+
+function purlVersionStrings(versions) {
+    const out = [];
+    for (const version of versions || []) {
+        const value = version && version.version;
+        if (typeof value === 'string' && value && value !== '0' && value !== '*' &&
+            !/[\s@/]/.test(value) && !out.includes(value)) {
+            out.push(value);
+        }
+    }
+    return out;
+}
+
+function purlSuggestions(record, affected) {
+    const out = [];
+    const versions = purlVersionStrings(affected && affected.versions);
+    const legacy = purlFromLegacyIdentifiers(
+        affected && affected.collectionURL, affected && affected.packageName);
+    if (legacy) {
+        out.push(legacy);
+        for (const version of versions) {
+            out.push(legacy + '@' + version);
+        }
+    }
+    const owner = record && record.CNA_private && record.CNA_private.owner;
+    const slug = purlProjectSlug(affected && affected.product) || purlProjectSlug(owner);
+    if (slug) {
+        const base = 'pkg:software-id/apache.org/' + slug;
+        out.push(base + '@latest');
+        for (const version of versions) {
+            out.push(base + '@' + version);
+        }
+    }
+    return out.filter((value, index) => out.indexOf(value) === index);
+}
+
 if (typeof exports !== 'undefined') {
     exports.getProductListNoVendor = getProductListNoVendor;
     exports.isGitboxRepo = isGitboxRepo;
     exports.titleNamesProduct = titleNamesProduct;
     exports.parsePurl = parsePurl;
     exports.purlToLegacyIdentifiers = purlToLegacyIdentifiers;
+    exports.purlFromLegacyIdentifiers = purlFromLegacyIdentifiers;
+    exports.purlSuggestions = purlSuggestions;
 }
