@@ -177,11 +177,21 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
         this.legacyWatchPaths.forEach(
             (path) => this.jsoneditor.watch(path, this.legacyWatchListener));
         this.refreshPurlHint();
+        this.purlDatalist = document.createElement('datalist');
+        this.purlDatalist.id = this.path + '-purl-datalist';
+        this.input.setAttribute('list', this.purlDatalist.id);
+        this.control.appendChild(this.purlDatalist);
+        this.purlSuggestListener = () => this.refreshPurlSuggestions();
+        this.input.addEventListener('focus', this.purlSuggestListener);
+        this.refreshPurlSuggestions();
     }
 
     destroy() {
         this.legacyWatchPaths.forEach(
             (path) => this.jsoneditor.unwatch(path, this.legacyWatchListener));
+        if (this.input && this.purlSuggestListener) {
+            this.input.removeEventListener('focus', this.purlSuggestListener);
+        }
         super.destroy();
     }
 
@@ -214,6 +224,25 @@ JSONEditor.defaults.editors.purlString = class purlString extends JSONEditor.def
             ? 'Package collection URL: ' + derived.collectionURL
                 + ' \u00b7 Package name: ' + derived.packageName
             : '';
+    }
+
+    refreshPurlSuggestions() {
+        if (!this.purlDatalist) {
+            return;
+        }
+        let record = null;
+        try {
+            record = this.jsoneditor.getValue();
+        } catch (e) {
+            record = null;
+        }
+        const affected = this.parent ? this.parent.getValue() : null;
+        this.purlDatalist.innerHTML = '';
+        purlSuggestions(record, affected).forEach((value) => {
+            const option = document.createElement('option');
+            option.value = value;
+            this.purlDatalist.appendChild(option);
+        });
     }
 };
 

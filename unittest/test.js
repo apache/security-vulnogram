@@ -98,6 +98,35 @@ assert(legacy(undefined) === null)
 assert(purl.parsePurl('pkg:maven/g/a') !== null,
   'purl parsing must work in plain Node, with no browser globals set')
 
+// Suggestions for the Package URL field.
+const purlSuggest = purl.purlSuggestions
+assert.deepEqual(purlSuggest({ CNA_private: { owner: 'tomcat' } }, {
+  product: 'Apache Tomcat',
+  versions: [{ version: '10.1.0' }, { version: '0' }, { version: '11.0.0' }]
+}), [
+  'pkg:software-id/apache.org/tomcat@latest',
+  'pkg:software-id/apache.org/tomcat@10.1.0',
+  'pkg:software-id/apache.org/tomcat@11.0.0'
+])
+assert.deepEqual(purlSuggest({}, {
+  product: 'Apache Commons Lang',
+  collectionURL: 'https://repo.maven.apache.org/maven2',
+  packageName: 'org.apache.commons:commons-lang3',
+  versions: [{ version: '3.14.0' }]
+}), [
+  'pkg:maven/org.apache.commons/commons-lang3',
+  'pkg:maven/org.apache.commons/commons-lang3@3.14.0',
+  'pkg:software-id/apache.org/commons-lang@latest',
+  'pkg:software-id/apache.org/commons-lang@3.14.0'
+])
+assert.deepEqual(purlSuggest({ CNA_private: { owner: 'tomcat' } }, {}), [
+  'pkg:software-id/apache.org/tomcat@latest'
+])
+assert.deepEqual(purlSuggest({}, {}), [])
+assert.equal(purl.purlFromLegacyIdentifiers('https://packages.debian.org', 'curl'),
+  'pkg:deb/debian/curl')
+assert.equal(purl.purlFromLegacyIdentifiers('https://example.com', 'curl'), null)
+
 // reduceJSON derives the legacy identifiers when the record is serialised.
 // It is the only place they are produced: the CVE-JSON tab and
 // customRoutes/publishcve.js both go through it.
