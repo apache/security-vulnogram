@@ -193,7 +193,7 @@ module.exports = {
                                                     "description": {
                                                         "options": {
                                                             "inputAttributes": {
-                                                                "placeholder": "Vulnerability type: can be a pull-down CWE or free text"
+                                                                "placeholder": "Start typing to pick a CWE, or enter a free-text problem type"
                                                             }
                                                         },
                                                         "$ref": "js/cwe-all.json"
