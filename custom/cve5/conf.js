@@ -561,6 +561,21 @@ module.exports = {
                     titleNamesProduct(value.containers.cna.title)) {
                     errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title does not need to contain the product name: it will be prepended automatically'});
                 }
+                // CVE.org rejects a title over 256 characters, and only with a generic
+                // "cnaContainer JSON schema validation FAILED". Check the title as it will
+                // be published, with the product names prepended (getProductListNoVendor
+                // is a global from custom/cve5/script.js).
+                // The limit is a literal: validators are serialized into the page with toString().
+                if (value && value.containers && value.containers.cna && value.containers.cna.title) {
+                    const MAX_PUBLISHED_TITLE_LENGTH = 256;
+                    const cna = value.containers.cna;
+                    const published = titleNamesProduct(cna.title) || !Array.isArray(cna.affected)
+                        ? cna.title
+                        : getProductListNoVendor(value) + ": " + cna.title;
+                    if (published.length > MAX_PUBLISHED_TITLE_LENGTH) {
+                        errors.push({path: "root.containers.cna.title", property: 'format', message: 'The title as published to CVE.org' + (published === cna.title ? '' : ', with the product names prepended,') + ' is ' + published.length + ' characters; CVE.org rejects titles longer than ' + MAX_PUBLISHED_TITLE_LENGTH + '. Shorten the title.'});
+                    }
+                }
                 if (value && value.containers && value.containers.cna && value.containers.cna.affected) {
                     for (let i = 0; i < value.containers.cna.affected.length; i++) {
                         const affected = value.containers.cna.affected[i]

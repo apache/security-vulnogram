@@ -31,6 +31,7 @@ global.parsePurl = require('../custom/cve5/script.js').parsePurl
 global.purlToLegacyIdentifiers = require('../custom/cve5/script.js').purlToLegacyIdentifiers
 global.isGitboxRepo = require('../custom/cve5/script.js').isGitboxRepo
 global.titleNamesProduct = require('../custom/cve5/script.js').titleNamesProduct
+global.getProductListNoVendor = require('../custom/cve5/script.js').getProductListNoVendor
 
 // The root validator warns about a title that names the product,
 // which is prepended on publication.
@@ -42,6 +43,22 @@ assert.equal(titleWarnings('Something in Apache Other').length, 1, 'any Apache w
 assert.equal(titleWarnings('A very long title that only mentions late the Apache word').length, 1, 'the whole title counts')
 assert.equal(titleWarnings('Something in Example').length, 0, 'only the Apache word counts')
 assert.equal(titleWarnings('Connection leak in ApacheHttpClient.execute()').length, 0, 'an identifier is not the product')
+
+// CVE.org rejects a title over 256 characters, counted after the product
+// names are prepended on publication.
+const lengthErrors = (title, products) => customValidators(undefined, {
+  containers: { cna: { title: title, affected: products.map(p => ({ product: p })) } }
+}, 'root').filter(e => e.path === 'root.containers.cna.title' && e.message.includes('CVE.org rejects'))
+const fourProducts = ['Apache Example One', 'Apache Example Two', 'Apache Example Three', 'Apache Example Four']
+const prefix = fourProducts.join(', ') + ': '
+assert.equal(lengthErrors('x'.repeat(256 - prefix.length), fourProducts).length, 0, 'exactly 256 is allowed')
+assert.equal(lengthErrors('x'.repeat(257 - prefix.length), fourProducts).length, 1, 'the prefix counts')
+assert(lengthErrors('x'.repeat(257 - prefix.length), fourProducts)[0].message.includes('257 characters'))
+assert.equal(lengthErrors('x'.repeat(256 - 'Apache Example: '.length), ['Apache Example']).length, 0)
+assert.equal(lengthErrors('x'.repeat(257 - 'Apache Example: '.length), ['Apache Example']).length, 1)
+assert.equal(lengthErrors('Apache ' + 'x'.repeat(249), fourProducts).length, 0, 'no prefix when the title names Apache: 256')
+assert.equal(lengthErrors('Apache ' + 'x'.repeat(250), fourProducts).length, 1, 'no prefix when the title names Apache: 257')
+assert.equal(lengthErrors('x'.repeat(200), ['Apache Example', 'Apache Example']).length, 0, 'a repeated product is listed once')
 
 // The purl checks now live in the ASF validator, not the default one.
 const productValidator = require('../custom/cve5/conf.js').validators[1]
